@@ -2,10 +2,19 @@
 
 import { ContactShadows, OrbitControls } from '@react-three/drei'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Bloom, EffectComposer, ToneMapping } from '@react-three/postprocessing'
+import { ToneMappingMode } from 'postprocessing'
 import { useRef, type ReactNode } from 'react'
 import * as THREE from 'three'
 
-export type CameraShot = 'box' | 'front' | 'close' | 'top' | 'hero'
+/**
+ * World scale. Scenes are authored in "cake units" (radius 1) but drawn at real
+ * size: Paperlab's fire is physically scaled (1 unit = 210 mm), so a 10 cm cake
+ * has to actually be ~0.25 units across for its flames to look like flames.
+ */
+export const WORLD = 0.25
+
+export type CameraShot = 'box' | 'front' | 'close' | 'top' | 'hero' | 'burn'
 
 const SHOTS: Record<CameraShot, { pos: [number, number, number]; look: [number, number, number] }> = {
   box: { pos: [0, 5.4, 7], look: [0, 0.2, 0] },
@@ -13,21 +22,23 @@ const SHOTS: Record<CameraShot, { pos: [number, number, number]; look: [number, 
   front: { pos: [0, 2.3, 3.6], look: [0, 0.4, 0] },
   close: { pos: [0, 2.4, 3.4], look: [0, 0.45, 0] },
   top: { pos: [0, 5.2, 0.01], look: [0, 0.6, 0] },
+  // steep but not straight down, so flames rise visibly off the sheet
+  burn: { pos: [0, 4.4, 2.2], look: [0, 0.6, 0.15] },
 }
 
 /** Shots are framed for landscape; on tall screens pull back so the cake still fits across. */
 function framed(shot: CameraShot, aspect: number) {
   const s = SHOTS[shot]
   const k = aspect < 1.1 ? Math.min(2.3, 1.1 / aspect) : 1
-  const look = new THREE.Vector3(...s.look)
-  const pos = new THREE.Vector3(...s.pos).sub(look).multiplyScalar(k).add(look)
+  const look = new THREE.Vector3(...s.look).multiplyScalar(WORLD)
+  const pos = new THREE.Vector3(...s.pos).multiplyScalar(WORLD).sub(look).multiplyScalar(k).add(look)
   return { pos, look }
 }
 
 /** Eases the camera to a named shot. Disabled while the user orbits. */
 function CameraRig({ shot, speed = 0.06 }: { shot: CameraShot; speed?: number }) {
   const { camera, size } = useThree()
-  const look = useRef(new THREE.Vector3(...SHOTS[shot].look))
+  const look = useRef(new THREE.Vector3(...SHOTS[shot].look).multiplyScalar(WORLD))
   useFrame(() => {
     const s = framed(shot, size.width / size.height)
     camera.position.lerp(s.pos, speed)
@@ -50,6 +61,8 @@ export interface StageProps {
   shot?: CameraShot
   /** let the user drag to spin (maker) instead of the rig driving the camera */
   orbit?: boolean
+  /** keep the orbit camera still (e.g. while stamping on the cake) */
+  orbitLocked?: boolean
   autoSpin?: boolean
   background?: string
   onCreated?: (gl: THREE.WebGLRenderer) => void
@@ -57,16 +70,18 @@ export interface StageProps {
   style?: React.CSSProperties
   /** keep the drawing buffer so we can snapshot frames for posters */
   capture?: boolean
+  /** bloom HDR sources (fire, flames) — on for the burn, off where nothing glows */
+  glow?: boolean
 }
 
-export function Stage({ children, shot = 'front', orbit, autoSpin, background = '#f6efe4', onCreated, className, style, capture }: StageProps) {
+export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, background = '#f6efe4', onCreated, className, style, capture, glow }: StageProps) {
   return (
     <Canvas
       className={className}
       style={style}
       shadows
       dpr={[1, 2]}
-      camera={{ position: SHOTS[shot].pos, fov: 34, near: 0.05, far: 60 }}
+      camera={{ position: SHOTS[shot].pos.map((v) => v * WORLD) as [number, number, number], fov: 34, near: 0.01, far: 20 }}
       gl={{ preserveDrawingBuffer: !!capture, antialias: true }}
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping
@@ -82,32 +97,42 @@ export function Stage({ children, shot = 'front', orbit, autoSpin, background = 
         color="#fff4e6"
         castShadow
         shadow-mapSize={[1024, 1024]}
-        shadow-camera-left={-3}
-        shadow-camera-right={3}
-        shadow-camera-top={3}
-        shadow-camera-bottom={-3}
+        shadow-camera-left={-0.8}
+        shadow-camera-right={0.8}
+        shadow-camera-top={0.8}
+        shadow-camera-bottom={-0.8}
         shadow-bias={-0.0004}
       />
       <directionalLight position={[-4, 2.5, -2]} intensity={0.35} color="#f3d9ff" />
       {/* paper tabletop */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1, 0]} receiveShadow>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1 * WORLD, 0]} receiveShadow>
         <planeGeometry args={[40, 40]} />
         <meshStandardMaterial color={background} roughness={1} />
       </mesh>
-      <ContactShadows position={[0, -0.095, 0]} opacity={0.35} scale={8} blur={2.4} far={2} color="#7a5a48" />
-      <Spin on={!!autoSpin}>{children}</Spin>
+      <ContactShadows position={[0, -0.095 * WORLD, 0]} opacity={0.35} scale={8 * WORLD} blur={2.4} far={2 * WORLD} color="#7a5a48" />
+      <group scale={WORLD}>
+        <Spin on={!!autoSpin}>{children}</Spin>
+      </group>
       {orbit ? (
         <OrbitControls
           makeDefault
+          enabled={!orbitLocked}
           enablePan={false}
-          minDistance={2.4}
-          maxDistance={11}
+          minDistance={2.4 * WORLD}
+          maxDistance={11 * WORLD}
           minPolarAngle={0.05}
           maxPolarAngle={1.25}
-          target={[0, 0.4, 0]}
+          target={[0, 0.4 * WORLD, 0]}
         />
       ) : (
         <CameraRig shot={shot} />
+      )}
+      {glow && (
+        // Only things brighter than paper white bloom: flames, embers, the ember line.
+        <EffectComposer multisampling={0}>
+          <Bloom mipmapBlur luminanceThreshold={1.35} luminanceSmoothing={0.25} intensity={0.75} radius={0.6} />
+          <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+        </EffectComposer>
       )}
     </Canvas>
   )

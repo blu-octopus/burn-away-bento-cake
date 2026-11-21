@@ -100,6 +100,15 @@ export const sfx = {
 
 /** Must be called from a user gesture once, so iOS lets audio play later. */
 export function primeAudio() {
+  // iOS Safari 17+: play through the speaker even when the ringer switch is on silent.
+  const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession
+  if (session) {
+    try {
+      session.type = 'playback'
+    } catch {
+      /* older Safari */
+    }
+  }
   ac()
 }
 

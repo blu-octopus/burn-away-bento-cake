@@ -2,11 +2,12 @@
 
 /**
  * The burn: a Paperlab sheet carrying the top-layer picture, lying on the cake,
- * with Paperlab's damage simulation, flames, embers/smoke/ash and fire sound.
+ * with Paperlab's damage simulation, real flames (a small GPU fire sim),
+ * embers/smoke/ash, bloom + heat haze, and the fire's own synthesised sound.
  * Paperlab © Nour Mtir, Apache-2.0 — see NOTICE.
  */
 
-import { useFrame } from '@react-three/fiber'
+import { createPortal, useFrame, useThree } from '@react-three/fiber'
 import { PaperMesh, type PaperHandle } from 'paperlab'
 import {
   createAudioContext,
@@ -14,10 +15,14 @@ import {
   FireEmitter,
   FireSound,
   FxAudio,
+  FxFireFluid,
   FxFlames,
   FxParticles,
   ParticlePool,
+  fireFluidDefaults,
   fxQualityFor,
+  type DamageLook,
+  type FireZonesInput,
   type SurfaceLocator,
 } from 'paperlab/fx'
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
@@ -26,8 +31,38 @@ import type { CakeShape } from '@/lib/design'
 import { outsideCells } from '@/lib/textures'
 import { TOP_Y } from './Cake'
 
-/** How much faster than real paper the cake burns. Real paper takes ~a minute; a reveal wants ~8 s. */
-const BURN_SPEED = 3.2
+/** Sim seconds per real second. A sugar-sheet burn takes ~24 sim s, so ~8 s on screen. */
+const BURN_SPEED = 3
+
+/**
+ * A sugar sheet, not newsprint: a bright, beaded ember line with only a thin
+ * char band behind it, so the burn reads as fire rather than a brown stain.
+ */
+const SUGAR_SHEET_LOOK: DamageLook = {
+  emberIntensity: 1.8,
+  emberGlow: 1.6,
+  emberWidth: 1.3,
+  emberCoverage: 0.9,
+  sparkle: 1.4,
+  charWidth: 0.55,
+  charWarmth: 0.8,
+  scorchReach: 0.45,
+  scorchDarkness: 0.5,
+}
+
+/** Orange at the root, a lavender-pink tip — the girly flame from the reference. */
+const FLAME_ZONES: FireZonesInput = {
+  core: { color: '#fff1c9' },
+  body: { color: '#ff9a3c' },
+  tip: { color: '#c8a6ff' },
+}
+
+/** Shorter, cosier tongues: less lift and less smoke than Paperlab's open-air default. */
+const FLAME_PARAMS = {
+  buoyancy: fireFluidDefaults.buoyancy * 0.6,
+  smokeProduction: fireFluidDefaults.smokeProduction * 0.4,
+  smokeFade: fireFluidDefaults.smokeFade * 0.5,
+}
 
 export interface BurnSheetHandle {
   /** Light the sheet at a world point (only x/z are used). Returns false if the point is off the sheet. */
@@ -48,18 +83,26 @@ interface Props {
   onProgress?: (remaining: number) => void
 }
 
+function deviceTier() {
+  if (typeof navigator === 'undefined') return 'medium' as const
+  return /iPhone|iPad|Android|Mobile/i.test(navigator.userAgent) ? ('low' as const) : ('medium' as const)
+}
+
 export const BurnSheet = forwardRef<BurnSheetHandle, Props>(function BurnSheet({ shape, image, sound, onProgress }, ref) {
   const paper = useRef<PaperHandle>(null)
   const started = useRef(false)
   const audio = useRef<{ fx: FxAudio; fire: FireSound } | null>(null)
-  const quality = useMemo(() => {
-    if (typeof navigator === 'undefined') return 'medium' as const
-    return /iPhone|Android|Mobile/i.test(navigator.userAgent) ? ('low' as const) : ('medium' as const)
-  }, [])
+  const quality = useMemo(deviceTier, [])
+  const scene = useThree((st) => st.scene)
 
   const field = useMemo(() => {
-    const f = new DamageField({ seed: 7 })
+    // A sugar sheet has weaker "fibres" than paper (anisotropy 2 vs 3), so the
+    // front spreads rounder instead of in long horizontal streaks. Less heat
+    // diffusion + faster consumption keep the hot zone tight: Paperlab draws hot
+    // paper as glowing/translucent, and a wide hot zone looked like a vanished sheet.
+    const f = new DamageField({ seed: 7, anisotropy: 2, heatDiffusion: 40e-5, consumeRate: 9 })
     f.detail = fxQualityFor(quality).detail
+    Object.assign(f, { look: SUGAR_SHEET_LOOK })
     // The visible edge is Paperlab's die-cut along the picture's alpha (clean).
     // Paper well OUTSIDE the outline is also removed from the burn, so the
     // invisible corners of the square sheet never catch fire or shed ash;
@@ -68,6 +111,11 @@ export const BurnSheet = forwardRef<BurnSheetHandle, Props>(function BurnSheet({
     f.step(1 / 60)
     return f
   }, [shape, quality])
+
+  const pool = useMemo(() => new ParticlePool(900, 11), [])
+  const scratch = useMemo(() => new THREE.Vector3(), [])
+  const locate = useMemo<SurfaceLocator>(() => (u, v) => paper.current?.surfacePoint(u, v, scratch) ?? null, [scratch])
+  const emitter = useMemo(() => new FireEmitter(field, pool, locate, { caps: fxQualityFor(quality).caps }), [field, pool, locate, quality])
 
   // dev-only: let a test harness advance the burn by hand (a throttled tab barely ticks)
   useEffect(() => {
@@ -85,12 +133,10 @@ export const BurnSheet = forwardRef<BurnSheetHandle, Props>(function BurnSheet({
     }
     window.addEventListener('cake-debug-step', onStep)
     return () => window.removeEventListener('cake-debug-step', onStep)
-  })
+  }, [field, emitter, pool])
 
-  const pool = useMemo(() => new ParticlePool(900, 11), [])
-  const scratch = useMemo(() => new THREE.Vector3(), [])
-  const locate = useMemo<SurfaceLocator>(() => (u, v) => paper.current?.surfacePoint(u, v, scratch) ?? null, [scratch])
-  const emitter = useMemo(() => new FireEmitter(field, pool, locate, { caps: fxQualityFor(quality).caps }), [field, pool, locate, quality])
+  // silence the fire if the sheet goes away mid-burn
+  useEffect(() => () => audio.current?.fx.stopAll(), [])
 
   useImperativeHandle(
     ref,
@@ -118,10 +164,14 @@ export const BurnSheet = forwardRef<BurnSheetHandle, Props>(function BurnSheet({
       remaining: () => field.lastStats.remaining,
       burning: () => started.current && !field.asleep,
       enableSound() {
-        if (!sound || audio.current) return
+        if (!sound) return
         try {
-          const fx = new FxAudio({ context: createAudioContext(), volume: 0.8, quality })
-          audio.current = { fx, fire: new FireSound(fx, { volume: 0.7 }) }
+          if (!audio.current) {
+            const fx = new FxAudio({ context: createAudioContext(), volume: 0.9, quality })
+            audio.current = { fx, fire: new FireSound(fx, { volume: 0.8 }) }
+          }
+          // Browsers start audio suspended; this must run inside the tap.
+          void audio.current.fx.unlock()
         } catch {
           /* no audio, no problem */
         }
@@ -157,8 +207,20 @@ export const BurnSheet = forwardRef<BurnSheetHandle, Props>(function BurnSheet({
         position={[0, TOP_Y + 0.006, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
       />
-      <FxFlames field={field} locate={locate} quality={quality} wind={pool.wind} />
+      {/* The fire lives at the scene root: it places itself in WORLD space from
+          surfacePoint(), so it must not inherit the cake's scaled group. */}
+      {createPortal(
+        <>
+      {/* Real flames: the fluid fire on capable devices, sprite flames on phones. Both stand on the burning rim. */}
+      {quality === 'low' ? (
+        <FxFlames field={field} locate={locate} quality={quality} wind={pool.wind} />
+      ) : (
+        <FxFireFluid field={field} locate={locate} quality={quality} zones={FLAME_ZONES} params={FLAME_PARAMS} />
+      )}
       <FxParticles pool={pool} />
+        </>,
+        scene,
+      )}
     </>
   )
 })
