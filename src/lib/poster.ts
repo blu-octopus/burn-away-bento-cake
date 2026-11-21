@@ -147,6 +147,15 @@ export async function cutout(src: string, bg = '#f6efe4'): Promise<string> {
   return cv.toDataURL('image/png')
 }
 
+/** A QR for the link, or null when the link is too long to fit in one. */
+export async function qrDataUrl(link: string, width: number): Promise<string | null> {
+  try {
+    return await QRCode.toDataURL(link, { margin: 1, width, color: { dark: INK, light: '#fffdf8' }, errorCorrectionLevel: 'L' })
+  } catch {
+    return null
+  }
+}
+
 export async function senderPoster(opts: { design: CakeDesign; shot: string; link: string }): Promise<HTMLCanvasElement> {
   await fontsReady()
   const { design, shot, link } = opts
@@ -161,8 +170,8 @@ export async function senderPoster(opts: { design: CakeDesign; shot: string; lin
   await drawCake(ctx, shot, 40, 560, W - 80, 1000)
   tape(ctx, W - 210, 640, 220, 0.5)
 
-  // QR card
-  const qr = await QRCode.toDataURL(link, { margin: 1, width: 300, color: { dark: INK, light: '#fffdf8' }, errorCorrectionLevel: 'L' })
+  // QR card — or, when the link is too long for a QR (a photo tucked inside it), a note instead
+  const qr = await qrDataUrl(link, 300)
   ctx.save()
   ctx.translate(W - 410, HGT - 420)
   ctx.rotate(-0.04)
@@ -171,11 +180,16 @@ export async function senderPoster(opts: { design: CakeDesign; shot: string; lin
   ctx.strokeStyle = INK
   ctx.lineWidth = 3
   ctx.strokeRect(0, 0, 330, 360)
-  ctx.drawImage(await loadImage(qr), 15, 15, 300, 300)
   ctx.fillStyle = INK
-  ctx.font = `500 24px ${CANVAS_FONTS.mono}`
   ctx.textAlign = 'center'
-  ctx.fillText('SCAN TO OPEN', 165, 345)
+  if (qr) {
+    ctx.drawImage(await loadImage(qr), 15, 15, 300, 300)
+    ctx.font = `500 24px ${CANVAS_FONTS.mono}`
+    ctx.fillText('SCAN TO OPEN', 165, 345)
+  } else {
+    ctx.font = `700 46px ${CANVAS_FONTS.hand}`
+    ;['the link is', 'in your', 'messages ♡'].forEach((l, i) => ctx.fillText(l, 165, 120 + i * 62))
+  }
   ctx.restore()
   tape(ctx, W - 245, HGT - 420, 150, -0.12, 'rgba(211,230,207,.9)')
 

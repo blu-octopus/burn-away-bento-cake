@@ -16,13 +16,18 @@ import { StampLayer } from './StampLayer'
 import { CapyHint } from '@/components/ui/CapyHint'
 import styles from './Maker.module.css'
 
+/**
+ * The order you'd actually build a burn-away cake in: frost the cake, write the
+ * secret on it, lay the printed sugar sheet over the top, decorate, box it, send.
+ * Each step's `chef` line is what the capy baker says while you're on it.
+ */
 export const STEPS = [
-  { id: 'bake', n: '①', label: 'bake', hint: 'pick a shape + frosting' },
-  { id: 'top', n: '②', label: 'top', hint: 'this layer will burn away 🔥' },
-  { id: 'decorate', n: '③', label: 'decorate', hint: 'bows, fruit, candle' },
-  { id: 'secret', n: '④', label: 'secret', hint: 'what they find underneath' },
-  { id: 'package', n: '⑤', label: 'package', hint: 'box it up + optional extras' },
-  { id: 'send', n: '⑥', label: 'send', hint: 'ready to send ✉️' },
+  { id: 'bake', n: '1', label: 'bake', chef: 'first things first — pick a shape and a frosting ♡' },
+  { id: 'secret', n: '2', label: 'secret', chef: 'now write the secret on the cake. only they’ll see it ♡' },
+  { id: 'top', n: '3', label: 'cover', chef: 'lay the burn-away cover on top — art, a photo, or words' },
+  { id: 'decorate', n: '4', label: 'decorate', chef: 'ooh, bows and berries time. tap a spot to dress it' },
+  { id: 'package', n: '5', label: 'package', chef: 'box it up! add a passcode or a time if you like' },
+  { id: 'send', n: '6', label: 'send', chef: 'all wrapped. who’s the lucky one?' },
 ] as const
 export type StepId = (typeof STEPS)[number]['id']
 
@@ -165,17 +170,18 @@ export default function Maker() {
           <span className="mono">operation:</span>
           <span className="hand">secret cake</span>
         </a>
-        <nav className={styles.steps} aria-label="steps">
-          {STEPS.map((s, i) => (
-            <button key={s.id} className={styles.stepDot} aria-label={`step ${i + 1}: ${s.label}`} aria-current={s.id === step ? 'step' : undefined} data-done={i < idx || undefined} onClick={() => go(i)}>
-              <span>{s.n}</span>
-              <em>{s.label}</em>
-            </button>
-          ))}
-        </nav>
+
       </header>
 
       <section className={styles.stage}>
+          <nav className={styles.steps} aria-label="steps">
+            {STEPS.map((s, i) => (
+              <button key={s.id} className={styles.stepDot} aria-label={`step ${i + 1}: ${s.label}`} aria-current={s.id === step ? 'step' : undefined} data-done={i < idx || undefined} onClick={() => go(i)}>
+                <span>{s.n}</span>
+                <em>{s.label}</em>
+              </button>
+            ))}
+          </nav>
         <Stage orbit orbitLocked={step === 'top'} capture onCreated={(r) => (gl.current = r)} className={styles.canvas}>
           <OrbitShot shot={shot} />
           <Bounce trigger={bounceKey}>
@@ -185,12 +191,12 @@ export default function Maker() {
           </Bounce>
         </Stage>
         <div className={styles.stageTag}>
-          <CapyHint text={step === 'top' && ink ? 'tap the cake to stamp ♡' : stepInfo.hint} size={52} />
+          <CapyHint text={step === 'top' && ink ? 'tap anywhere on the cake to stamp it ♡' : step === 'secret' && peek ? 'that’s the cover they’ll burn away' : stepInfo.chef} size={52} />
         </div>
         <div className={styles.stageTools}>
           {step === 'secret' && (
             <button className="chip" aria-pressed={peek} onClick={() => setPeek((p) => !p)}>
-              {peek ? '👀 top layer on' : '👀 peek top'}
+              {peek ? 'hide burn-away cover' : 'show burn-away cover'}
             </button>
           )}
           {step === 'package' && (
@@ -224,17 +230,17 @@ export default function Maker() {
           {step === 'bake' && <BakeStation design={design} setDesign={setDesign} />}
           {step === 'top' && <TopStation design={design} setDesign={setDesign} ink={ink} setInk={setInk} sel={sel} setSel={setSel} />}
           {step === 'decorate' && <DecorateStation design={design} setDesign={setDesign} />}
-          {step === 'secret' && <SecretStation secret={secret} setSecret={setSecret} />}
+          {step === 'secret' && <SecretStation secret={secret} setSecret={setSecret} frosting={design.frosting} />}
           {step === 'package' && <PackageStation draft={draft} setDesign={setDesign} patch={patch} onPreview={() => setPreview(true)} />}
           {step === 'send' && <SendStation draft={draft} captureHero={captureHero} onPreview={() => setPreview(true)} onEdit={() => go(0)} />}
         </div>
         {step !== 'send' && (
           <footer className={styles.nav}>
             <button className="btn ghost" onClick={() => go(idx - 1)} disabled={idx === 0}>
-              ← back
+              back
             </button>
             <button className="btn primary" onClick={() => go(idx + 1)}>
-              {idx === STEPS.length - 2 ? 'wrap it up ✉️' : 'next →'}
+              {idx === STEPS.length - 2 ? 'wrap it up' : `next: ${STEPS[idx + 1].label}`}
             </button>
           </footer>
         )}

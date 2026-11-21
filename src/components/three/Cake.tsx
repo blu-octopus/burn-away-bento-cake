@@ -149,7 +149,7 @@ function Sprinkles({ design }: { design: CakeDesign }) {
   const ref = useRef<THREE.InstancedMesh>(null)
   const colors = ['#f7b3c4', '#ffd86b', '#9fd3c7', '#cdb6f2', '#ffffff', '#f08a6a']
   const spots = useMemo(() => {
-    const ring = perimeter(design.shape, 0.035, 0.86)
+    const ring = [...perimeter(design.shape, 0.045, 0.88), ...perimeter(design.shape, 0.06, 0.78)]
     return ring.map((r, i) => ({ ...r, c: colors[i % colors.length], a: (i * 2.39) % Math.PI }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [design.shape])
@@ -161,7 +161,7 @@ function Sprinkles({ design }: { design: CakeDesign }) {
     spots.forEach((s, i) => {
       const [x, z] = toWorld(s.p)
       const jitter = ((i * 7919) % 100) / 100 - 0.5
-      o.position.set(x + jitter * 0.06, TOP_Y + 0.012, z + jitter * 0.05)
+      o.position.set(x + jitter * 0.05, TOP_Y + 0.016, z + jitter * 0.04)
       o.rotation.set(Math.PI / 2, 0, s.a)
       o.updateMatrix()
       m.setMatrixAt(i, o.matrix)
@@ -169,11 +169,11 @@ function Sprinkles({ design }: { design: CakeDesign }) {
     })
     m.instanceMatrix.needsUpdate = true
     if (m.instanceColor) m.instanceColor.needsUpdate = true
-  }, [spots])
+  }, [spots, design.sprinkles])
   if (!design.sprinkles) return null
   return (
     <instancedMesh ref={ref} args={[undefined, undefined, spots.length]}>
-      <capsuleGeometry args={[0.009, 0.03, 2, 4]} />
+      <capsuleGeometry args={[0.013, 0.045, 2, 5]} />
       <meshStandardMaterial flatShading roughness={0.7} />
     </instancedMesh>
   )
@@ -408,11 +408,11 @@ export function CakeModel({ design, topTexture, secretTexture, showTop = true, c
       <mesh geometry={body} material={frosting} castShadow receiveShadow />
       {/* the secret, printed on the frosting under the sheet */}
       <mesh geometry={cap} position={[0, H + 0.002, 0]} receiveShadow>
-        <meshStandardMaterial map={secretTexture ?? null} color={secretTexture ? '#ffffff' : design.frosting} roughness={0.95} />
+        <meshStandardMaterial key={secretTexture?.uuid ?? 'plain'} map={secretTexture ?? null} color={secretTexture ? '#ffffff' : design.frosting} roughness={0.95} />
       </mesh>
       {showTop && (
         <mesh geometry={cap} position={[0, TOP_Y, 0]} receiveShadow>
-          <meshStandardMaterial map={topTexture ?? null} color={topTexture ? '#ffffff' : design.frosting} roughness={0.75} />
+          <meshStandardMaterial key={topTexture?.uuid ?? 'plain'} map={topTexture ?? null} color={topTexture ? '#ffffff' : design.frosting} roughness={0.75} />
         </mesh>
       )}
       <Piping design={design} />
@@ -518,7 +518,7 @@ export function BentoBox({ color, ribbon, open, tag }: { color: string; ribbon: 
           {tag && ribbonVisible && (
             <mesh position={[0.72, lidH + 0.03, 0.78]} rotation={[-Math.PI / 2, 0, 0.18]}>
               <planeGeometry args={[1.1, 0.62]} />
-              <meshStandardMaterial map={tag} transparent roughness={1} />
+              <meshStandardMaterial key={tag?.uuid ?? 'none'} map={tag} transparent roughness={1} />
             </mesh>
           )}
         </group>

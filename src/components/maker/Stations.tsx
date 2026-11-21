@@ -13,6 +13,7 @@ import {
   type FontKey,
   type PipingStyle,
   type Secret,
+  shapeOutline,
 } from '@/lib/design'
 import { FONT_LABELS } from '@/lib/fonts'
 import { haptic, sfx } from '@/lib/feel'
@@ -232,10 +233,26 @@ export function TopStation({
         ))}
       </div>
       {ink && <p className={styles.note}>tap anywhere on the cake to stamp · tap a stamp to pick it up and drag it</p>}
+      {t.stickers.length > 0 && (
+        <div className="row" style={{ marginTop: 6 }}>
+          <span className={styles.small}>
+            {t.stickers.length} stamp{t.stickers.length > 1 ? 's' : ''} on the cover
+          </span>
+          <button
+            className="chip"
+            onClick={() => {
+              setDesign((d) => void (d.top.stickers = []))
+              setSel(null)
+            }}
+          >
+            clear all stamps
+          </button>
+        </div>
+      )}
 
       {sel !== null && t.stickers[sel] && (
         <div className={styles.selBar}>
-          <span className="mono">stamp</span>
+          <span className="mono">picked-up stamp</span>
           <label>
             size
             <input type="range" min={0.3} max={3} step={0.01} value={t.stickers[sel].s} onChange={(e) => setDesign((d) => void (d.top.stickers[sel].s = +e.target.value), true)} />
@@ -270,6 +287,10 @@ export function DecorateStation({ design, setDesign }: { design: CakeDesign; set
     ['pearls', '⚪'],
   ]
   const spots = ['back left', 'back right', 'front right', 'front left']
+  const outlinePath = (shape: CakeShape) =>
+    shapeOutline(shape, 64)
+      .map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(3)} ${(-y).toFixed(3)}`)
+      .join(' ') + 'Z'
   const cycle = (i: number) =>
     setDesign((d) => {
       const at = kinds.findIndex(([k]) => k === d.decor[i])
@@ -277,11 +298,18 @@ export function DecorateStation({ design, setDesign }: { design: CakeDesign; set
     })
   return (
     <>
-      <Label>rim spots · tap to cycle</Label>
-      <div className={styles.spots}>
-        {design.decor.map((k, i) => (
-          <button key={i} className={`sketch ${styles.spot}`} onClick={() => cycle(i)} aria-label={`${spots[i]}: ${k}`}>
-            <span style={{ fontSize: 28 }}>{kinds.find(([v]) => v === k)?.[1]}</span>
+      <Label>rim spots · tap a spot to change it</Label>
+      {/* a little top-down map: each button sits where its spot is on the cake */}
+      <div className={styles.spotMap}>
+        <svg viewBox="-1.15 -1.15 2.3 2.3" className={styles.spotCake} aria-hidden>
+          <path d={outlinePath(design.shape)} fill={design.frosting} stroke="var(--color-brand-brown)" strokeWidth="0.035" strokeLinejoin="round" />
+          <text x="0" y="0.06" textAnchor="middle" fontSize="0.18" fill="var(--ink-soft)" fontFamily="var(--body)" fontWeight="600">
+            back ↑
+          </text>
+        </svg>
+        {([0, 1, 3, 2] as const).map((i) => (
+          <button key={i} className={`sketch ${styles.spot} ${styles[`spot${i}` as 'spot0']}`} onClick={() => cycle(i)} aria-label={`${spots[i]}: ${design.decor[i]}`}>
+            <span style={{ fontSize: 24 }}>{kinds.find(([v]) => v === design.decor[i])?.[1]}</span>
             <span className="mono" style={{ fontSize: 9 }}>
               {spots[i]}
             </span>
@@ -294,9 +322,17 @@ export function DecorateStation({ design, setDesign }: { design: CakeDesign; set
             all {e}
           </button>
         ))}
+        <button className="chip" onClick={() => setDesign((d) => void (d.decor = ['none', 'none', 'none', 'none']))}>
+          clear
+        </button>
       </div>
-      <Label>bow color</Label>
-      <Swatches colors={['#d9364a', '#e86a92', '#f4c2c9', '#ffffff', '#6b5ca5', '#3d6b8a', '#2f2a2a']} value={design.decorColor} onPick={(c) => setDesign((d) => void (d.decorColor = c))} />
+      {/* only bows take a colour; fruit and pearls are what they are */}
+      {design.decor.includes('bow') && (
+        <>
+          <Label>bow color</Label>
+          <Swatches colors={['#d9364a', '#e86a92', '#f4c2c9', '#ffffff', '#6b5ca5', '#3d6b8a', '#2f2a2a']} value={design.decorColor} onPick={(c) => setDesign((d) => void (d.decorColor = c))} />
+        </>
+      )}
       <label className="toggle">
         <span>sprinkles ✨</span>
         <Toggle checked={design.sprinkles} onCheckedChange={(checked) => setDesign((d) => void (d.sprinkles = checked))} />
@@ -322,7 +358,22 @@ export function DecorateStation({ design, setDesign }: { design: CakeDesign; set
 
 const BOWS = ['୨୧', '⋆˚࿔', '♡', '🎀', '✧˖°', '꒰ঌ ໒꒱', '⋆｡ﾟ☁︎｡⋆', '₊˚⊹♡', '🍓', '🫶']
 
-export function SecretStation({ secret, setSecret }: { secret: Secret; setSecret: (fn: (s: Secret) => void) => void }) {
+/** WCAG relative luminance contrast between two hex colours. */
+function contrast(a: string, b: string) {
+  const lum = (hex: string) => {
+    const n = parseInt(hex.slice(1), 16)
+    const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => {
+      const x = v / 255
+      return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4
+    })
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+  }
+  const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x)
+  return (hi + 0.05) / (lo + 0.05)
+}
+
+export function SecretStation({ secret, setSecret, frosting }: { secret: Secret; setSecret: (fn: (s: Secret) => void) => void; frosting: string }) {
+  const lowContrast = contrast(secret.ink, frosting) < 1.8
   const ta = useRef<HTMLTextAreaElement>(null)
   const insert = (s: string) => {
     const el = ta.current
@@ -338,7 +389,8 @@ export function SecretStation({ secret, setSecret }: { secret: Secret; setSecret
     <>
       <p className={styles.note}>only they see this — after they burn the top ♡</p>
       <Label>your secret message</Label>
-      <textarea ref={ta} rows={4} maxLength={160} value={secret.text} onChange={(e) => setSecret((s) => void (s.text = e.target.value))} className={styles.secretInput} data-font={secret.font} style={{ color: secret.ink }} />
+      <textarea ref={ta} rows={4} maxLength={160} value={secret.text} onChange={(e) => setSecret((s) => void (s.text = e.target.value))} className={styles.secretInput} data-font={secret.font} style={{ color: secret.ink, background: frosting }} />
+      {lowContrast && <p className={styles.warn}>psst: this ink is hard to read on your frosting — try a darker one ♡</p>}
       <div className={styles.counter}>{secret.text.length}/160</div>
       <div className="scroll-x" style={{ marginTop: 4 }}>
         {BOWS.map((b) => (

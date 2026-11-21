@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { haptic, sfx } from '@/lib/feel'
 import { buildLink } from '@/lib/link'
 import { hostPhoto } from '@/lib/photo'
-import { canvasBlob, downloadBlob, senderPoster, shareImage } from '@/lib/poster'
+import { canvasBlob, downloadBlob, qrDataUrl, senderPoster, shareImage } from '@/lib/poster'
 import { Checkbox } from '@/capy'
 import {
   CakeIcon,
@@ -43,6 +43,9 @@ export function SendStation({
   const [email, setEmail] = useState('')
   const [optIn, setOptIn] = useState(false)
   const [mailed, setMailed] = useState(false)
+  const [qrOk, setQrOk] = useState(true)
+  const [posterError, setPosterError] = useState(false)
+  const [retry, setRetry] = useState(0)
   const ran = useRef(false)
 
   const needsCode = draft.usePasscode && !draft.passcode
@@ -54,29 +57,38 @@ export function SendStation({
       const design = structuredClone(draft.design)
       if (!draft.useUnlock) delete design.pack.unlockAt
       if (!draft.usePasscode) delete design.pack.question
-      if (design.top.mode === 'photo' && design.top.photo) {
-        setStatus('uploading your photo…')
-        const hosted = await hostPhoto(design.top.photo)
-        design.top.photo = hosted.url
-        setInlinePhoto(hosted.inline)
-      } else {
-        delete design.top.photo
+      // each stage names itself, so a failure says what actually went wrong
+      let stage = 'packing the photo'
+      try {
+        if (design.top.mode === 'photo' && design.top.photo) {
+          setStatus('uploading your photo…')
+          const hosted = await hostPhoto(design.top.photo)
+          design.top.photo = hosted.url
+          setInlinePhoto(hosted.inline)
+        } else {
+          delete design.top.photo
+        }
+        stage = 'sealing the secret'
+        setStatus('sealing the secret…')
+        const url = await buildLink(design, draft.secret, draft.usePasscode ? draft.passcode : undefined)
+        setLink(url)
+        setQrOk(!!(await qrDataUrl(url, 64)))
+        stage = 'drawing the poster'
+        setStatus('taking its portrait…')
+        const shot = await captureHero()
+        setPoster(await senderPoster({ design, shot, link: url }))
+        setStatus('')
+        sfx.chime()
+        haptic.reveal()
+      } catch (e) {
+        console.error(e)
+        // the link is the important part — if only the poster failed, it's still sendable
+        setStatus(stage === 'drawing the poster' ? '' : `oops — got stuck ${stage}. tap “try again” ♡`)
+        if (stage === 'drawing the poster') setPosterError(true)
+        else ran.current = false
       }
-      setStatus('sealing the secret…')
-      const url = await buildLink(design, draft.secret, draft.usePasscode ? draft.passcode : undefined)
-      setLink(url)
-      setStatus('taking its portrait…')
-      const shot = await captureHero()
-      setPoster(await senderPoster({ design, shot, link: url }))
-      setStatus('')
-      sfx.chime()
-      haptic.reveal()
-    })().catch((e) => {
-      console.error(e)
-      setStatus('something went wrong — try again?')
-      ran.current = false
-    })
-  }, [draft, captureHero, needsCode])
+    })()
+  }, [draft, captureHero, needsCode, retry])
 
   if (needsCode)
     return (
@@ -84,7 +96,7 @@ export function SendStation({
         you turned on a passcode but didn’t set one yet.
         <div style={{ marginTop: 12 }}>
           <button className="btn" onClick={onEdit}>
-            ← back to packaging
+            back to packaging
           </button>
         </div>
       </div>
@@ -116,6 +128,11 @@ export function SendStation({
     await QRCode.toCanvas(cv, link, { margin: 2, width: 900, color: { dark: '#4a332c', light: '#fffdf8' }, errorCorrectionLevel: 'L' })
     downloadBlob(await canvasBlob(cv), 'secret-cake-qr.png')
   }
+  const tryAgain = () => {
+    ran.current = false
+    setStatus('boxing it up…')
+    setRetry((n) => n + 1)
+  }
 
   const receipt = () => {
     const p = draft.design.pack
@@ -144,11 +161,17 @@ export function SendStation({
           <span className="float" style={{ fontSize: 40 }}>
             📦
           </span>
-          <span className="hand" style={{ fontSize: 26 }}>
+          <span className="hand" style={{ fontSize: 26, textAlign: 'center' }}>
             {status}
           </span>
+          {status.startsWith('oops') && (
+            <button className="btn soft" onClick={tryAgain}>
+              try again
+            </button>
+          )}
         </div>
       )}
+      {posterError && <p className={styles.small}>the poster didn’t draw this time, but your link is ready to send ♡</p>}
       {poster && (
         <div className={`${styles.posterWrap} pop-in`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -200,7 +223,7 @@ export function SendStation({
             <button className="btn" onClick={() => poster && shareImage(poster, 'secret-cake-poster', shareText, link)} disabled={!poster}>
               <DownloadIcon className="ico" aria-hidden /> save poster
             </button>
-            <button className="btn" onClick={saveQr}>
+            <button className="btn" onClick={saveQr} disabled={!qrOk} title={qrOk ? undefined : 'this link carries your photo, so it’s too long for a QR code'}>
               <QrIcon className="ico" aria-hidden /> save qr
             </button>
             <button className="btn soft" onClick={onPreview}>
@@ -208,7 +231,11 @@ export function SendStation({
             </button>
           </div>
           <input type="text" readOnly value={link} aria-label="your cake link" className={styles.linkBox} onFocus={(e) => e.currentTarget.select()} />
-          {inlinePhoto && <p className={styles.small}>psst: photo uploads aren’t set up here, so your photo is tucked inside the link (it’s a long one).</p>}
+          {inlinePhoto && (
+            <p className={styles.small}>
+              psst: your photo is tucked inside the link itself, so it’s a long one{qrOk ? '' : ' — too long for a QR code, so share the link instead'}. it still opens fine ♡
+            </p>
+          )}
 
           <div className={styles.receipt}>
             <span className="field-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

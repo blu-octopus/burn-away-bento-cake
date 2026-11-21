@@ -172,31 +172,52 @@ export async function renderSecret(secret: Secret, design: CakeDesign, size = 10
   ctx.fillStyle = design.frosting
   ctx.fillRect(0, 0, size, size)
 
-  // safe text box inside the shape
-  const heart = design.shape === 'heart'
-  const boxW = size * (heart ? 0.56 : 0.66)
-  const boxH = size * (heart ? 0.4 : 0.5)
-  const cy = size * (heart ? 0.44 : 0.48)
-
-  let top = cy - boxH / 2
-  if (secret.sticker) {
-    await drawSticker(ctx, secret.sticker, 0.5, (top - size * 0.02) / size, 0.9, 0, size)
-    top += size * 0.05
+  // A safe box per shape that the whole block (sticker / message / signature)
+  // must fit in, stacked and centred. The heart's box sits below the notch
+  // between its lobes and above where it narrows to the point.
+  const SAFE: Record<CakeDesign['shape'], { w: number; top: number; bottom: number }> = {
+    round: { w: 0.64, top: 0.2, bottom: 0.8 },
+    square: { w: 0.7, top: 0.17, bottom: 0.83 },
+    heart: { w: 0.5, top: 0.27, bottom: 0.68 },
   }
+  const safe = SAFE[design.shape]
+  const boxW = size * safe.w
+  const boxTop = size * safe.top
+  const boxH = size * (safe.bottom - safe.top)
 
+  const stickerS = secret.sticker ? (design.shape === 'heart' ? 0.6 : 0.8) : 0
+  const stickerH = secret.sticker ? (size / 5) * stickerS + size * 0.02 : 0
   const font = CANVAS_FONTS[secret.font]
   const weight = secret.font === 'hand' ? '700' : secret.font === 'serif' ? '400' : '500'
-  const { size: fs, lines } = fitText(ctx, secret.text || '♡', font, weight, boxW, boxH, secret.font === 'hand' ? 120 : 84, 1.2)
+  const sigReserve = secret.signature ? 0.7 : 0 // in multiples of the message size
+  // fit the message in what's left, leaving a line's room for the signature
+  const maxFs = secret.font === 'hand' ? 120 : 84
+  const roomForSig = secret.signature ? maxFs * 0.62 * 1.4 : 0
+  const { size: fs, lines } = fitText(ctx, secret.text || '♡', font, weight, boxW, boxH - stickerH - roomForSig, maxFs, 1.2)
+  const sigFs = Math.round(fs * 0.62)
+  const blockH = stickerH + lines.length * fs * 1.2 + (secret.signature ? sigFs * 1.4 : 0)
+  let y = boxTop + (boxH - blockH) / 2
+
+  if (secret.sticker) {
+    await drawSticker(ctx, secret.sticker, 0.5, (y + ((size / 5) * stickerS) / 2) / size, stickerS, 0, size)
+    y += stickerH
+  }
   ctx.fillStyle = secret.ink
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  const y0 = cy - ((lines.length - 1) * fs * 1.2) / 2 + (secret.sticker ? size * 0.04 : 0)
-  lines.forEach((l, i) => ctx.fillText(l, size / 2, y0 + i * fs * 1.2))
+  ctx.font = `${weight} ${fs}px ${font}`
+  lines.forEach((l, i) => ctx.fillText(l, size / 2, y + fs * 0.6 + i * fs * 1.2))
+  y += lines.length * fs * 1.2
 
   if (secret.signature) {
-    ctx.font = `500 ${Math.round(fs * 0.62)}px ${CANVAS_FONTS.hand}`
-    ctx.textAlign = 'right'
-    ctx.fillText(secret.signature, size / 2 + boxW / 2, y0 + lines.length * fs * 1.2 + fs * 0.1)
+    // centred under the message (a right-aligned one falls off a heart's edge)
+    let sf = sigFs
+    ctx.font = `500 ${sf}px ${CANVAS_FONTS.hand}`
+    while (ctx.measureText(secret.signature).width > boxW && sf > 16) {
+      sf -= 2
+      ctx.font = `500 ${sf}px ${CANVAS_FONTS.hand}`
+    }
+    ctx.fillText(secret.signature, size / 2, y + sf * 0.8)
   }
   ctx.restore()
   return cv

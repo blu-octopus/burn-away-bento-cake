@@ -19,6 +19,33 @@ const NS = 'http://www.w3.org/2000/svg'
 let nextSeed = 11
 const seeds = new WeakMap<Element, number>()
 
+/**
+ * Buttons and chips are outlined tone-on-tone: a deeper shade of their own
+ * fill (raspberry on berry, dusty pink on blush, tan on cream), so each one
+ * reads as a single object. Cards, keys and swatches keep capy's brown line.
+ */
+function toneStroke(bg: string): string | null {
+  const m = bg.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?/)
+  if (!m || (m[4] !== undefined && +m[4] < 0.1)) return null
+  const [r, g, b] = [+m[1] / 255, +m[2] / 255, +m[3] / 255]
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  let h = 0
+  const l = (max + min) / 2
+  const d = max - min
+  let s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1))
+  if (d) {
+    if (max === r) h = ((g - b) / d) % 6
+    else if (max === g) h = (b - r) / d + 2
+    else h = (r - g) / d + 4
+    h *= 60
+  }
+  // very light fills: keep the hue but don't let the shade go neon
+  s = Math.min(l > 0.8 ? 0.42 : s * 1.05, 0.85)
+  const nl = l > 0.8 ? 0.58 : l * 0.62
+  return `hsl(${Math.round((h + 360) % 360)} ${Math.round(s * 100)}% ${Math.round(nl * 100)}%)`
+}
+
 function strokeWidthFor(el: HTMLElement) {
   if (el.classList.contains('card')) return 2.4
   if (el.classList.contains('chip') || el.classList.contains('swatch')) return 1.8
@@ -56,6 +83,9 @@ function paint(el: HTMLElement) {
   svg.setAttribute('viewBox', `0 0 ${w} ${h}`)
   const path = svg.firstChild as SVGPathElement
   path.setAttribute('d', ribbonPath)
+  const tone = el.matches('.btn, .chip') ? toneStroke(cs.backgroundColor) : null
+  if (tone) path.setAttribute('fill', tone)
+  else path.removeAttribute('fill')
   path.setAttribute('fill-rule', 'evenodd')
 }
 
@@ -79,15 +109,22 @@ export function SketchStrokes() {
     }
     adopt(document)
     const mo = new MutationObserver((muts) => {
-      for (const m of muts)
+      for (const m of muts) {
+        // pressed / disabled states change the fill, so the outline follows
+        if (m.type === 'attributes') {
+          const t = m.target as HTMLElement
+          if (seen.has(t)) requestAnimationFrame(() => paint(t))
+          continue
+        }
         m.addedNodes.forEach((n) => {
           if (n.nodeType !== 1) return
           const el = n as HTMLElement
           if (el.matches?.(SELECTOR)) adopt(el.parentElement ?? document)
           else adopt(el)
         })
+      }
     })
-    mo.observe(document.body, { childList: true, subtree: true })
+    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-pressed', 'aria-checked', 'class', 'disabled'] })
     return () => {
       mo.disconnect()
       ro.disconnect()

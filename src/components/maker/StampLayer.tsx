@@ -1,7 +1,7 @@
 'use client'
 
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { TOP_Y } from '@/components/three/Cake'
 import { WORLD } from '@/components/three/Stage'
@@ -35,6 +35,21 @@ export function StampLayer({
   const drag = useRef<{ kind: 'stamp' | 'photo'; i: number; du: number; dv: number; u0: number; v0: number; ox: number; oy: number } | null>(null)
   const ring = useRef<THREE.Mesh>(null)
   const stickers = design.top.stickers
+
+  // Delete / Backspace removes the picked-up stamp (unless you're typing somewhere)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (sel === null || (e.key !== 'Delete' && e.key !== 'Backspace')) return
+      const tag = (e.target as HTMLElement | null)?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      e.preventDefault()
+      setDesign((d) => void d.top.stickers.splice(sel, 1))
+      setSel(null)
+      sfx.soft()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [sel, setDesign, setSel])
 
   /** world hit → sheet uv (0..1, v down the canvas = toward the front of the cake) */
   const uvOf = (e: ThreeEvent<PointerEvent>) => {

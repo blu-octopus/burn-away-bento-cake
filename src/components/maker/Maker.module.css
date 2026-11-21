@@ -12,25 +12,15 @@
 .logo .mono { font-size: 9px; }
 .logo .hand { font-size: 24px; font-weight: 700; color: var(--berry); }
 
-.steps { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; min-width: 0; }
 .logo { flex: none; }
 .steps::-webkit-scrollbar { display: none; }
-.stepDot {
-  display: flex; flex-direction: column; align-items: center; gap: 0; flex: none;
-  border: 0; background: none; padding: 2px 3px; opacity: 0.45; min-width: 30px;
-}
-@media (max-width: 520px) { .stepDot em { display: none; } }
-.stepDot span { font-size: 18px; }
-.stepDot em { font-style: normal; font-family: var(--mono); font-size: 9px; letter-spacing: .06em; }
-.stepDot[data-done] { opacity: 0.75; }
-.stepDot[aria-current='step'] { opacity: 1; color: var(--berry); }
 
 .stage { position: relative; min-height: 0; }
 .canvas { position: absolute !important; inset: 0; touch-action: none; }
 .stageTag {
   position: absolute; left: 12px; bottom: 8px; right: 70px; pointer-events: none;
 }
-.stageTools { position: absolute; right: 12px; top: 8px; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.stageTools { position: absolute; right: 12px; top: 10px; z-index: 5; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
 
 .panel {
   min-height: 0; display: flex; flex-direction: column;
@@ -84,7 +74,6 @@
 .selBar label { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; }
 .selBar input[type='range'] { width: 90px; accent-color: var(--berry); }
 
-.spots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .spot {
   display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; border-radius: 16px; background: var(--card);
 }
@@ -131,3 +120,41 @@
   transition: transform 100ms ease;
 }
 .viaBtn:active { transform: scale(0.94); }
+
+/* ---------- step bar: a pill floating over the middle of the canvas ---------- */
+.steps {
+  position: absolute; top: 10px; left: 50%; translate: -50% 0; z-index: 4;
+  display: flex; gap: 2px; padding: 5px 8px; border-radius: 999px;
+  background: color-mix(in srgb, var(--card) 88%, transparent); backdrop-filter: blur(6px);
+  box-shadow: 0 10px 24px -18px rgba(130, 61, 0, 0.5);
+}
+.stepDot {
+  display: flex; flex-direction: column; align-items: center; gap: 2px; flex: none;
+  border: 0; background: none; padding: 3px 6px; min-width: 40px; color: var(--ink-soft); opacity: .6;
+  font-family: var(--body); font-size: 10px; font-weight: 600; letter-spacing: .02em;
+}
+.stepDot span {
+  display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid currentColor; font-size: 11px; font-weight: 700;
+}
+.stepDot[data-done] { opacity: .9; color: var(--ink); }
+.stepDot[data-done] span { background: var(--color-capy-body); border-color: var(--color-capy-body); }
+.stepDot[aria-current='step'] { opacity: 1; color: var(--berry); }
+.stepDot[aria-current='step'] span { background: var(--berry); border-color: var(--berry); color: #fff; }
+@media (max-width: 520px) {
+  .stepDot { min-width: 34px; padding: 3px 3px; }
+  .stepDot em { display: none; }
+  .stageTools { top: 64px !important; }
+}
+.stepDot em { font-style: normal; }
+
+/* rim-spot map: buttons at the cake's four corners, top-down */
+.spotMap {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto;
+  gap: 70px 90px; padding: 4px 0; max-width: 380px; margin: 0 auto;
+}
+.spotCake { position: absolute; inset: 14px 22%; width: 56%; height: calc(100% - 28px); pointer-events: none; }
+.spot { z-index: 1; }
+.spot1, .spot2 { justify-self: end; }
+.spotMap .spot { width: 104px; }
+.warn { margin: 6px 0 0; font-size: 13px; color: var(--berry); font-weight: 600; }
