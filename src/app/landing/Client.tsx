@@ -1,7 +1,8 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { BackIcon, FlameIcon, GiftIcon, NextIcon, PencilIcon } from '@/components/ui/Icons'
 import { GALLERY, type GalleryCake } from '@/lib/gallery'
 import { renderTop } from '@/lib/textures'
 import styles from './landing.module.css'
@@ -20,7 +21,7 @@ export function GotACake() {
   if (!open)
     return (
       <button className="btn" onClick={() => setOpen(true)}>
-        🎁 i got a cake
+        <GiftIcon className="ico" aria-hidden /> i got a cake
       </button>
     )
   const go = () => {
@@ -64,26 +65,62 @@ function Thumb({ cake }: { cake: GalleryCake }) {
   )
 }
 
+/**
+ * The bakery display case: one shelf that scrolls sideways (snap per cake).
+ * Trackpads and phones scroll it natively; the arrow buttons are for mice and
+ * keyboards, and disable themselves at either end.
+ */
 export function Gallery() {
   const [trying, setTrying] = useState<GalleryCake | null>(null)
+  const track = useRef<HTMLDivElement>(null)
+  const [edge, setEdge] = useState({ start: true, end: false })
+
+  const update = useCallback(() => {
+    const el = track.current
+    if (!el) return
+    setEdge({ start: el.scrollLeft < 8, end: el.scrollLeft + el.clientWidth > el.scrollWidth - 8 })
+  }, [])
+  useEffect(() => {
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [update])
+
+  const page = (dir: 1 | -1) => {
+    const el = track.current
+    if (!el) return
+    el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: 'smooth' })
+  }
+
   return (
     <>
-      <div className={styles.grid}>
-        {GALLERY.map((g, i) => (
-          <article key={g.id} className={`sketch ${styles.cake}`} style={{ rotate: `${((i * 37) % 5) - 2}deg` }}>
-            <Thumb cake={g} />
-            <h3 className="display">{g.occasion}</h3>
-            <p className="mono">{g.blurb}</p>
-            <div className={styles.cakeBtns}>
-              <button className="btn soft" onClick={() => setTrying(g)}>
-                🔥 try it
-              </button>
-              <a className="btn" href={`/bake?g=${g.id}`}>
-                ✏️ use this
-              </a>
-            </div>
-          </article>
-        ))}
+      <div className={styles.caseWrap} data-start={edge.start || undefined} data-end={edge.end || undefined}>
+        <div className={styles.arrows}>
+          <button className={`btn ${styles.arrow}`} onClick={() => page(-1)} disabled={edge.start} aria-label="previous cakes">
+            <BackIcon className="ico" aria-hidden />
+          </button>
+          <button className={`btn ${styles.arrow}`} onClick={() => page(1)} disabled={edge.end} aria-label="more cakes">
+            <NextIcon className="ico" aria-hidden />
+          </button>
+        </div>
+        <div ref={track} className={styles.shelf} onScroll={update} role="list" aria-label="premade cakes" tabIndex={0}>
+          {GALLERY.map((g, i) => (
+            <article key={g.id} role="listitem" className={`sketch ${styles.cake}`} style={{ ['--tilt' as string]: `${((i * 37) % 5) - 2}deg` }}>
+              <Thumb cake={g} />
+              <h3 className="display">{g.occasion}</h3>
+              <p className="mono">{g.blurb}</p>
+              <div className={styles.cakeBtns}>
+                <button className="btn soft" onClick={() => setTrying(g)}>
+                  <FlameIcon className="ico" aria-hidden /> try it
+                </button>
+                <a className="btn" href={`/bake?g=${g.id}`}>
+                  <PencilIcon className="ico" aria-hidden /> use this
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+        <div className={styles.shelfLip} aria-hidden />
       </div>
       {trying && (
         <div className={styles.modal}>
@@ -91,5 +128,31 @@ export function Gallery() {
         </div>
       )}
     </>
+  )
+}
+
+/** Fades + lifts its children in the first time they scroll into view. */
+export function Reveal({ children, delay = 0, className }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [shown, setShown] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setShown(true)
+          io.disconnect()
+        }
+      },
+      { rootMargin: '0px 0px -10% 0px' },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+  return (
+    <div ref={ref} className={`${styles.reveal} ${className ?? ''}`} data-shown={shown || undefined} style={{ transitionDelay: `${delay}ms` }}>
+      {children}
+    </div>
   )
 }
