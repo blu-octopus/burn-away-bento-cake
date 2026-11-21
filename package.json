@@ -1,0 +1,36 @@
+{
+  "name": "burn-away-bento-cake",
+  "version": "0.1.0",
+  "private": true,
+  "description": "operation: secret cake — bake a tiny bento cake, hide a secret under the top layer, let them burn it open.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
+    "@react-three/postprocessing": "^3.2.2",
+    "@vercel/blob": "^2.9.0",
+    "gsap": "^3.15.1",
+    "lz-string": "^1.5.0",
+    "next": "^16.4.6",
+    "paperlab": "^0.9.1",
+    "postprocessing": "^6.39.6",
+    "qrcode": "^1.5.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "resend": "^6.39.0",
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.187.0",
+    "typescript": "^7.0.2"
+  }
+}
