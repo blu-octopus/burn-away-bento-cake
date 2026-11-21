@@ -230,7 +230,7 @@ export function Unboxing({ design, secret: initialSecret, sealed, previewSecret,
 
   return (
     <div className={styles.wrap}>
-      <Stage shot={shot} capture glow onCreated={(r) => (gl.current = r)} className={styles.canvas}>
+      <Stage shot={shot} capture glow magic={phase === 'burning' || phase === 'revealed'} onCreated={(r) => (gl.current = r)} className={styles.canvas}>
         <group onClick={phase === 'boxed' ? open : undefined}>
           <BentoBox color={design.pack.box} ribbon={design.pack.ribbon} open={lidOpen} tag={tag} />
         </group>
@@ -351,7 +351,7 @@ function Striker({ onStrike }: { onStrike: () => void }) {
           // a little animated arrow showing which way to swipe
           <span className={styles.swipeHint} aria-hidden>
             <svg viewBox="0 0 60 24" width="72" height="28">
-              <path d="M4 12 H48 M38 4 L50 12 L38 20" fill="none" stroke="#fff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M4 12 H48 M38 4 L50 12 L38 20" fill="none" stroke="#fff8ec" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </span>
         )}

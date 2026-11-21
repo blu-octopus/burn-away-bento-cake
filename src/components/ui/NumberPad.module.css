@@ -16,7 +16,7 @@
   font-family: var(--display); font-weight: 800; font-size: 26px; transition: transform .08s;
 }
 .key:active { transform: scale(0.94); }
-.key:nth-child(odd):not(.fn):not(.go) { background: #fffaf2; }
+.key:nth-child(odd):not(.fn):not(.go) { background: var(--cream); }
 .fn { background: var(--butter); font-size: 22px; }
 .go { background: var(--berry); color: #fff; }
 .go:disabled { opacity: .4; }

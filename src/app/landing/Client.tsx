@@ -24,7 +24,7 @@ export function GotACake() {
     return (
       <button className={`btn ${styles.bigCta} ${styles.bigCtaAlt}`} onClick={() => setOpen(true)}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={stickerUrl('gift')} alt="" className={styles.ctaSticker} />
+        <img src={stickerUrl('dotbow')} alt="" className={styles.ctaSticker} />
         {LANDING.ctaSecondary}
       </button>
     )

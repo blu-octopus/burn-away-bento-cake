@@ -13,8 +13,8 @@ function bubbleTexture() {
   const g = c.createRadialGradient(64, 64, 30, 64, 64, 62)
   g.addColorStop(0, 'rgba(255,255,255,0)')
   g.addColorStop(0.72, 'rgba(255,230,245,0.08)')
-  g.addColorStop(0.88, 'rgba(200,180,255,0.45)')
-  g.addColorStop(0.95, 'rgba(255,190,220,0.75)')
+  g.addColorStop(0.88, 'rgba(160,230,215,0.5)')
+  g.addColorStop(0.95, 'rgba(255,240,215,0.75)')
   g.addColorStop(1, 'rgba(255,255,255,0)')
   c.fillStyle = g
   c.beginPath()
@@ -73,7 +73,7 @@ export function Magic() {
   return (
     <group>
       <Sparkles count={46} scale={[3.6, 2.2, 3.6]} position={[0, 0.9, 0]} size={5} speed={0.35} opacity={0.9} color="#fff3c4" noise={0.6} />
-      <Sparkles count={24} scale={[3, 1.8, 3]} position={[0, 0.8, 0]} size={4} speed={0.25} opacity={0.8} color="#ffc4dc" noise={0.5} />
+      <Sparkles count={24} scale={[3, 1.8, 3]} position={[0, 0.8, 0]} size={4} speed={0.25} opacity={0.8} color="#bfeee2" noise={0.5} />
       <Bubbles />
     </group>
   )

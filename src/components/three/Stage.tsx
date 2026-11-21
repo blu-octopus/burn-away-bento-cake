@@ -37,23 +37,24 @@ function framed(shot: CameraShot, aspect: number) {
 }
 
 let ginghamTex: THREE.Texture | null = null
-/** A soft pink gingham, drawn once on a canvas and tiled. */
+/** Mint tablecloth with chocolate polka dots, drawn once on a canvas and tiled. */
 function gingham() {
   if (ginghamTex) return ginghamTex
   const cv = document.createElement('canvas')
   cv.width = cv.height = 64
   const c = cv.getContext('2d')!
-  c.fillStyle = '#fff6f8'
+  c.fillStyle = '#d2f3ea'
   c.fillRect(0, 0, 64, 64)
-  c.fillStyle = 'rgba(255, 160, 195, 0.16)'
-  c.fillRect(0, 0, 32, 64)
-  c.fillRect(0, 0, 64, 32)
-  c.fillStyle = 'rgba(255, 160, 195, 0.1)'
-  c.fillRect(0, 0, 32, 32)
+  c.fillStyle = 'rgba(91, 58, 46, 0.55)'
+  for (const [x, y] of [[16, 16], [48, 48]]) {
+    c.beginPath()
+    c.arc(x, y, 4, 0, Math.PI * 2)
+    c.fill()
+  }
   const t = new THREE.CanvasTexture(cv)
   t.wrapS = t.wrapT = THREE.RepeatWrapping
-  t.repeat.set(260, 260)
-  t.magFilter = THREE.NearestFilter
+  t.repeat.set(320, 320)
+  t.anisotropy = 8
   t.colorSpace = THREE.SRGBColorSpace
   ginghamTex = t
   return t
@@ -100,7 +101,7 @@ export interface StageProps {
   magic?: boolean
 }
 
-export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, background = '#fff1f6', onCreated, className, style, capture, glow = true, magic = true }: StageProps) {
+export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, background = '#d2f3ea', onCreated, className, style, capture, glow = true, magic = false }: StageProps) {
   return (
     <Canvas
       className={className}
@@ -116,8 +117,8 @@ export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, 
       }}
     >
       <color attach="background" args={[background]} />
-      <hemisphereLight args={['#fffafd', '#e6dcff', 1.15]} />
-      <ambientLight intensity={0.25} color="#ffe8f2" />
+      <hemisphereLight args={['#fffdf6', '#cdeee4', 1.15]} />
+      <ambientLight intensity={0.25} color="#fff6ea" />
       <directionalLight
         position={[2.5, 6, 3.5]}
         intensity={1.35}
@@ -130,13 +131,13 @@ export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, 
         shadow-camera-bottom={-0.8}
         shadow-bias={-0.0004}
       />
-      <directionalLight position={[-4, 2.5, -2]} intensity={0.35} color="#f3d9ff" />
+      <directionalLight position={[-4, 2.5, -2]} intensity={0.35} color="#d4f5ec" />
       {/* a pink gingham tablecloth, like a game kitchen counter */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1 * WORLD, 0]} receiveShadow>
         <planeGeometry args={[40, 40]} />
         <meshStandardMaterial map={gingham()} roughness={1} />
       </mesh>
-      <ContactShadows position={[0, -0.095 * WORLD, 0]} opacity={0.35} scale={8 * WORLD} blur={2.4} far={2 * WORLD} color="#7a5a48" />
+      <ContactShadows position={[0, -0.095 * WORLD, 0]} opacity={0.35} scale={8 * WORLD} blur={2.4} far={2 * WORLD} color="#5b3a2e" />
       <group scale={WORLD}>
         <Spin on={!!autoSpin}>{children}</Spin>
         {magic && <Magic />}

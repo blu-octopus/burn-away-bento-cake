@@ -10,10 +10,8 @@
  * ones exist. The "proof" is the product itself — try a cake right on the page.
  */
 import { CapyMascot } from '@/capy'
-import { LinkIcon } from '@/components/ui/Icons'
 import { Logo } from '@/components/ui/Logo'
 import { Ribbon } from '@/components/ui/Ribbon'
-import { Sky } from '@/components/ui/Sky'
 import { stickerUrl } from '@/lib/art'
 import { GotACake, HeroCake, Gallery, Reveal } from './landing/Client'
 import styles from './landing/landing.module.css'
@@ -21,20 +19,19 @@ import { LANDING } from '@/content/copy'
 
 // Words live in src/content/copy.ts — sticker art and tile colours stay here.
 const BENEFIT_STYLE = [
-  { sticker: 'lollipop', tone: '#ffe6ee' },
-  { sticker: 'cakeslice', tone: '#fff4cf' },
-  { sticker: 'heart', tone: '#e3f6ee' },
-  { sticker: 'cupcake', tone: '#efe7ff' },
+  { sticker: 'dotbow', tone: '#fff4e0' },
+  { sticker: 'chocostar', tone: '#e6f8f2' },
+  { sticker: 'dotheart', tone: '#fff4e0' },
+  { sticker: 'swissroll', tone: '#e6f8f2' },
 ]
 const BENEFITS = LANDING.benefits.map((b, i) => ({ ...b, ...BENEFIT_STYLE[i % BENEFIT_STYLE.length] }))
 const FAQ = LANDING.faq
-const LEVEL_TONES = ['#ffe6ee', '#e3f6ee', '#fff4cf']
-const LEVEL_STICKERS = ['strawberry', 'bow', 'sparkle']
+const LEVEL_TONES = ['#fff4e0', '#e6f8f2', '#fff4e0']
+const LEVEL_STICKERS = ['mintscoop', 'dotbow', 'polkastar']
 
 export default function Home() {
   return (
     <>
-      <Sky sweets />
       <header className={styles.header}>
         <div className={styles.headerIn}>
           <a href="/" className={styles.brand} aria-label="operation: secret cake — home">
@@ -64,7 +61,7 @@ export default function Home() {
             <div className={`${styles.ctas} ${styles.rise}`} style={{ animationDelay: '260ms' }}>
               <a className={`btn primary ${styles.bigCta}`} href="/bake">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={stickerUrl('cakeslice')} alt="" className={styles.ctaSticker} />
+                <img src={stickerUrl('mintscoop')} alt="" className={styles.ctaSticker} />
                 {LANDING.ctaPrimary}
               </a>
               <GotACake />
@@ -80,7 +77,7 @@ export default function Home() {
         {/* ---------- how to play: three level cards ---------- */}
         <section id="how" className={styles.section} aria-labelledby="how-title">
           <div className={styles.sectionHead}>
-            <Ribbon as="h2" color="#ff9dbb">
+            <Ribbon as="h2" color="#6b4334">
               <span id="how-title">{LANDING.howTitle}</span>
             </Ribbon>
           </div>
@@ -103,7 +100,7 @@ export default function Home() {
       {/* ---------- the bakery case ---------- */}
       <section id="case" className={styles.case} aria-labelledby="case-title">
         <header className={styles.caseHead}>
-          <Ribbon as="h2" color="#8fdcc0">
+          <Ribbon as="h2" color="#3a9e8f">
             <span id="case-title">{LANDING.caseTitle}</span>
           </Ribbon>
           <p>{LANDING.caseBody}</p>
@@ -115,7 +112,7 @@ export default function Home() {
         {/* ---------- why ---------- */}
         <section className={styles.section} aria-labelledby="why-title">
           <div className={styles.sectionHead}>
-            <Ribbon as="h2" color="#ffc47e">
+            <Ribbon as="h2" color="#6b4334">
               <span id="why-title">{LANDING.whyTitle}</span>
             </Ribbon>
           </div>
@@ -136,7 +133,7 @@ export default function Home() {
         {/* ---------- faq ---------- */}
         <section id="faq" className={styles.section} aria-labelledby="faq-title">
           <div className={styles.sectionHead}>
-            <Ribbon as="h2" color="#c9b3ff">
+            <Ribbon as="h2" color="#3a9e8f">
               <span id="faq-title">{LANDING.faqRibbon}</span>
             </Ribbon>
           </div>
@@ -164,7 +161,7 @@ export default function Home() {
             </h2>
             <a className={`btn primary ${styles.hugeCta}`} href="/bake">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={stickerUrl('cakeslice')} alt="" className={styles.ctaSticker} />
+              <img src={stickerUrl('mintscoop')} alt="" className={styles.ctaSticker} />
               {LANDING.finalCta}
             </a>
           </div>
@@ -189,13 +186,13 @@ export default function Home() {
             <h3 className="mono">{LANDING.footerHelp}</h3>
             <a href="#faq">faq</a>
             <a href="https://github.com/blu-octopus/burn-away-bento-cake/issues">report a problem</a>
-            <a href="https://github.com/blu-octopus/burn-away-bento-cake">
-              <LinkIcon size={14} aria-hidden /> source on github
-            </a>
+            <a href="https://github.com/blu-octopus/burn-away-bento-cake">GitHub</a>
+            <a href="/privacy">privacy policy</a>
           </nav>
           <div>
             <h3 className="mono">{LANDING.footerPrivacy}</h3>
             <p className={styles.footNote}>{LANDING.privacy}</p>
+            <a href="/privacy">read the privacy policy</a>
           </div>
         </div>
         <p className={styles.credits}>

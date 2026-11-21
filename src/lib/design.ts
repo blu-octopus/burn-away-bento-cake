@@ -78,6 +78,8 @@ export interface CakeDesign {
 }
 
 export const FROSTINGS = [
+  '#bfeee2', // mint
+  '#6b4334', // chocolate
   '#fbf3e6', // vanilla cream
   '#f7d6d0', // strawberry milk
   '#f4c2c9', // blush
@@ -90,9 +92,9 @@ export const FROSTINGS = [
   '#2f2a2a', // black forest
 ]
 
-export const INKS = ['#3b2a26', '#c8323b', '#e86a92', '#6b5ca5', '#3d6b8a', '#5c7a3a', '#ffffff']
+export const INKS = ['#3b2a26', '#3a9e8f', '#c8323b', '#e86a92', '#6b5ca5', '#3d6b8a', '#5c7a3a', '#ffffff']
 
-export const BOXES = ['#fbf6ee', '#f3cfd3', '#d7e3cc', '#cdb08a', '#d9d4ef']
+export const BOXES = ['#fff4e0', '#bfeee2', '#6b4334', '#fbf6ee', '#f3cfd3', '#d7e3cc']
 
 export const DEFAULT_DESIGN: CakeDesign = {
   shape: 'round',

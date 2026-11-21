@@ -17,9 +17,8 @@ import { MAKER, STEP_COPY } from '@/content/copy'
 import { CapyHint } from '@/components/ui/CapyHint'
 import { Ribbon } from '@/components/ui/Ribbon'
 import { Logo } from '@/components/ui/Logo'
-import { Sky } from '@/components/ui/Sky'
 
-const RIBBON_TONES = ['#ff9dbb', '#c9b3ff', '#8fdcc0', '#ffc47e', '#8fcaff', '#ff9dbb']
+const RIBBON_TONES = ['#6b4334', '#3a9e8f', '#6b4334', '#3a9e8f', '#6b4334', '#3a9e8f']
 import styles from './Maker.module.css'
 
 /**
@@ -171,7 +170,6 @@ export default function Maker() {
 
   return (
     <div className={styles.maker}>
-      <Sky density={10} />
       <header className={styles.header}>
         <a href="/" className={styles.logo} aria-label="operation: secret cake — home">
           <Logo size={20} />

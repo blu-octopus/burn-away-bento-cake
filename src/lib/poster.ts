@@ -15,8 +15,8 @@ import { loadImage } from './textures'
 
 export const W = 1080
 export const HGT = 1920
-const INK = '#5a3f47'
-const EDGE = '#f1c6d6'
+const INK = '#4a2f25'
+const EDGE = '#d9c7a8'
 
 // ---------------------------------------------------------------------------
 // drawing kit
@@ -31,9 +31,6 @@ function rr(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: n
 function panel(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, opts: { r?: number; fill?: string; drop?: number; lw?: number; edge?: string } = {}) {
   const { r = 34, fill = '#ffffff', lw = 3, edge = EDGE } = opts
   ctx.save()
-  ctx.shadowColor = 'rgba(214, 110, 150, 0.35)'
-  ctx.shadowBlur = 40
-  ctx.shadowOffsetY = 16
   ctx.fillStyle = fill
   rr(ctx, x, y, w, h, r)
   ctx.fill()
@@ -64,23 +61,16 @@ function sky() {
   cv.width = W
   cv.height = HGT
   const ctx = cv.getContext('2d')!
-  const g = ctx.createLinearGradient(0, 0, W * 0.6, HGT)
-  g.addColorStop(0, '#e6dbff')
-  g.addColorStop(0.5, '#ffd8ea')
-  g.addColorStop(1, '#ffe6d3')
-  ctx.fillStyle = g
+  // mint with chocolate polka dots
+  ctx.fillStyle = '#c9f0e5'
   ctx.fillRect(0, 0, W, HGT)
-  let seed = 7
-  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647)
-  ctx.fillStyle = 'rgba(255,255,255,0.35)'
-  for (const [x, y, r] of [
-    [140, 260, 130],
-    [930, 520, 170],
-    [780, 1640, 210],
-    [120, 1320, 110],
-  ])
-    (ctx.beginPath(), ctx.arc(x, y, r, 0, Math.PI * 2), ctx.fill())
-  for (let i = 0; i < 26; i++) sparkle(ctx, rnd() * W, rnd() * HGT, 8 + rnd() * 16, ['#ffffff', '#fff3b0', '#ffd3e2'][i % 3])
+  ctx.fillStyle = 'rgba(91, 58, 46, 0.5)'
+  for (let y = 0, row = 0; y < HGT + 60; y += 44, row++)
+    for (let x = row % 2 ? 22 : 0; x < W + 60; x += 44) {
+      ctx.beginPath()
+      ctx.arc(x, y, 4, 0, Math.PI * 2)
+      ctx.fill()
+    }
   return { cv, ctx }
 }
 
@@ -111,14 +101,11 @@ function gameTitle(ctx: CanvasRenderingContext2D, text: string, cx: number, top:
   lines.forEach((l, i) => {
     const y = top + size * 0.86 + i * lh
     ctx.save()
-    ctx.shadowColor = 'rgba(220, 100, 150, 0.4)'
-    ctx.shadowBlur = 24
-    ctx.shadowOffsetY = 8
     ctx.lineWidth = size * 0.16
     ctx.strokeStyle = '#ffffff'
     ctx.strokeText(l, cx, y)
     ctx.restore()
-    ctx.fillStyle = '#ff6f98'
+    ctx.fillStyle = '#5b3a2e'
     ctx.fillText(l, cx, y)
   })
   return top + lines.length * lh + size * 0.15
@@ -246,17 +233,17 @@ export async function senderPoster(opts: { design: CakeDesign; shot: string; lin
   await fontsReady()
   const { design, shot, link } = opts
   const { cv, ctx } = sky()
-  let y = ribbon(ctx, 'operation: secret cake', W / 2, 70, '#c9b3ff', 74)
+  let y = ribbon(ctx, 'operation: secret cake', W / 2, 70, '#6b4334', 74)
   y = gameTitle(ctx, design.pack.title || 'a secret cake', W / 2, y + 22, W - 140, 140)
-  if (design.pack.to) pill(ctx, `for ${design.pack.to} ♥`, W / 2, y, { fill: '#ffe08a', size: 34 })
+  if (design.pack.to) pill(ctx, `for ${design.pack.to} ♥`, W / 2, y, { fill: '#fff4e0', size: 34 })
 
   await polaroid(ctx, shot, W / 2, 610, 640, `baked by ${design.pack.from || 'someone'} · ${today()}`)
-  await sticker(ctx, 'donut', 150, 640, 170, -14)
-  await sticker(ctx, 'bow', 930, 600, 150, 12)
-  await sticker(ctx, 'cupcake', 140, 1330, 150, 8)
+  await sticker(ctx, 'polkastar', 150, 640, 170, -14)
+  await sticker(ctx, 'dotbow', 930, 600, 150, 12)
+  await sticker(ctx, 'swissroll', 140, 1330, 150, 8)
 
   // bottom: how to open it + the QR
-  panel(ctx, 70, 1500, 520, 300, { fill: '#ffe6ee', r: 30, edge: '#f6c1d2' })
+  panel(ctx, 70, 1500, 520, 300, { fill: '#fff4e0', r: 30, edge: '#e9d3ae' })
   ctx.fillStyle = INK
   ctx.textAlign = 'left'
   ctx.textBaseline = 'alphabetic'
@@ -279,7 +266,7 @@ export async function senderPoster(opts: { design: CakeDesign; shot: string; lin
     ctx.font = `600 44px ${CANVAS_FONTS.hand}`
     ;['the link is', 'in your', 'messages ♡'].forEach((l, i) => ctx.fillText(l, 825, 1580 + i * 64))
   }
-  ribbon(ctx, 'scan me', 825, 1392, '#8fdcc0', 58)
+  ribbon(ctx, 'scan me', 825, 1392, '#3a9e8f', 58)
   ctx.textAlign = 'left'
   ctx.fillStyle = INK
   ctx.font = `600 24px ${CANVAS_FONTS.game}`
@@ -292,15 +279,15 @@ export async function revealPoster(opts: { design: CakeDesign; shot: string }): 
   await fontsReady()
   const { design, shot } = opts
   const { cv, ctx } = sky()
-  let y = ribbon(ctx, 'you opened it!', W / 2, 64, '#ffb3c9', 80)
+  let y = ribbon(ctx, 'you opened it!', W / 2, 64, '#6b4334', 80)
   y = gameTitle(ctx, design.pack.title || 'a secret cake', W / 2, y + 30, W - 140, 132)
-  if (design.pack.to) pill(ctx, `for ${design.pack.to} ♥`, W / 2, y + 8, { fill: '#ffe08a', size: 32 })
+  if (design.pack.to) pill(ctx, `for ${design.pack.to} ♥`, W / 2, y + 8, { fill: '#fff4e0', size: 32 })
 
   await polaroid(ctx, shot, W / 2, 640, 680, `from ${design.pack.from || 'someone'} · ${today()}`, 0.025)
-  await sticker(ctx, 'cakeslice', 150, 700, 170, -10)
-  await sticker(ctx, 'sparkle', 940, 660, 130, 10)
-  await sticker(ctx, 'lollipop', 960, 1520, 160, 14)
-  await sticker(ctx, 'heart', 120, 1560, 120, -12)
+  await sticker(ctx, 'mintscoop', 150, 700, 170, -10)
+  await sticker(ctx, 'chocostar', 940, 660, 130, 10)
+  await sticker(ctx, 'dotheart', 960, 1520, 160, 14)
+  await sticker(ctx, 'polkastar', 120, 1560, 120, -12)
 
   pill(ctx, `make your own at ${host()}`, W / 2, 1760, { size: 30 })
   return cv
@@ -312,8 +299,8 @@ export async function photoStrip(opts: { design: CakeDesign; frames: string[] })
   const { design, frames } = opts
   const { cv, ctx } = sky()
   const labels = ['unboxed', 'lit', 'burning', 'opened']
-  const tones = ['#ffe0ea', '#fff0b8', '#ffd9c2', '#d4f2e5']
-  ribbon(ctx, 'photo booth', W / 2, 54, '#ffb3c9', 78)
+  const tones = ['#bfeee2', '#fff4e0', '#bfeee2', '#fff4e0']
+  ribbon(ctx, 'photo booth', W / 2, 54, '#6b4334', 78)
   const fw = 780
   const fh = 340
   const x = (W - fw) / 2
@@ -343,7 +330,7 @@ export async function photoStrip(opts: { design: CakeDesign; frames: string[] })
     ctx.arc(x + 4, y + 6, 38, 0, Math.PI * 2)
     ctx.fill()
     ctx.lineWidth = 3
-    ctx.strokeStyle = 'rgba(140, 60, 90, 0.3)'
+    ctx.strokeStyle = 'rgba(74, 47, 37, 0.35)'
     ctx.stroke()
     ctx.fillStyle = INK
     ctx.textAlign = 'center'
@@ -353,10 +340,10 @@ export async function photoStrip(opts: { design: CakeDesign; frames: string[] })
     pill(ctx, labels[i], x + fw - 110, y + fh - 50, { fill: tones[i], size: 26 })
     y += fh + 34
   }
-  await sticker(ctx, 'strawberry', 70, 380, 110, -12)
-  await sticker(ctx, 'macaron', 1010, 760, 110, 10)
-  await sticker(ctx, 'candy', 70, 1150, 110, 8)
-  await sticker(ctx, 'heart', 1010, 1500, 100, -10)
+  await sticker(ctx, 'chocostar', 70, 380, 110, -12)
+  await sticker(ctx, 'mintscoop', 1010, 760, 110, 10)
+  await sticker(ctx, 'dotbow', 70, 1150, 110, 8)
+  await sticker(ctx, 'dotheart', 1010, 1500, 100, -10)
   pill(ctx, `${design.pack.title || 'secret cake'} · ${today()}`, W / 2, HGT - 96, { size: 28 })
   return cv
 }
@@ -382,8 +369,8 @@ export async function combo(opts: { strip: HTMLCanvasElement; poster: HTMLCanvas
   }
   place(opts.strip, 40, (HGT - sh) / 2, sw, sh, -0.035)
   place(opts.poster, W - pw - 40, (HGT - ph) / 2, pw, ph, 0.025)
-  await sticker(ctx, 'cupcake', 510, 210, 140, -10)
-  await sticker(ctx, 'bow', 520, 1730, 130, 12)
+  await sticker(ctx, 'dotbow', 510, 210, 140, -10)
+  await sticker(ctx, 'chocostar', 520, 1730, 130, 12)
   return cv
 }
 

@@ -19,8 +19,8 @@ const ramp = (() => {
   return t
 })()
 
-const SHADOW_TINT = new THREE.Color('#b9a3ff')
-const RIM = new THREE.Color('#fff0f6')
+const SHADOW_TINT = new THREE.Color('#9fd8cb')
+const RIM = new THREE.Color('#f3fffb')
 
 export function toonMaterial(color: THREE.ColorRepresentation, opts: { rim?: number; shadowTint?: number } = {}) {
   const m = new THREE.MeshToonMaterial({ color, gradientMap: ramp })

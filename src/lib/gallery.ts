@@ -17,6 +17,25 @@ function make(over: (d: CakeDesign) => void): CakeDesign {
 
 export const GALLERY: GalleryCake[] = [
   {
+    id: 'mint-choco',
+    occasion: 'mint choco',
+    blurb: 'mint frosting, chocolate polka',
+    design: make((d) => {
+      d.frosting = '#bfeee2'
+      d.top.art = 'mint-choco'
+      d.piping = 'beads'
+      d.pipingColor = '#6b4334'
+      d.decor = ['bow', 'none', 'bow', 'none']
+      d.decorColor = '#6b4334'
+      d.sprinkles = false
+      d.candleColor = '#6b4334'
+      d.pack.title = 'happy birthday'
+      d.pack.box = '#fff4e0'
+      d.pack.ribbon = '#6b4334'
+    }),
+    secret: { text: 'mint to be friends ♡', font: 'hand', ink: '#4a2f25', signature: '' },
+  },
+  {
     id: 'birthday',
     occasion: 'birthday',
     blurb: 'strawberry picnic, red bows',

@@ -443,7 +443,7 @@ export function CakeModel({ design, topTexture, secretTexture, showTop = true, c
   return (
     <group>
       <mesh geometry={plate} material={plateMat} position={[0, -0.05, 0]} receiveShadow>
-        <Ink px={2} color="#f3d3e0" />
+        <Ink px={2} color="#d9c7a8" />
       </mesh>
       <mesh geometry={body} material={frosting} castShadow receiveShadow>
         <Ink px={2.4} color={design.frosting} />

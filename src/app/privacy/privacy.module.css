@@ -1,0 +1,12 @@
+.header { position: sticky; top: 0; z-index: 10; background: var(--cream); border-bottom: 1.5px solid var(--cream-edge); padding: 10px 18px; }
+.header a { text-decoration: none; display: inline-flex; }
+.page { max-width: 760px; margin: 0 auto; padding: 28px 16px 64px; }
+.doc { padding: 28px 26px; background: var(--paper-2); line-height: 1.65; font-size: 16px; }
+.doc h1 { font-size: 34px; margin: 0; }
+.doc h2 { font-size: 19px; margin: 28px 0 6px; }
+.doc p, .doc li { color: var(--ink); }
+.doc ul { padding-left: 20px; margin: 6px 0; }
+.doc a { color: var(--teal-dark); font-weight: 600; }
+.meta { color: var(--ink-soft) !important; font-size: 14px; margin: 4px 0 18px; }
+.back { margin-top: 28px; }
+.back a { color: var(--ink) !important; }

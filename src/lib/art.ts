@@ -20,7 +20,10 @@ const svg = (body: string) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-7 -7 114 114"><defs><filter id="die" x="-20%" y="-20%" width="140%" height="140%"><feMorphology in="SourceAlpha" operator="dilate" radius="4.5" result="d"/><feFlood flood-color="#fff"/><feComposite in2="d" operator="in" result="w"/><feMerge><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g filter="url(#die)">${body}</g></svg>`
 
 /** A tiny kawaii face: two dot eyes, a little smile, pink cheeks. */
-const face = (cx: number, cy: number, s = 1) => `
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const face = (cx: number, cy: number, s = 1) => ''
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _faceUnused = (cx: number, cy: number, s = 1) => `
   <circle cx="${cx - 9 * s}" cy="${cy}" r="${2.8 * s}" fill="${INK}"/><circle cx="${cx + 9 * s}" cy="${cy}" r="${2.8 * s}" fill="${INK}"/>
   <path d="M${cx - 3.5 * s} ${cy + 3 * s} Q${cx} ${cy + 7 * s} ${cx + 3.5 * s} ${cy + 3 * s}" fill="none" stroke="${INK}" stroke-width="${2.4 * s}" stroke-linecap="round"/>
   <ellipse cx="${cx - 15 * s}" cy="${cy + 5 * s}" rx="${4 * s}" ry="${2.4 * s}" fill="#ff9db8" opacity=".85"/><ellipse cx="${cx + 15 * s}" cy="${cy + 5 * s}" rx="${4 * s}" ry="${2.4 * s}" fill="#ff9db8" opacity=".85"/>`
@@ -201,6 +204,56 @@ STICKERS.push(
   },
 )
 
+/** Mint chocolate · cookies & cream set. */
+const dots = (id: string, fg: string, bg: string, r = 2.2, step = 9) =>
+  `<pattern id="${id}" width="${step}" height="${step}" patternUnits="userSpaceOnUse"><rect width="${step}" height="${step}" fill="${bg}"/><circle cx="${step / 2}" cy="${step / 2}" r="${r}" fill="${fg}"/></pattern>`
+STICKERS.push(
+  {
+    id: 'polkastar',
+    label: 'polka star',
+    svg: svg(`<defs>${dots('pdA', '#5b3a2e', '#9fe1d1')}</defs>
+      <path d="M50 6 L62 36 L94 38 L69 58 L78 90 L50 72 L22 90 L31 58 L6 38 L38 36Z" fill="url(#pdA)" ${lineW(3)} stroke="#5b3a2e"/>`),
+  },
+  {
+    id: 'chocostar',
+    label: 'choco star',
+    svg: svg(`<path d="M50 8 L61 36 L92 38 L68 57 L76 88 L50 71 L24 88 L32 57 L8 38 L39 36Z" fill="#6b4334" stroke="#4a2f25" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M50 22 L57 40 L76 41 L62 53 L66 72 L50 62 L34 72 L38 53 L24 41 L43 40Z" fill="none" stroke="#8a5a47" stroke-width="2.5" stroke-linejoin="round"/>
+      <g fill="#fff8ec"><circle cx="44" cy="48" r="3"/><circle cx="56" cy="48" r="3"/><circle cx="44" cy="59" r="3"/><circle cx="56" cy="59" r="3"/></g>`),
+  },
+  {
+    id: 'dotbow',
+    label: 'polka bow',
+    svg: svg(`<defs>${dots('pdB', '#5b3a2e', '#9fe1d1', 1.8, 7)}</defs>
+      <path d="M50 50 C36 28 10 30 12 46 C14 62 36 62 50 50Z" fill="url(#pdB)" stroke="#5b3a2e" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M50 50 C64 28 90 30 88 46 C86 62 64 62 50 50Z" fill="url(#pdB)" stroke="#5b3a2e" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M46 54 L32 88 L42 84 L46 92 L50 56Z M54 54 L68 88 L58 84 L54 92 L50 56Z" fill="url(#pdB)" stroke="#5b3a2e" stroke-width="3" stroke-linejoin="round"/>
+      <ellipse cx="50" cy="50" rx="8" ry="9" fill="#5b3a2e"/>`),
+  },
+  {
+    id: 'dotheart',
+    label: 'lace heart',
+    svg: svg(`<defs>${dots('pdC', '#5b3a2e', '#bfeee2', 1.6, 7)}</defs>
+      <path d="M50 92 C18 70 6 50 12 32 C18 16 40 14 50 30 C60 14 82 16 88 32 C94 50 82 70 50 92Z" fill="url(#pdC)" stroke="#5b3a2e" stroke-width="3"/>
+      <path d="M50 76 C30 62 24 50 27 40 C30 31 42 30 50 40 C58 30 70 31 73 40 C76 50 70 62 50 76Z" fill="#5b3a2e"/>
+      <path d="M44 42 L50 46 L56 42 L56 50 L50 46 L44 50Z" fill="#bfeee2"/>`),
+  },
+  {
+    id: 'mintscoop',
+    label: 'mint scoop',
+    svg: svg(`<path d="M18 62 C12 30 88 30 82 62 C86 62 88 70 80 72 C74 76 68 70 62 74 C56 78 50 72 44 76 C38 78 32 72 26 74 C18 76 12 70 18 62Z" fill="#9fe1d1" stroke="#5b3a2e" stroke-width="3" stroke-linejoin="round"/>
+      <g fill="#5b3a2e"><path d="M34 44l5 2-2 4z"/><path d="M58 40l4 4-5 1z"/><path d="M46 56l5-1 0 5z"/><path d="M68 54l3 4-5 0z"/><path d="M28 58l4-1 0 4z"/></g>
+      <path d="M30 40 C34 34 40 32 46 32" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>`),
+  },
+  {
+    id: 'swissroll',
+    label: 'choco roll',
+    svg: svg(`<path d="M20 36 L72 24 C88 24 94 64 82 76 L30 86 Z" fill="#6b4334" stroke="#4a2f25" stroke-width="3" stroke-linejoin="round"/>
+      <ellipse cx="28" cy="61" rx="20" ry="25" fill="#5b3a2e" stroke="#4a2f25" stroke-width="3"/>
+      <path d="M28 61 m0 -4 a4 4 0 1 1 -4 4 a9 9 0 1 1 9 9 a14 14 0 1 1 -14 -14" fill="none" stroke="#bfeee2" stroke-width="4.5" stroke-linecap="round"/>`),
+  },
+)
+
 export const STICKER_BY_ID = Object.fromEntries(STICKERS.map((s) => [s.id, s]))
 
 export function stickerUrl(id: string): string {
@@ -222,6 +275,17 @@ export interface ArtPreset {
 }
 
 export const ART: ArtPreset[] = [
+  {
+    id: 'mint-choco',
+    label: 'mint choco',
+    ground: '#bfeee2',
+    pattern: 'dots',
+    patternColor: '#6b4334',
+    stickers: [
+      { id: 'dotbow', x: 0.5, y: 0.46, s: 2.4, r: -4 },
+      { id: 'chocostar', x: 0.74, y: 0.74, s: 0.9, r: 12 },
+    ],
+  },
   {
     id: 'strawberry-gingham',
     label: 'strawberry picnic',

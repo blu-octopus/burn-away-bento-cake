@@ -84,7 +84,7 @@ export function EndCard({
           ⌄
         </button>
         <div className={styles.endHead}>
-          <Ribbon color="#ffb3c9">{mode === 'preview' ? 'preview' : RECEIVER.completeTitle}</Ribbon>
+          <Ribbon color="#6b4334">{mode === 'preview' ? 'preview' : RECEIVER.completeTitle}</Ribbon>
         </div>
         <div className="row" style={{ justifyContent: 'center', margin: '10px 0' }}>
           {(['both', 'strip', 'poster'] as Kind[]).map((k) => (
