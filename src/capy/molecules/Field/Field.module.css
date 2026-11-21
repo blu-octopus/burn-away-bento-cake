@@ -1,0 +1,37 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 248px;
+  max-width: 100%;
+}
+
+.label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-brand-black);
+}
+
+.control {
+  all: unset;
+  box-sizing: border-box;
+  width: 100%;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--color-brand-black);
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-brand-black);
+}
+
+.control::placeholder {
+  color: var(--color-brand-grey);
+}
+
+/* iOS Safari zooms the page in on focus for any input under 16px — bumping
+   it here (touch devices only, so desktop keeps the denser 12px) avoids that
+   jarring viewport jump without changing the design anywhere a mouse is in play. */
+@media (pointer: coarse) {
+  .control {
+    font-size: 16px;
+  }
+}

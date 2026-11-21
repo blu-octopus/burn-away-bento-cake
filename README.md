@@ -19,7 +19,7 @@ No app, no account, no database.
 
 ## Stack
 
-Next.js (App Router) · React Three Fiber + drei · [Paperlab](https://github.com/NourMtir0722/Paperlab) for the burn (damage simulation, flames, embers, fire sound) · `next/og` · Vercel Blob (photo uploads) · Resend (opt-in mailing list only) · WebAudio + Vibration API
+Next.js (App Router) · React Three Fiber + drei · [Paperlab](https://github.com/NourMtir0722/Paperlab) for the burn (damage simulation, fluid flames, embers, fire sound) · capy-ui · `next/og` · Vercel Blob (photo uploads) · Resend (opt-in mailing list only) · WebAudio + Vibration API
 
 ## Run it
 
@@ -36,5 +36,6 @@ Optional env vars are listed in `.env.example`:
 ## Credits
 
 - Burn effect: **Paperlab** © Nour Mtir, Apache-2.0 (see `NOTICE`)
-- UI palette and feel: [capy-ui](https://github.com/blu-octopus/capy-ui)
+- UI: [capy-ui](https://github.com/blu-octopus/capy-ui) (MIT), vendored in `src/capy`: its tokens, hand-drawn wobble-ribbon strokes, Toggle, Checkbox, DialogueBubble and the capy mascot, who is the baker
+- Brand icons: [simple-icons](https://simpleicons.org) (CC0)
 - Sticker style inspired by [salt-journal-materials](https://github.com/carolinaaafy/salt-journal-materials). The stickers here are original SVGs; none of that repo's images are included.

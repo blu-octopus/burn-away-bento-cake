@@ -6,6 +6,21 @@ import { haptic, sfx } from '@/lib/feel'
 import { buildLink } from '@/lib/link'
 import { hostPhoto } from '@/lib/photo'
 import { canvasBlob, downloadBlob, senderPoster, shareImage } from '@/lib/poster'
+import { Checkbox } from '@/capy'
+import {
+  CakeIcon,
+  DownloadIcon,
+  InstagramIcon,
+  LinkIcon,
+  MailIcon,
+  MessagesIcon,
+  PencilIcon,
+  PlayIcon,
+  QrIcon,
+  ShareIcon,
+  SnapchatIcon,
+  WhatsappIcon,
+} from '@/components/ui/Icons'
 import type { Draft } from './Maker'
 import styles from './Maker.module.css'
 
@@ -144,26 +159,61 @@ export function SendStation({
         <>
           <div className={styles.sendBtns}>
             <button className="btn primary" onClick={shareLink}>
-              💌 send it
+              <ShareIcon className="ico" aria-hidden /> send it
             </button>
             <button className="btn" onClick={copy}>
-              {copied ? 'copied ♡' : '🔗 copy link'}
+              <LinkIcon className="ico" aria-hidden /> {copied ? 'copied ♡' : 'copy link'}
             </button>
+          </div>
+          <div className={styles.via}>
+            <span className="field-label" style={{ margin: 0 }}>
+              or send via
+            </span>
+            <div className={styles.viaRow}>
+              <a className={`sketch ${styles.viaBtn}`} href={`sms:&body=${encodeURIComponent(`${shareText} ${link}`)}`} aria-label="send in Messages">
+                <MessagesIcon size={26} aria-hidden />
+                <span>messages</span>
+              </a>
+              <a className={`sketch ${styles.viaBtn}`} href={`https://wa.me/?text=${encodeURIComponent(`${shareText} ${link}`)}`} target="_blank" rel="noreferrer" aria-label="send on WhatsApp">
+                <WhatsappIcon size={26} aria-hidden />
+                <span>whatsapp</span>
+              </a>
+              <a className={`sketch ${styles.viaBtn}`} href={`https://www.snapchat.com/scan?attachmentUrl=${encodeURIComponent(link)}`} target="_blank" rel="noreferrer" aria-label="send on Snapchat">
+                <SnapchatIcon size={26} aria-hidden />
+                <span>snapchat</span>
+              </a>
+              <button
+                className={`sketch ${styles.viaBtn}`}
+                onClick={async () => {
+                  // Instagram has no web share link: copy, then open the DMs
+                  await copy()
+                  window.open('https://www.instagram.com/direct/inbox/', '_blank', 'noreferrer')
+                }}
+                aria-label="copy link and open Instagram DMs"
+              >
+                <InstagramIcon size={26} aria-hidden />
+                <span>ig dm</span>
+              </button>
+            </div>
+          </div>
+          <div className={styles.sendBtns}>
             <button className="btn" onClick={() => poster && shareImage(poster, 'secret-cake-poster', shareText, link)} disabled={!poster}>
-              🖼 save poster
+              <DownloadIcon className="ico" aria-hidden /> save poster
             </button>
             <button className="btn" onClick={saveQr}>
-              ▦ save qr
+              <QrIcon className="ico" aria-hidden /> save qr
             </button>
             <button className="btn soft" onClick={onPreview}>
-              ▶️ preview
+              <PlayIcon className="ico" aria-hidden /> preview
             </button>
           </div>
           <input type="text" readOnly value={link} aria-label="your cake link" className={styles.linkBox} onFocus={(e) => e.currentTarget.select()} />
           {inlinePhoto && <p className={styles.small}>psst: photo uploads aren’t set up here, so your photo is tucked inside the link (it’s a long one).</p>}
 
           <div className={styles.receipt}>
-            <span className="field-label">📧 email yourself a receipt</span>
+            <span className="field-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <MailIcon size={16} aria-hidden /> email yourself a receipt
+            </span>
             <p className={styles.small} style={{ marginTop: -4 }}>
               the link{draft.usePasscode ? ', question + passcode' : ''}
               {draft.useUnlock ? ' and unlock time' : ''} — opens in your own mail app.
@@ -175,17 +225,17 @@ export function SendStation({
               </button>
             </div>
             <label className={styles.optin}>
-              <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} />
-              <span>♡ tell me when new cakes &amp; decorations drop (optional, unsubscribe anytime)</span>
+              <Checkbox checked={optIn} onCheckedChange={(c) => setOptIn(!!c)} />
+              <span>tell me when new cakes &amp; decorations drop ♡ (optional, unsubscribe anytime)</span>
             </label>
           </div>
 
           <div className="row" style={{ justifyContent: 'center', marginTop: 6 }}>
             <button className="btn ghost" onClick={onEdit}>
-              ✏️ keep editing
+              <PencilIcon className="ico" aria-hidden /> keep editing
             </button>
             <a className="btn ghost" href="/bake" onClick={() => localStorage.removeItem('secret-cake:draft')}>
-              🎂 bake another
+              <CakeIcon className="ico" aria-hidden /> bake another
             </a>
           </div>
         </>

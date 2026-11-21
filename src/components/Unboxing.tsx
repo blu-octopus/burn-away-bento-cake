@@ -5,11 +5,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { BurnSheet, type BurnSheetHandle } from '@/components/three/BurnSheet'
 import { BentoBox, CakeModel, TOP_Y } from '@/components/three/Cake'
-import { Stage, type CameraShot } from '@/components/three/Stage'
+import { Stage, WORLD, type CameraShot } from '@/components/three/Stage'
 import { useSecretTexture, useTagTexture, useTopTexture } from '@/components/three/useTextures'
 import type { CakeDesign, Secret } from '@/lib/design'
 import { haptic, primeAudio, setMuted, sfx } from '@/lib/feel'
 import { openSecret } from '@/lib/link'
+import { CapyHint } from './ui/CapyHint'
 import { NumberPad } from './ui/NumberPad'
 import { Countdown } from './ui/Countdown'
 import { Confetti } from './ui/Confetti'
@@ -216,15 +217,18 @@ export function Unboxing({ design, secret: initialSecret, sealed, previewSecret,
       ? 'box'
       : phase === 'opening' || phase === 'strike' || phase === 'candle'
         ? 'close'
-        : 'top'
+        : phase === 'revealed'
+          ? 'top' // flat on, so the message reads cleanly (and photographs well)
+          : 'burn' // tilted, so the flames rise visibly off the sheet
 
   const lidOpen = phase === 'waiting' || phase === 'boxed' || phase === 'passcode' ? 0 : 1
-  const burnable = phase !== 'revealed' && !saved
+  // the sheet stays after the reveal so its last scraps finish burning on their own
+  const burnable = !saved
   const matchOn = phase === 'candle' || phase === 'ignite'
 
   return (
     <div className={styles.wrap}>
-      <Stage shot={shot} capture onCreated={(r) => (gl.current = r)} className={styles.canvas}>
+      <Stage shot={shot} capture glow onCreated={(r) => (gl.current = r)} className={styles.canvas}>
         <group onClick={phase === 'boxed' ? open : undefined}>
           <BentoBox color={design.pack.box} ribbon={design.pack.ribbon} open={lidOpen} tag={tag} />
         </group>
@@ -245,7 +249,7 @@ export function Unboxing({ design, secret: initialSecret, sealed, previewSecret,
 
       {hint && phase !== 'revealed' && (
         <div className={styles.hint} key={hint}>
-          <span className="pop-in">{hint}</span>
+          <CapyHint text={hint} className="pop-in" />
         </div>
       )}
 
@@ -318,7 +322,7 @@ function Striker({ onStrike }: { onStrike: () => void }) {
     <div className={styles.strikerWrap}>
       <div
         ref={track}
-        className={styles.striker}
+        className={`sketch ${styles.striker}`}
         onPointerDown={(e) => {
           dragging.current = true
           ;(e.target as HTMLElement).setPointerCapture?.(e.pointerId)
@@ -387,9 +391,10 @@ function MatchController({
     }
     const tip = m.position
     if (mode === 'candle') {
-      if (tip.distanceTo(wick) < 0.16) onCandle()
+      // generous: anywhere near the top of the candle counts, so it never feels fiddly
+      if (Math.hypot(tip.x - wick.x, tip.z - wick.z) < 0.26) onCandle()
     } else if (pressed.current || touched.current) {
-      if (onIgnite(tip.x, tip.z)) {
+      if (onIgnite(tip.x * WORLD, tip.z * WORLD)) {
         if (clock.elapsedTime - lastCrackle.current > 0.12) {
           lastCrackle.current = clock.elapsedTime
           haptic.crackle()
@@ -399,7 +404,8 @@ function MatchController({
   })
 
   const handle = (e: ThreeEvent<PointerEvent>) => {
-    target.current.set(e.point.x, planeY, e.point.z)
+    // e.point is in world space; the match lives inside the scene's scaled group
+    target.current.set(e.point.x / WORLD, planeY, e.point.z / WORLD)
   }
 
   return (
@@ -444,14 +450,14 @@ function MatchController({
         <group ref={flame} position={[0, 0.04, 0]}>
           <mesh scale={[0.05, 0.11, 0.05]} position={[0, 0.06, 0]}>
             <sphereGeometry args={[1, 6, 5]} />
-            <meshBasicMaterial color="#ffae42" toneMapped={false} transparent opacity={0.95} />
+            <meshBasicMaterial color={[3.2, 1.5, 0.45]} toneMapped={false} transparent opacity={0.95} />
           </mesh>
           <mesh scale={[0.026, 0.055, 0.026]} position={[0, 0.035, 0]}>
             <sphereGeometry args={[1, 6, 5]} />
-            <meshBasicMaterial color="#fff3c8" toneMapped={false} />
+            <meshBasicMaterial color={[4, 3.4, 2.2]} toneMapped={false} />
           </mesh>
         </group>
-        <pointLight color="#ffa04a" intensity={2.2} distance={2.2} decay={1.5} position={[0, 0.1, 0]} />
+        <pointLight color="#ffa04a" intensity={0.14} distance={0.55} decay={2} position={[0, 0.1, 0]} />
       </group>
     </>
   )

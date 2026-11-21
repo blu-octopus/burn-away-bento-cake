@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import type { CakeDesign } from '@/lib/design'
 import { haptic, sfx } from '@/lib/feel'
-import { combo, photoStrip, revealPoster, shareImage } from '@/lib/poster'
+import { canvasBlob, combo, downloadBlob, photoStrip, revealPoster, shareImage } from '@/lib/poster'
+import { BackIcon, CakeIcon, DownloadIcon, GiftIcon, InstagramIcon, SnapchatIcon, TiktokIcon } from './ui/Icons'
 import styles from './Unboxing.module.css'
 
 type Kind = 'poster' | 'strip' | 'both'
@@ -48,13 +49,21 @@ export function EndCard({
   }, [ready, design, frames])
 
   const current = canvases[kind]
-  const share = async () => {
+  /** Every "post to" goes through the native share sheet with the image attached —
+   *  that's where Instagram Stories, TikTok and Snapchat live on a phone. On a
+   *  computer (no file sharing) it saves the image instead. */
+  const share = async (where: string) => {
     if (!current) return
-    setBusy('share')
     haptic.tap()
-    const r = await shareImage(current, `secret-cake-${kind}`, 'i burnt open a secret cake 🎂🔥')
-    setBusy(r === 'downloaded' ? 'saved ♡' : null)
-    setTimeout(() => setBusy(null), 1600)
+    let msg: string | null = null
+    if (where === 'save') {
+      downloadBlob(await canvasBlob(current), `secret-cake-${kind}.png`)
+      msg = 'saved ♡'
+    } else if ((await shareImage(current, `secret-cake-${kind}`, 'i burnt open a secret cake 🎂🔥')) === 'downloaded') {
+      msg = `saved ♡ — now post it on ${where}`
+    }
+    setBusy(msg)
+    if (msg) setTimeout(() => setBusy(null), 2600)
   }
 
   const replyHref = `/bake?to=${encodeURIComponent(design.pack.from)}&from=${encodeURIComponent(design.pack.to)}`
@@ -98,29 +107,48 @@ export function EndCard({
             </span>
           )}
         </div>
-        <div className="row" style={{ justifyContent: 'center', marginTop: 12 }}>
-          <button className="btn primary" onClick={share} disabled={!current || busy === 'share'}>
-            {busy && busy !== 'share' ? busy : 'share / save'}
+        <div className={styles.postRow} aria-label="post it">
+          {(
+            [
+              ['instagram', InstagramIcon, 'stories'],
+              ['tiktok', TiktokIcon, 'tiktok'],
+              ['snapchat', SnapchatIcon, 'snap'],
+            ] as const
+          ).map(([id, Icon, label]) => (
+            <button key={id} className={`sketch ${styles.postBtn}`} onClick={() => share(label)} disabled={!current} aria-label={`post to ${label}`}>
+              <Icon size={28} aria-hidden />
+              <span>{label}</span>
+            </button>
+          ))}
+          <button className={`sketch ${styles.postBtn}`} onClick={() => share('save')} disabled={!current} aria-label="save image">
+            <DownloadIcon size={28} aria-hidden />
+            <span>save</span>
           </button>
+        </div>
+        {busy && <p className={styles.toast}>{busy}</p>}
+        <div className="row" style={{ justifyContent: 'center', marginTop: 10 }}>
           {mode === 'real' && (
-            <a className="btn soft" href={replyHref}>
-              bake one back 💌
+            <a className="btn primary" href={replyHref}>
+              <GiftIcon className="ico" aria-hidden /> bake one back
             </a>
           )}
           {mode === 'demo' && (
-            <a className="btn soft" href="/bake">
-              bake your own 🎂
+            <a className="btn primary" href="/bake">
+              <CakeIcon className="ico" aria-hidden /> bake your own
             </a>
           )}
           {mode !== 'real' && onClose && (
             <button className="btn" onClick={onClose}>
-              {mode === 'preview' ? 'back to baking' : 'close'}
+              {mode === 'preview' ? (
+                <>
+                  <BackIcon className="ico" aria-hidden /> back to baking
+                </>
+              ) : (
+                'close'
+              )}
             </button>
           )}
         </div>
-        <p className="mono" style={{ fontSize: 10, opacity: 0.6, marginTop: 10, textAlign: 'center' }}>
-          on iphone: share → instagram / tiktok / snap · or save image
-        </p>
       </div>
     </div>
   )

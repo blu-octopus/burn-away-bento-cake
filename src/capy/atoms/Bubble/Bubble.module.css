@@ -1,0 +1,29 @@
+.bubble {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  min-height: 48px;
+  box-sizing: border-box;
+}
+
+.outline {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.text {
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+  min-height: 48px;
+  padding: var(--bubble-padding-y, 16px) var(--bubble-padding-x, 28px);
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-brand-brown);
+  text-align: center;
+}

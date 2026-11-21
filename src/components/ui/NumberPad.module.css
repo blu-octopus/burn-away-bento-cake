@@ -4,17 +4,18 @@
 .q { font-family: var(--hand); font-size: 28px; line-height: 1.1; text-align: center; margin: 0; max-width: 280px; }
 .dots { display: flex; gap: 10px; min-height: 34px; }
 .dot {
-  width: 30px; height: 34px; border-radius: 10px; border: 2px solid var(--ink);
+  position: relative;
+  width: 30px; height: 34px; border-radius: 10px;
   display: grid; place-items: center; font-size: 18px; color: var(--berry); background: var(--card);
 }
 .dot[data-on] { background: var(--milk); animation: pop-in .25s cubic-bezier(.2,1.4,.4,1); }
 .grid { display: grid; grid-template-columns: repeat(3, 68px); gap: 10px; }
 .key {
-  height: 60px; border-radius: 20px; border: 2px solid var(--ink); background: var(--card);
-  font-family: var(--display); font-weight: 800; font-size: 26px;
-  box-shadow: 0 4px 0 var(--ink); transition: transform .08s, box-shadow .08s;
+  position: relative; border: none;
+  height: 60px; border-radius: 20px; background: var(--card);
+  font-family: var(--display); font-weight: 800; font-size: 26px; transition: transform .08s;
 }
-.key:active { transform: translateY(4px); box-shadow: 0 0 0 var(--ink); }
+.key:active { transform: scale(0.94); }
 .key:nth-child(odd):not(.fn):not(.go) { background: #fffaf2; }
 .fn { background: var(--butter); font-size: 22px; }
 .go { background: var(--berry); color: #fff; }

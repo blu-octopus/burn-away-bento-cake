@@ -1,23 +1,32 @@
-/* cozy paper kitchen ♡ — palette borrowed from capy-ui's cream + cocoa, plus strawberry milk */
+@import '../capy/tokens.css';
+
+/*
+ * operation: secret cake — built on capy-ui (src/capy, vendored from
+ * blu-octopus/capy-ui). Its tokens drive the chrome: brand brown for every
+ * stroke and the focus ring, M PLUS Rounded for display, Inter for body.
+ * Outlines are capy's generated hand-drawn ribbons (see SketchStrokes), never
+ * CSS borders. Cake colours (berry, blush, butter…) are only fills.
+ */
 :root {
   --paper: #f6efe4;
   --paper-2: #fbf6ee;
   --card: #fffdf8;
-  --ink: #4a332c;
-  --ink-soft: #8a6f63;
-  --line: #e4d6c6;
+  --ink: var(--color-brand-brown);
+  --ink-soft: #8a5a3c;
+  --line: #e4d2bf;
   --berry: #d9364a;
   --blush: #f4c2c9;
   --milk: #f7d6d0;
   --sage: #d3e6cf;
-  --butter: #f6e3a8;
+  --butter: var(--color-yellow-secondary);
   --lilac: #e8c7e3;
-  --shadow: 0 2px 0 #e4d6c6, 0 10px 24px -14px rgba(74, 51, 44, 0.35);
   --radius: 18px;
   --hand: var(--font-hand), var(--font-oriya), var(--font-symbols), cursive;
   --serif: var(--font-serif), var(--font-oriya), var(--font-symbols), Georgia, serif;
-  --mono: var(--font-mono), var(--font-oriya), var(--font-symbols), ui-monospace, monospace;
+  --body: var(--font-body), var(--font-oriya), var(--font-symbols), system-ui, sans-serif;
+  --mono: var(--font-body), var(--font-oriya), var(--font-symbols), system-ui, sans-serif;
   --display: var(--font-display), var(--font-symbols), system-ui, sans-serif;
+  --focus-ring: var(--stroke-width-2) dashed var(--color-border-focus);
   color-scheme: light;
 }
 
@@ -26,7 +35,7 @@ html, body { margin: 0; padding: 0; }
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--serif);
+  font-family: var(--body);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   overflow-x: hidden;
@@ -35,100 +44,117 @@ button, input, textarea, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
 a { color: inherit; }
 
-/* the whole site sits on paper: a fixed grain + soft halftone over everything */
+/* the whole site sits on paper: a fixed grain over everything */
 .paper-grain {
   pointer-events: none;
   position: fixed;
   inset: 0;
   z-index: 100;
-  opacity: 0.32;
+  opacity: 0.28;
   mix-blend-mode: multiply;
   background-image:
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .36  0 0 0 0 .3  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
-/* ---------- little building blocks ---------- */
-.mono { font-family: var(--mono); letter-spacing: 0.08em; text-transform: uppercase; font-size: 12px; }
+/* ---------- type ---------- */
+.mono { font-family: var(--body); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 11px; }
 .hand { font-family: var(--hand); }
-.display { font-family: var(--display); font-weight: 800; letter-spacing: -0.02em; }
+.display { font-family: var(--display); font-weight: 800; letter-spacing: -0.01em; }
+
+/* ---------- capy hand-drawn primitives (strokes painted by SketchStrokes) ---------- */
+svg[data-sketch-stroke] {
+  position: absolute; inset: 0; pointer-events: none; overflow: visible;
+  fill: var(--color-brand-brown);
+}
+.btn, .chip, .card, .swatch, .sketch { position: relative; border: none; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  border: 2px solid var(--ink);
   background: var(--card);
-  border-radius: 999px;
-  padding: 12px 20px;
-  font-family: var(--mono); font-size: 13px; letter-spacing: 0.06em; text-transform: lowercase;
-  box-shadow: 0 3px 0 var(--ink);
-  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.2s;
+  border-radius: 14px;
+  min-height: 44px;
+  padding: 10px 20px;
+  font-family: var(--body); font-weight: 600; font-size: 14px; letter-spacing: 0.01em;
+  transition: transform 100ms ease, background-color 120ms ease, opacity 120ms ease;
   text-decoration: none;
   user-select: none;
   white-space: nowrap;
+  touch-action: manipulation;
 }
-.btn:active { transform: translateY(3px); box-shadow: 0 0 0 var(--ink); }
+.btn:hover { background: var(--paper-2); }
+.btn:active { transform: scale(0.95); }
 .btn.primary { background: var(--berry); color: #fff; }
+.btn.primary svg[data-sketch-stroke] { fill: #6b1a24; }
 .btn.soft { background: var(--milk); }
-.btn.ghost { border-color: transparent; box-shadow: none; background: transparent; text-decoration: underline; text-underline-offset: 4px; }
+.btn.ghost { background: transparent; color: var(--ink-soft); padding: 10px 8px; }
+.btn.ghost:hover { color: var(--ink); }
 .btn:disabled { opacity: 0.45; pointer-events: none; }
+.btn .ico { width: 18px; height: 18px; flex: none; }
 
 .card {
   background: var(--card);
-  border: 2px solid var(--ink);
-  border-radius: var(--radius);
-  box-shadow: 0 4px 0 var(--ink);
+  border-radius: 22px;
+  box-shadow: 0 14px 30px -22px rgba(130, 61, 0, 0.45);
+}
+
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  border-radius: 999px;
+  min-height: 34px;
+  padding: 6px 14px; background: var(--card);
+  font-family: var(--body); font-weight: 500; font-size: 13px;
+  white-space: nowrap;
+  transition: transform 100ms ease, background-color 120ms ease;
+}
+.chip:active { transform: scale(0.95); }
+.chip[aria-pressed='true'] { background: var(--color-capy-body); }
+
+.swatch {
+  width: 36px; height: 36px; border-radius: 50%;
+  flex: none;
+  transition: transform 120ms ease;
+}
+.swatch[aria-pressed='true'] { transform: scale(1.12); }
+.swatch[aria-pressed='true']::after {
+  /* a small heart tick on the picked colour */
+  content: '♡'; position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: 14px; color: var(--ink); text-shadow: 0 0 3px #fff;
 }
 
 .tape {
   position: absolute;
   width: 84px; height: 24px;
   background: repeating-linear-gradient(45deg, rgba(244,194,201,.85) 0 8px, rgba(255,255,255,.7) 8px 16px);
-  border-left: 2px dashed rgba(74,51,44,.25);
-  border-right: 2px dashed rgba(74,51,44,.25);
   transform: rotate(-6deg);
   opacity: 0.92;
 }
 
-.chip {
-  display: inline-flex; align-items: center; gap: 6px;
-  border: 1.5px solid var(--ink); border-radius: 999px;
-  padding: 6px 12px; background: var(--card);
-  font-family: var(--mono); font-size: 12px; letter-spacing: .04em; text-transform: lowercase;
-  white-space: nowrap;
-}
-.chip[aria-pressed='true'] { background: var(--ink); color: var(--paper-2); }
+.field-label { font-family: var(--body); font-weight: 600; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin: 16px 0 8px; display: block; }
 
-.swatch {
-  width: 34px; height: 34px; border-radius: 50%;
-  border: 2px solid var(--ink);
-  box-shadow: inset 0 -4px 0 rgba(0,0,0,.08);
-  flex: none;
-}
-.swatch[aria-pressed='true'] { outline: 3px solid var(--ink); outline-offset: 3px; }
-
-.field-label { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin: 14px 0 8px; display: block; }
-
+/* capy Field look: soft grey well, brown text, no hard border */
 input[type='text'], input[type='email'], input[type='datetime-local'], textarea {
   width: 100%;
-  border: 2px solid var(--ink);
-  border-radius: 14px;
+  border: 1.5px solid var(--color-border-default);
+  border-radius: 12px;
   background: var(--card);
   padding: 12px 14px;
   font-size: 16px;
   outline: none;
+  transition: border-color 120ms ease;
 }
-input:focus-visible, textarea:focus-visible, button:focus-visible { outline: 3px solid var(--berry); outline-offset: 2px; }
+input[type='text']:focus, input[type='email']:focus, input[type='datetime-local']:focus, textarea:focus { border-color: var(--color-brand-brown); }
 textarea { resize: none; line-height: 1.35; }
 
+/* capy's focus ring: dashed brand brown, offset 2px, following the element's own radius */
+:focus { outline: none; }
+:focus-visible { outline: var(--focus-ring); outline-offset: 3px; }
+
 .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.scroll-x { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 10px; scrollbar-width: none; }
+.scroll-x { display: flex; gap: 10px; overflow-x: auto; padding: 6px 4px 10px; scrollbar-width: none; }
 .scroll-x::-webkit-scrollbar { display: none; }
 .scroll-x > * { flex: none; }
 
-.toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1.5px dashed var(--line); }
-.toggle input[type='checkbox'] { width: 46px; height: 26px; appearance: none; border-radius: 999px; border: 2px solid var(--ink); background: var(--paper); position: relative; flex: none; cursor: pointer; }
-.toggle input[type='checkbox']::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: var(--ink); transition: left .18s; }
-.toggle input[type='checkbox']:checked { background: var(--blush); }
-.toggle input[type='checkbox']:checked::after { left: 22px; }
+.toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1.5px dashed var(--line); cursor: pointer; }
 
 @keyframes pop-in { from { transform: scale(.6) rotate(-4deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
 @keyframes float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }

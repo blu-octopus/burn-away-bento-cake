@@ -52,7 +52,7 @@ function Thumb({ cake }: { cake: GalleryCake }) {
     renderTop(cake.design, 320).then((cv) => setSrc(cv.toDataURL()))
   }, [cake])
   return (
-    <div className={styles.thumb} style={{ background: cake.design.pack.box }}>
+    <div className={`sketch ${styles.thumb}`} style={{ background: cake.design.pack.box }}>
       <div className={styles.thumbCake} style={{ background: cake.design.frosting }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {src && <img src={src} alt="" />}
@@ -70,7 +70,7 @@ export function Gallery() {
     <>
       <div className={styles.grid}>
         {GALLERY.map((g, i) => (
-          <article key={g.id} className={styles.cake} style={{ rotate: `${((i * 37) % 5) - 2}deg` }}>
+          <article key={g.id} className={`sketch ${styles.cake}`} style={{ rotate: `${((i * 37) % 5) - 2}deg` }}>
             <Thumb cake={g} />
             <h3 className="display">{g.occasion}</h3>
             <p className="mono">{g.blurb}</p>

@@ -1,0 +1,63 @@
+/*
+ * Track stays white in both states, like ColorPicker's selected swatch —
+ * only the border and thumb color communicate checked/unchecked.
+ */
+.root {
+  all: unset;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 47px;
+  height: 22px;
+  border-radius: 20px;
+  background: var(--color-brand-white);
+  border: 2px solid var(--color-grey-primary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Same invisible hit-area technique as Checkbox — the 22px-tall track stays
+   Figma-accurate visually, but the tappable region clears ~44px. */
+.root::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 47px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+
+.root[data-checked] {
+  border-color: var(--color-brand-brown);
+}
+
+.root:focus-visible {
+  outline: var(--stroke-width-2) dashed var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+.thumb {
+  position: absolute;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 20px;
+  background: var(--color-button-secondary);
+  color: var(--color-grey-primary);
+  transition: transform 150ms ease, color 150ms ease;
+}
+
+.root[data-checked] .thumb {
+  background: var(--color-brand-white);
+  color: var(--color-brand-brown);
+  /*
+   * Containing block for an absolutely positioned .thumb is .root's padding
+   * box (47 - 2*2px border = 43px wide), not its border box — so a 2px gap
+   * on the right (matching the unchecked 2px `left`) needs the thumb's left
+   * edge at 43 - 20(thumb) - 2(gap) = 21px, i.e. 19px past the base `left: 2px`.
+   */
+  transform: translateX(19px);
+}

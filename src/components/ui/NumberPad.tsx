@@ -36,26 +36,26 @@ export function NumberPad({
       {question && <p className={styles.q}>{question}</p>}
       <div className={styles.dots} aria-label={`${code.length} digits entered`}>
         {Array.from({ length: Math.max(minLength, code.length) }).map((_, i) => (
-          <span key={i} className={styles.dot} data-on={i < code.length || undefined}>
+          <span key={i} className={`sketch ${styles.dot}`} data-on={i < code.length || undefined}>
             {i < code.length ? '♡' : ''}
           </span>
         ))}
       </div>
       <div className={styles.grid}>
         {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((d) => (
-          <button key={d} type="button" className={styles.key} onClick={() => press(d)}>
+          <button key={d} type="button" className={`sketch ${styles.key}`} onClick={() => press(d)}>
             {d}
           </button>
         ))}
-        <button type="button" className={`${styles.key} ${styles.fn}`} onClick={back} aria-label="delete">
+        <button type="button" className={`sketch ${styles.key} ${styles.fn}`} onClick={back} aria-label="delete">
           ⌫
         </button>
-        <button type="button" className={styles.key} onClick={() => press('0')}>
+        <button type="button" className={`sketch ${styles.key}`} onClick={() => press('0')}>
           0
         </button>
         <button
           type="button"
-          className={`${styles.key} ${styles.go}`}
+          className={`sketch ${styles.key} ${styles.go}`}
           disabled={code.length < minLength}
           onClick={() => {
             onSubmit(code)

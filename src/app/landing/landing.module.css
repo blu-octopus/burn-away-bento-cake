@@ -16,8 +16,7 @@
 .ctas > .btn { font-size: 15px; padding: 14px 22px; }
 .sub { font-size: 14px; color: var(--ink-soft); margin-top: 14px; }
 .heroCake {
-  position: relative; aspect-ratio: 1; width: 100%; max-width: 520px; justify-self: center;
-  border: 2px solid var(--ink); border-radius: 28px; overflow: hidden; box-shadow: 0 6px 0 var(--ink);
+  position: relative; aspect-ratio: 1; width: 100%; max-width: 520px; justify-self: center; border-radius: 28px; overflow: hidden;
   background: var(--paper);
 }
 .heroCake :global(.tape) { z-index: 2; }
@@ -29,8 +28,7 @@
 
 .how { display: grid; gap: 16px; padding: 24px 0 40px; }
 .step {
-  position: relative; border: 2px solid var(--ink); border-radius: 20px; padding: 18px 18px 14px;
-  box-shadow: 0 4px 0 var(--ink);
+  position: relative; border-radius: 20px; padding: 18px 18px 14px;
 }
 .step h3 { font-size: 32px; margin: 0 0 6px; }
 .step p { margin: 0 0 10px; font-size: 16px; line-height: 1.35; }
@@ -45,8 +43,7 @@
 
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 18px; }
 .cake {
-  background: var(--card); border: 2px solid var(--ink); border-radius: 20px; padding: 12px;
-  box-shadow: 0 4px 0 var(--ink); display: flex; flex-direction: column; gap: 6px;
+  background: var(--card); border-radius: 20px; padding: 12px; display: flex; flex-direction: column; gap: 6px;
 }
 .cake h3 { margin: 4px 0 0; font-size: 22px; }
 .cake p { margin: 0; font-size: 10px; color: var(--ink-soft); }
@@ -54,11 +51,11 @@
 .cakeBtns .btn { padding: 9px 10px; font-size: 12px; }
 
 .thumb {
-  position: relative; aspect-ratio: 1; border-radius: 14px; border: 2px solid var(--ink);
+  position: relative; aspect-ratio: 1; border-radius: 14px;
   display: grid; place-items: center; overflow: hidden;
 }
 .thumbCake {
-  width: 76%; aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--ink);
+  width: 76%; aspect-ratio: 1; border-radius: 50%;
   box-shadow: 0 8px 0 rgba(74,51,44,.25); overflow: hidden; display: grid; place-items: center;
 }
 .thumbCake img { width: 100%; height: 100%; }

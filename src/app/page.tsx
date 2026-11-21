@@ -32,7 +32,7 @@ export default function Home() {
           </div>
           <p className={styles.sub}>free · no app · no account · takes about 2 minutes ♡</p>
         </div>
-        <div className={styles.heroCake}>
+        <div className={`sketch ${styles.heroCake}`}>
           <span className="tape" style={{ top: 10, left: 24 }} />
           <HeroCake />
         </div>
@@ -44,7 +44,7 @@ export default function Home() {
           ['2', 'hide', 'write your secret under the top layer. box it up — passcode or unlock time if you want.', '#d3e6cf'],
           ['3', 'send', 'share the link or QR. they strike a match, light the candle and burn it open.', '#f6e3a8'],
         ].map(([n, t, d, c], i) => (
-          <article key={n} className={styles.step} style={{ background: c, rotate: `${[-2, 1.5, -1][i]}deg` }}>
+          <article key={n} className={`sketch ${styles.step}`} style={{ background: c, rotate: `${[-2, 1.5, -1][i]}deg` }}>
             <span className={`display ${styles.stepN}`}>{n}</span>
             <h3 className="display">{t}</h3>
             <p>{d}</p>
