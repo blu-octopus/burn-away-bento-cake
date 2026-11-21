@@ -47,10 +47,16 @@
 
 .postRow { display: flex; justify-content: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
 .postBtn {
-  display: flex; flex-direction: column; align-items: center; gap: 4px; width: 70px; padding: 10px 4px 8px;
-  border-radius: 16px; background: var(--card); border: none; font-size: 11px; font-weight: 600;
-  transition: transform 100ms ease;
+  display: flex; flex-direction: column; align-items: center; gap: 4px; width: 72px; padding: 10px 4px 8px;
+  border-radius: 16px; background: #fff; border: 2.5px solid var(--ink); box-shadow: 0 3px 0 var(--ink);
+  font-size: 11px; font-weight: 700; transition: transform 90ms ease, box-shadow 90ms ease;
 }
-.postBtn:active { transform: scale(0.94); }
+.postBtn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
 .postBtn:disabled { opacity: .4; }
 .toast { text-align: center; font-family: var(--hand); font-size: 20px; margin: 8px 0 0; }
+
+.endHead { display: grid; justify-items: center; gap: 6px; margin: 4px 0 8px; }
+.endStars { display: flex; align-items: flex-end; gap: 4px; }
+.endStars svg { animation: star-pop .5s cubic-bezier(.2,1.6,.4,1) both; }
+@keyframes star-pop { from { transform: scale(0) rotate(-30deg); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .endStars svg { animation: none; } }

@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next'
-import { SketchStrokes } from '@/components/ui/SketchStrokes'
 import { fontVariables } from '@/lib/fonts'
 import './globals.css'
 
@@ -22,7 +21,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-  themeColor: '#f6efe4',
+  themeColor: '#ffd8ea',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -30,7 +29,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={fontVariables}>
       <body>
         {children}
-        <SketchStrokes />
         <div className="paper-grain" aria-hidden />
       </body>
     </html>

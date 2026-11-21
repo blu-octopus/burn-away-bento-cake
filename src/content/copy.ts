@@ -18,6 +18,7 @@ export const LANDING = {
   pasteQrNote: 'Got a QR code? Scan it with your phone camera.',
   proof: ['free', 'no app', 'no account', 'about 2 minutes'],
 
+  howTitle: 'how to play',
   how: [
     { title: 'bake', body: 'Choose a shape, frosting and decorations. Put art or a photo on top.', tone: '#f7d6d0' },
     { title: 'hide', body: 'Write your message under the top layer. Add a passcode or an unlock time if you want.', tone: '#d3e6cf' },
@@ -31,6 +32,8 @@ export const LANDING = {
   useThis: 'use this',
 
   whyTitle: 'why send a cake',
+  faqRibbon: 'faq',
+  finalBadge: 'ready?',
   benefits: [
     { title: 'no app, no account', body: 'They tap a link. It opens straight to the box.' },
     { title: 'they get to open it', body: 'They strike a match, light the candle and watch the top burn away.' },
@@ -105,6 +108,7 @@ export const RECEIVER = {
   passcodeFallbackQuestion: 'Enter the passcode.',
   loading: 'Loading your cake…',
   brokenLink: 'This link is incomplete. Ask them to send it again.',
+  completeTitle: 'cake opened!',
   keepTitle: 'save the moment',
   bakeBack: 'bake one back',
   bakeYourOwn: 'bake your own',

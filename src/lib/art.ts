@@ -15,7 +15,15 @@ export interface StickerDef {
   svg: string
 }
 
-const svg = (body: string) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${body}</svg>`
+/** Every sticker gets a white die-cut edge (a dilated silhouette behind it), like a real kiss-cut sticker. */
+const svg = (body: string) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-7 -7 114 114"><defs><filter id="die" x="-20%" y="-20%" width="140%" height="140%"><feMorphology in="SourceAlpha" operator="dilate" radius="4.5" result="d"/><feFlood flood-color="#fff"/><feComposite in2="d" operator="in" result="w"/><feMerge><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g filter="url(#die)">${body}</g></svg>`
+
+/** A tiny kawaii face: two dot eyes, a little smile, pink cheeks. */
+const face = (cx: number, cy: number, s = 1) => `
+  <circle cx="${cx - 9 * s}" cy="${cy}" r="${2.8 * s}" fill="${INK}"/><circle cx="${cx + 9 * s}" cy="${cy}" r="${2.8 * s}" fill="${INK}"/>
+  <path d="M${cx - 3.5 * s} ${cy + 3 * s} Q${cx} ${cy + 7 * s} ${cx + 3.5 * s} ${cy + 3 * s}" fill="none" stroke="${INK}" stroke-width="${2.4 * s}" stroke-linecap="round"/>
+  <ellipse cx="${cx - 15 * s}" cy="${cy + 5 * s}" rx="${4 * s}" ry="${2.4 * s}" fill="#ff9db8" opacity=".85"/><ellipse cx="${cx + 15 * s}" cy="${cy + 5 * s}" rx="${4 * s}" ry="${2.4 * s}" fill="#ff9db8" opacity=".85"/>`
 
 export const STICKERS: StickerDef[] = [
   {
@@ -119,6 +127,69 @@ export const STICKERS: StickerDef[] = [
       <ellipse cx="60" cy="62" rx="4.5" ry="3" fill="#f7b3c4"/>`),
   },
 ]
+
+
+/** Kawaii sweets — used as stamps and as the floating decorations around the site. */
+STICKERS.push(
+  {
+    id: 'donut',
+    label: 'donut',
+    svg: svg(`
+      <circle cx="50" cy="52" r="40" fill="#f3c48a" ${line}/>
+      <path d="M14 46 C16 24 34 12 52 12 C74 12 88 28 88 46 C84 52 80 46 76 52 C72 58 66 50 60 56 C54 62 48 52 42 58 C36 62 30 52 24 56 C18 58 16 50 14 46Z" fill="#ff9dbd" ${line}/>
+      <circle cx="50" cy="52" r="11" fill="#fff8f1" ${line}/>
+      <g stroke-width="3" stroke-linecap="round"><path d="M30 28l5 3" stroke="#7fd4ff"/><path d="M62 24l4-3" stroke="#ffe08a"/><path d="M74 38l5 2" stroke="#9fe3cf"/><path d="M40 20l2-4" stroke="#c8a6ff"/></g>
+      ${face(50, 76, 0.7)}`),
+  },
+  {
+    id: 'lollipop',
+    label: 'lollipop',
+    svg: svg(`
+      <rect x="47" y="56" width="6" height="40" rx="3" fill="#fff" ${line}/>
+      <circle cx="50" cy="38" r="30" fill="#c8a6ff" ${line}/>
+      <path d="M50 38 m0 -4 a4 4 0 1 1 -4 4 a8 8 0 1 1 8 8 a12 12 0 1 1 -12 -12 a16 16 0 1 1 16 16 a20 20 0 1 1 -20 -20" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M58 86 C62 82 70 84 70 90 C70 96 60 96 58 92Z" fill="#ff9dbd" ${lineW(2.4)}/><path d="M42 86 C38 82 30 84 30 90 C30 96 40 96 42 92Z" fill="#ff9dbd" ${lineW(2.4)}/>`),
+  },
+  {
+    id: 'candy',
+    label: 'candy',
+    svg: svg(`
+      <path d="M22 50 L6 36 L8 64 Z" fill="#9fe3cf" ${line}/><path d="M78 50 L94 36 L92 64 Z" fill="#9fe3cf" ${line}/>
+      <ellipse cx="50" cy="50" rx="30" ry="24" fill="#ffe08a" ${line}/>
+      <path d="M32 34 C40 44 40 58 32 68 M68 34 C60 44 60 58 68 68" fill="none" stroke="#ffb35a" stroke-width="4" stroke-linecap="round"/>
+      ${face(50, 48, 0.75)}`),
+  },
+  {
+    id: 'macaron',
+    label: 'macaron',
+    svg: svg(`
+      <path d="M14 46 C14 22 86 22 86 46Z" fill="#b9ecd9" ${line}/>
+      <path d="M12 50 C20 46 30 54 40 49 C50 54 60 46 70 51 C78 47 84 52 88 50 L88 56 L12 56Z" fill="#fff8f1" ${line}/>
+      <path d="M14 58 C14 80 86 80 86 58Z" fill="#b9ecd9" ${line}/>
+      ${face(50, 36, 0.7)}`),
+  },
+  {
+    id: 'cakeslice',
+    label: 'cake slice',
+    svg: svg(`
+      <path d="M10 60 L66 28 L92 44 L92 78 L36 92 L10 80Z" fill="#fff1c9" ${line}/>
+      <path d="M10 60 L36 72 L92 44 L66 28Z" fill="#fffdf6" ${line}/>
+      <path d="M36 72 L36 92 M14 71 L36 80 L92 60" fill="none" ${line}/>
+      <path d="M36 80 L36 86 L92 70 L92 62Z" fill="#f2577f" opacity=".85"/>
+      <circle cx="70" cy="34" r="8" fill="#e8434f" ${line}/><path d="M66 27 L70 22 L74 27" fill="#6fae5b" ${lineW(2.2)}/>
+      ${face(56, 60, 0.7)}`),
+  },
+  {
+    id: 'cupcake',
+    label: 'cupcake',
+    svg: svg(`
+      <path d="M22 54 L78 54 L70 92 L30 92Z" fill="#ff9dbd" ${line}/>
+      <path d="M36 56 L38 90 M50 56 L50 90 M64 56 L62 90" stroke="${INK}" stroke-width="2" opacity=".35"/>
+      <path d="M16 56 C10 42 26 34 32 36 C30 22 50 16 56 26 C62 18 80 24 76 36 C88 38 90 54 80 56Z" fill="#fff8f1" ${line}/>
+      <circle cx="54" cy="18" r="7" fill="#e8434f" ${line}/>
+      ${face(50, 44, 0.65)}`),
+  },
+)
 
 export const STICKER_BY_ID = Object.fromEntries(STICKERS.map((s) => [s.id, s]))
 

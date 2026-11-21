@@ -1,4 +1,4 @@
-import { Bricolage_Grotesque, Cherry_Bomb_One, DM_Mono, Klee_One, Fraunces, Inter, M_PLUS_Rounded_1c, Noto_Sans_Oriya, Noto_Sans_Symbols_2 } from 'next/font/google'
+import { Bricolage_Grotesque, Cherry_Bomb_One, DM_Mono, Fredoka, Klee_One, Fraunces, Inter, M_PLUS_Rounded_1c, Noto_Sans_Oriya, Noto_Sans_Symbols_2 } from 'next/font/google'
 import type { FontKey } from './design'
 
 // handwriting voice: Klee One — a neat, pencil-drawn hand (less "comic" than Caveat)
@@ -16,7 +16,10 @@ export const symbols = Noto_Sans_Symbols_2({ subsets: ['symbols'], weight: '400'
 export const capyDisplay = M_PLUS_Rounded_1c({ subsets: ['latin'], weight: ['400', '700', '800'], variable: '--font-capy-display' })
 export const capyBody = Inter({ subsets: ['latin'], variable: '--font-capy-body' })
 
-export const fontVariables = [klee, cherryBomb, fraunces, dmMono, bricolage, oriya, symbols, capyDisplay, capyBody].map((f) => f.variable).join(' ')
+// game body type: Fredoka — rounded, chunky, friendly
+export const fredoka = Fredoka({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-game' })
+
+export const fontVariables = [fredoka, klee, cherryBomb, fraunces, dmMono, bricolage, oriya, symbols, capyDisplay, capyBody].map((f) => f.variable).join(' ')
 
 const fallback = `${oriya.style.fontFamily}, ${symbols.style.fontFamily}, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`
 

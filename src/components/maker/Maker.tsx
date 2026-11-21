@@ -15,6 +15,10 @@ import { SendStation } from './SendStation'
 import { StampLayer } from './StampLayer'
 import { MAKER, STEP_COPY } from '@/content/copy'
 import { CapyHint } from '@/components/ui/CapyHint'
+import { Ribbon } from '@/components/ui/Ribbon'
+import { Sky } from '@/components/ui/Sky'
+
+const RIBBON_TONES = ['#f2577f', '#c8a6ff', '#9fe3cf', '#ffb35a', '#7fc8ff', '#f2577f']
 import styles from './Maker.module.css'
 
 /**
@@ -166,6 +170,7 @@ export default function Maker() {
 
   return (
     <div className={styles.maker}>
+      <Sky density={10} />
       <header className={styles.header}>
         <a href="/" className={styles.logo}>
           <span className="mono">operation:</span>
@@ -222,12 +227,14 @@ export default function Maker() {
 
       <section className={styles.panel}>
         <div className={styles.panelInner} key={step}>
-          <h2 className={styles.panelTitle}>
-            <span className="mono">
-              step {idx + 1} / {STEPS.length}
+          <div className={styles.panelTitle}>
+            <Ribbon as="h2" color={RIBBON_TONES[idx % RIBBON_TONES.length]}>
+              {stepInfo.label}
+            </Ribbon>
+            <span className={styles.levelTag}>
+              level {idx + 1} / {STEPS.length}
             </span>
-            <span className="display">{stepInfo.label}</span>
-          </h2>
+          </div>
           {step === 'bake' && <BakeStation design={design} setDesign={setDesign} />}
           {step === 'top' && <TopStation design={design} setDesign={setDesign} ink={ink} setInk={setInk} sel={sel} setSel={setSel} />}
           {step === 'decorate' && <DecorateStation design={design} setDesign={setDesign} />}

@@ -10,24 +10,42 @@
  * ones exist. The "proof" is the product itself — try a cake right on the page.
  */
 import { CapyMascot } from '@/capy'
-import { CakeIcon, FlameIcon, GiftIcon, HeartIcon, LinkIcon, PlayIcon } from '@/components/ui/Icons'
+import { LinkIcon, PlayIcon } from '@/components/ui/Icons'
+import { Ribbon } from '@/components/ui/Ribbon'
+import { Sky } from '@/components/ui/Sky'
+import { stickerUrl } from '@/lib/art'
 import { GotACake, HeroCake, Gallery, Reveal } from './landing/Client'
 import styles from './landing/landing.module.css'
 import { LANDING } from '@/content/copy'
 
-// Words live in src/content/copy.ts — icons and tile colours stay here.
+// Words live in src/content/copy.ts — sticker art and tile colours stay here.
 const BENEFIT_STYLE = [
-  { icon: GiftIcon, tone: '#f7d6d0' },
-  { icon: FlameIcon, tone: '#ffe493' },
-  { icon: HeartIcon, tone: '#d3e6cf' },
-  { icon: PlayIcon, tone: '#e8c7e3' },
+  { sticker: 'lollipop', tone: '#ffd3e2' },
+  { sticker: 'cakeslice', tone: '#ffe9a8' },
+  { sticker: 'heart', tone: '#c6efdf' },
+  { sticker: 'cupcake', tone: '#ddd0ff' },
 ]
 const BENEFITS = LANDING.benefits.map((b, i) => ({ ...b, ...BENEFIT_STYLE[i % BENEFIT_STYLE.length] }))
 const FAQ = LANDING.faq
+const LEVEL_TONES = ['#ffd3e2', '#c6efdf', '#ffe9a8']
+const LEVEL_STICKERS = ['strawberry', 'bow', 'sparkle']
+
+function Stars({ n = 3 }: { n?: number }) {
+  return (
+    <span className={styles.stars} aria-hidden>
+      {Array.from({ length: n }, (_, i) => (
+        <svg key={i} viewBox="0 0 24 24" width={22} height={22}>
+          <path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8z" fill="#ffd34d" stroke="#3a2622" strokeWidth="1.8" strokeLinejoin="round" />
+        </svg>
+      ))}
+    </span>
+  )
+}
 
 export default function Home() {
   return (
     <>
+      <Sky sweets />
       <header className={styles.header}>
         <div className={styles.headerIn}>
           <a href="/" className={styles.brand} aria-label="operation: secret cake — home">
@@ -35,86 +53,105 @@ export default function Home() {
             <span className="brandmark">secret cake</span>
           </a>
           <nav className={styles.navLinks} aria-label="sections">
-            <a href="#how">how it works</a>
+            <a href="#how">{LANDING.howTitle}</a>
             <a href="#case">cakes</a>
-            <a href="#faq">faq</a>
+            <a href="#faq">{LANDING.faqRibbon}</a>
           </nav>
         </div>
       </header>
 
       <main className={styles.page}>
+        {/* ---------- title screen ---------- */}
         <section className={styles.hero}>
           <div className={styles.heroText}>
-            <span className={`mono ${styles.kicker} ${styles.rise}`} style={{ animationDelay: '0ms' }}>
-              ( {LANDING.kicker} )
-            </span>
-            <h1 className={`display ${styles.h1}`}>
-              {LANDING.titleLines.map((line, i) => (
-                <span key={line} className={`${styles.rise} ${i === LANDING.titleLines.length - 1 ? styles.burn : ''}`} style={{ animationDelay: `${80 + i * 120}ms` }}>
-                  {line}
-                </span>
-              ))}
+            <div className={styles.rise} style={{ animationDelay: '0ms' }}>
+              <Ribbon size="sm" color="#c8a6ff">
+                {LANDING.kicker}
+              </Ribbon>
+            </div>
+            <h1 className={`game-title ${styles.logo} ${styles.rise}`} style={{ animationDelay: '90ms' }}>
+              <span className={styles.logoSmall}>operation:</span>
+              secret cake
             </h1>
-            <p className={`${styles.lede} ${styles.rise}`} style={{ animationDelay: '440ms' }}>
+            <p className={`${styles.tagline} ${styles.rise}`} style={{ animationDelay: '200ms' }}>
+              {LANDING.titleLines.join(' ')}
+            </p>
+            <p className={`${styles.lede} ${styles.rise}`} style={{ animationDelay: '300ms' }}>
               {LANDING.lede}
             </p>
-            <div className={`${styles.ctas} ${styles.rise}`} style={{ animationDelay: '560ms' }}>
+            <div className={`${styles.ctas} ${styles.rise}`} style={{ animationDelay: '420ms' }}>
               <a className={`btn primary ${styles.bigCta}`} href="/bake">
-                <CakeIcon className="ico" aria-hidden /> {LANDING.ctaPrimary}
+                <PlayIcon className="ico" aria-hidden /> {LANDING.ctaPrimary}
               </a>
               <GotACake />
             </div>
-            <ul className={`${styles.proof} ${styles.rise}`} style={{ animationDelay: '680ms' }} aria-label="what you get">
+            <ul className={`${styles.proof} ${styles.rise}`} style={{ animationDelay: '540ms' }} aria-label="what you get">
               {LANDING.proof.map((p) => (
                 <li key={p}>{p}</li>
               ))}
             </ul>
           </div>
-          <div className={`sketch ${styles.heroCake}`}>
-            <span className="tape" style={{ top: 10, left: 24 }} />
-            <HeroCake />
+          <div className={styles.window}>
+            <div className={styles.windowRibbon}>
+              <Ribbon size="sm">today’s special</Ribbon>
+            </div>
+            <div className={`card ${styles.heroCake}`}>
+              <HeroCake />
+            </div>
           </div>
         </section>
 
-        <section id="how" className={styles.how} aria-labelledby="how-title">
-          <h2 id="how-title" className="sr-only">
-            how it works
-          </h2>
-          {LANDING.how.map((h, i) => (
-            <Reveal key={h.title} delay={i * 90}>
-              <article className={`sketch ${styles.step}`} style={{ background: h.tone, rotate: `${[-2, 1.5, -1][i % 3]}deg` }}>
-                <span className={`display ${styles.stepN}`}>{i + 1}</span>
-                <h3 className="display">{h.title}</h3>
-                <p>{h.body}</p>
-              </article>
-            </Reveal>
-          ))}
+        {/* ---------- how to play: three level cards ---------- */}
+        <section id="how" className={styles.section} aria-labelledby="how-title">
+          <div className={styles.sectionHead}>
+            <Ribbon as="h2" color="#f2577f">
+              <span id="how-title">{LANDING.howTitle}</span>
+            </Ribbon>
+          </div>
+          <div className={styles.levels}>
+            {LANDING.how.map((h, i) => (
+              <Reveal key={h.title} delay={i * 90}>
+                <article className={`card ${styles.level}`} style={{ background: LEVEL_TONES[i % 3] }}>
+                  <div className={styles.levelTop}>
+                    <span className="badge">{i + 1}</span>
+                    <Stars n={i + 1} />
+                  </div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={stickerUrl(LEVEL_STICKERS[i % 3])} alt="" className={styles.levelSticker} />
+                  <h3 className="display">{h.title}</h3>
+                  <p>{h.body}</p>
+                </article>
+              </Reveal>
+            ))}
+          </div>
         </section>
       </main>
 
+      {/* ---------- the bakery case ---------- */}
       <section id="case" className={styles.case} aria-labelledby="case-title">
         <header className={styles.caseHead}>
-          <span className="mono">{LANDING.caseKicker}</span>
-          <h2 id="case-title" className="display">
-            {LANDING.caseTitle}
-          </h2>
+          <Ribbon as="h2" color="#9fe3cf">
+            <span id="case-title">{LANDING.caseTitle}</span>
+          </Ribbon>
           <p>{LANDING.caseBody}</p>
         </header>
         <Gallery />
       </section>
 
       <main className={styles.page}>
-        <section className={styles.why} aria-labelledby="why-title">
-          <Reveal>
-            <h2 id="why-title" className={`display ${styles.h2}`}>
-              {LANDING.whyTitle}
-            </h2>
-          </Reveal>
-          <div className={styles.bento}>
+        {/* ---------- why ---------- */}
+        <section className={styles.section} aria-labelledby="why-title">
+          <div className={styles.sectionHead}>
+            <Ribbon as="h2" color="#ffb35a">
+              <span id="why-title">{LANDING.whyTitle}</span>
+            </Ribbon>
+          </div>
+          <div className={styles.perks}>
             {BENEFITS.map((b, i) => (
-              <Reveal key={b.title} delay={i * 80} className={styles[`b${i}` as 'b0']}>
-                <article className={`sketch ${styles.benefit}`} style={{ background: b.tone }}>
-                  <b.icon size={34} aria-hidden className={styles.benefitIco} />
+              <Reveal key={b.title} delay={i * 80}>
+                <article className={`card ${styles.perk}`} style={{ background: b.tone }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={stickerUrl(b.sticker)} alt="" className={styles.perkSticker} />
                   <h3 className="display">{b.title}</h3>
                   <p>{b.body}</p>
                 </article>
@@ -123,13 +160,16 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="faq" className={styles.faq} aria-labelledby="faq-title">
-          <h2 id="faq-title" className={`display ${styles.h2}`}>
-            {LANDING.faqTitle}
-          </h2>
-          <div className={styles.faqList}>
+        {/* ---------- faq ---------- */}
+        <section id="faq" className={styles.section} aria-labelledby="faq-title">
+          <div className={styles.sectionHead}>
+            <Ribbon as="h2" color="#c8a6ff">
+              <span id="faq-title">{LANDING.faqRibbon}</span>
+            </Ribbon>
+          </div>
+          <div className={`card ${styles.faqPanel}`}>
             {FAQ.map(([q, a]) => (
-              <details key={q} className={`sketch ${styles.qa}`}>
+              <details key={q} className={styles.qa}>
                 <summary>
                   <span>{q}</span>
                   <span className={styles.plus} aria-hidden>
@@ -141,24 +181,27 @@ export default function Home() {
             ))}
           </div>
         </section>
-      </main>
 
-      <section className={styles.final} aria-labelledby="final-title">
-        <div className={styles.finalIn}>
-          <CapyMascot size={150} aria-hidden className={styles.finalCapy} />
-          <div>
+        {/* ---------- final call: a "level complete" card ---------- */}
+        <section className={styles.final} aria-labelledby="final-title">
+          <div className={styles.finalRibbon}>
+            <Ribbon size="lg">{LANDING.finalBadge}</Ribbon>
+          </div>
+          <div className={`card ${styles.finalCard}`}>
+            <Stars n={3} />
+            <CapyMascot size={130} aria-hidden className={styles.finalCapy} />
             <h2 id="final-title" className={`display ${styles.finalTitle}`}>
               {LANDING.finalTitle}
             </h2>
             <p className={styles.finalSub}>{LANDING.finalBody}</p>
             <a className={`btn primary ${styles.hugeCta}`} href="/bake">
-              <CakeIcon className="ico" aria-hidden /> {LANDING.finalCta}
+              <PlayIcon className="ico" aria-hidden /> {LANDING.finalCta}
             </a>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
-      <footer className={styles.footer}>
+      <footer className={`card ${styles.footer}`}>
         <div className={styles.footCols}>
           <div>
             <span className={styles.brand}>
