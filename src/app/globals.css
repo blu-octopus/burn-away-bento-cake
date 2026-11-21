@@ -70,7 +70,7 @@ body {
   font-weight: 500;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
-  overflow-x: hidden;
+  overflow-x: clip;
   min-height: 100dvh;
   background: transparent;
 }
@@ -236,7 +236,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 84px; }
   box-shadow: 0 0 0 3px #fff; border-radius: 2px;
 }
 .logo-name {
-  font-family: var(--logo); font-size: var(--logo-size); letter-spacing: .01em; white-space: nowrap;
+  font-family: var(--logo); font-size: var(--logo-size); letter-spacing: .01em; white-space: nowrap; max-width: 100%;
   -webkit-text-stroke: calc(var(--logo-size) * .16) #fff; paint-order: stroke fill;
   
 }

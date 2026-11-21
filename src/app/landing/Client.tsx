@@ -57,14 +57,11 @@ function Thumb({ cake }: { cake: GalleryCake }) {
     renderTop(cake.design, 320).then((cv) => setSrc(cv.toDataURL()))
   }, [cake])
   return (
-    <div className={`sketch ${styles.thumb}`} style={{ background: cake.design.pack.box }}>
+    <div className={styles.thumb} style={{ background: cake.design.pack.box }}>
       <div className={styles.thumbCake} style={{ background: cake.design.frosting }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {src && <img src={src} alt="" />}
       </div>
-      <span className={styles.thumbBow} style={{ color: cake.design.pack.ribbon }}>
-        🎀
-      </span>
     </div>
   )
 }

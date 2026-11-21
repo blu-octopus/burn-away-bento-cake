@@ -6,6 +6,10 @@
  * (Placeholders like {to} / {from} are filled in by the app.)
  */
 
+/** Where feedback goes (a Google Form). */
+export const FEEDBACK_URL = 'https://forms.gle/VsL4QpCcDT5QyR8w9'
+export const MADE_BY_URL = 'https://github.com/blu-octopus'
+
 export const LANDING = {
   kicker: 'a bento cake with a hidden message',
   titleLines: ['bake a tiny cake.', 'hide a message inside.', 'they burn it open.'],
@@ -20,16 +24,16 @@ export const LANDING = {
 
   howTitle: 'how it works',
   how: [
-    { title: 'bake', body: 'frost it, bow it, stamp it cute.', tone: '#ffe6ee' },
-    { title: 'hide', body: 'write a secret under the top layer.', tone: '#e3f6ee' },
-    { title: 'send', body: 'they light a match and burn it open.', tone: '#fff4cf' },
+    { title: 'make a cake', body: 'pick your flavor, shape and cute decor.', tone: '#fff4e0' },
+    { title: 'hide a secret', body: 'tuck a secret message inside your cake!', tone: '#e6f8f2' },
+    { title: 'send it!', body: 'send it to a friend, and they get a super special cake from you ♡', tone: '#fff4e0' },
   ],
 
   caseKicker: 'premade cakes · scroll',
   caseTitle: 'fresh from the oven',
   caseBody: 'burn one open yourself, or borrow it as your starting cake.',
-  tryIt: 'burn it',
-  useThis: 'make it mine',
+  tryIt: 'burn me!',
+  useThis: 'customize me!',
 
   whyTitle: 'why a cake?',
   faqRibbon: 'faq',

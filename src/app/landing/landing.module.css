@@ -14,8 +14,8 @@
 .navLinks a:hover { background: var(--mint); }
 
 /* ---------- title screen ---------- */
-.hero { display: grid; gap: 34px; align-items: center; padding: 34px 0 44px; }
-.heroText { display: grid; justify-items: start; gap: 10px; }
+.hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 34px; align-items: center; padding: 34px 0 44px; }
+.heroText { display: grid; justify-items: start; gap: 10px; min-width: 0; }
 .heroLogo { margin: 0 0 8px; font-weight: 400; }
 .lede { font-size: 17px; line-height: 1.55; max-width: 44ch; margin: 2px 0 8px; color: var(--ink); font-weight: 500; }
 .ctas { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; width: 100%; max-width: 580px; }
@@ -108,10 +108,9 @@
 .cakeBtns { display: grid; gap: 6px; margin-top: auto; padding-top: 6px; }
 .cakeBtns :global(.btn) { min-height: 40px; padding: 8px 10px; font-size: 13px; }
 
-.thumb { position: relative; aspect-ratio: 1; border-radius: 16px; border: 1.5px solid var(--edge); display: grid; place-items: center; overflow: hidden; }
+.thumb { position: relative; aspect-ratio: 1; border-radius: 16px; display: grid; place-items: center; overflow: hidden; }
 .thumbCake { width: 76%; aspect-ratio: 1; border-radius: 50%; border: 1.5px solid var(--edge); overflow: hidden; display: grid; place-items: center; }
 .thumbCake img { width: 100%; height: 100%; }
-.thumbBow { position: absolute; top: 4px; right: 8px; font-size: 22px; }
 
 .arrows {
   display: none; justify-content: flex-end; gap: 8px;
@@ -123,10 +122,15 @@
 
 .modal { position: fixed; inset: 0; z-index: 60; background: var(--paper); }
 
-/* why: sticker perks */
-.perks { display: grid; gap: 18px; }
-.perk { position: relative; padding: 20px 20px 22px 96px; min-height: 120px; }
-.perkSticker { position: absolute; left: 14px; top: 16px; width: 68px; rotate: -8deg; }
+/* why: a bento grid — one tall hero tile, two small, one wide */
+.bento { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+.bento > * { height: 100%; }
+.perk { position: relative; height: 100%; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+.perkSticker { width: 64px; rotate: -8deg; }
+.bento0 .perk { justify-content: space-between; }
+.bento0 .perkSticker { width: 120px; }
+.bento0 .perk h3 { font-size: 30px; }
+.bento3 .perk { flex-direction: row; align-items: center; }
 .perk h3 { font-size: 22px; margin: 0 0 6px; }
 .perk p { margin: 0; line-height: 1.45; font-weight: 500; }
 
@@ -145,7 +149,7 @@
 .qa p { margin: 0 0 16px; line-height: 1.55; color: var(--ink-soft); max-width: 62ch; font-weight: 500; }
 
 /* final: level-complete card */
-.final { position: relative; padding: 40px 0 56px; display: grid; justify-items: center; }
+.final { position: relative; padding: 40px 0 56px; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; }
 .finalCard {
   width: min(560px, 100%); padding: 44px 24px 30px; display: grid; justify-items: center; gap: 10px; text-align: center;
   background: var(--cream);
@@ -153,7 +157,7 @@
 .finalCapy { animation: bob 3.2s ease-in-out infinite; }
 .finalTitle { font-size: clamp(28px, 6vw, 40px); line-height: 1.05; margin: 0; }
 .finalSub { font-family: var(--hand); font-size: 20px; margin: 0 0 8px; }
-.hugeCta { position: relative; min-height: 64px; padding: 16px 34px 16px 84px; font-size: 19px; border-radius: 22px; }
+.hugeCta { position: relative; min-height: 64px; max-width: 100%; padding: 14px 24px 14px 80px; font-size: 18px; border-radius: 22px; white-space: normal; }
 .hugeCta:hover .ctaSticker { rotate: 6deg; scale: 1.12; }
 
 /* footer */
@@ -171,7 +175,10 @@
   .navLinks { display: flex; }
   .arrows { display: flex; }
   .levels { grid-template-columns: repeat(3, 1fr); }
-  .perks { grid-template-columns: 1fr 1fr; }
+  .bento { grid-template-columns: 1.2fr 1fr 1fr; grid-template-rows: auto auto; }
+  .bento0 { grid-row: span 2; }
+  .bento3 { grid-column: span 2; }
+  .bento0 .perk { min-height: 340px; }
   .footCols { grid-template-columns: 1.3fr 1fr 1fr 1.4fr; }
 }
 @media (min-width: 960px) {
@@ -183,5 +190,5 @@
 }
 
 /* equal-height cards in a row (Reveal wraps each card in a div) */
-.levels > *, .perks > * { height: 100%; }
-.level, .perk { height: 100%; }
+.levels > * { height: 100%; }
+.level { height: 100%; }

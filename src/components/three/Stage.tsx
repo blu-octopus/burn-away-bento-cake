@@ -4,7 +4,7 @@ import { ContactShadows, OrbitControls, PerformanceMonitor } from '@react-three/
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Bloom, EffectComposer, ToneMapping } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Component, useEffect, useRef, useState, type ErrorInfo, type ReactNode } from 'react'
 import * as THREE from 'three'
 import { Magic } from './Magic'
 
@@ -101,7 +101,62 @@ export interface StageProps {
   magic?: boolean
 }
 
-export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, background = '#d2f3ea', onCreated, className, style, capture, glow = false, magic = false }: StageProps) {
+/**
+ * If WebGL is missing or a GPU chokes on the scene, show a friendly still
+ * instead of letting the error take the whole page down with it.
+ */
+class CanvasBoundary extends Component<{ children: ReactNode; className?: string; style?: React.CSSProperties }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() {
+    return { failed: true }
+  }
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('3D scene failed, showing fallback', error, info.componentStack)
+  }
+  render() {
+    if (!this.state.failed) return this.props.children
+    return (
+      <div
+        className={this.props.className}
+        style={{ ...this.props.style, display: 'grid', placeItems: 'center', textAlign: 'center', padding: 16, background: '#d2f3ea' }}
+        role="img"
+        aria-label="a little cake"
+      >
+        <div>
+          <div style={{ fontSize: 56 }}>🎂</div>
+          <p style={{ margin: 6, fontWeight: 600 }}>your browser couldn’t draw the 3D cake, but everything else still works ♡</p>
+        </div>
+      </div>
+    )
+  }
+}
+
+function hasWebGL() {
+  if (typeof document === 'undefined') return true
+  try {
+    const c = document.createElement('canvas')
+    return !!(c.getContext('webgl2') || c.getContext('webgl'))
+  } catch {
+    return false
+  }
+}
+
+export function Stage(props: StageProps) {
+  const [ok] = useState(hasWebGL)
+  return (
+    <CanvasBoundary className={props.className} style={props.style}>
+      {ok ? <StageCanvas {...props} /> : <NoWebGL className={props.className} style={props.style} />}
+    </CanvasBoundary>
+  )
+}
+
+function NoWebGL({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  throw new Error('WebGL unavailable')
+  // eslint-disable-next-line no-unreachable
+  return <div className={className} style={style} />
+}
+
+function StageCanvas({ children, shot = 'front', orbit, orbitLocked, autoSpin, background = '#d2f3ea', onCreated, className, style, capture, glow = false, magic = false }: StageProps) {
   // Performance: start at a sensible pixel ratio and let the monitor lower it
   // (and drop shadows) on slow machines; stop rendering entirely when the
   // canvas is scrolled out of view.

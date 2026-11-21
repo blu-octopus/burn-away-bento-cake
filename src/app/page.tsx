@@ -9,19 +9,19 @@
  * No fake social proof: there are no reviews or user counts here until real
  * ones exist. The "proof" is the product itself — try a cake right on the page.
  */
-import { CapyMascot } from '@/capy'
+import { CapyChef } from '@/components/ui/CapyChef'
 import { Logo } from '@/components/ui/Logo'
 import { Ribbon } from '@/components/ui/Ribbon'
 import { stickerUrl } from '@/lib/art'
 import { GotACake, HeroCake, Gallery, Reveal } from './landing/Client'
 import styles from './landing/landing.module.css'
-import { LANDING } from '@/content/copy'
+import { FEEDBACK_URL, LANDING, MADE_BY_URL } from '@/content/copy'
 
 // Words live in src/content/copy.ts — sticker art and tile colours stay here.
 const BENEFIT_STYLE = [
-  { sticker: 'dotbow', tone: '#fff4e0' },
-  { sticker: 'chocostar', tone: '#e6f8f2' },
   { sticker: 'dotheart', tone: '#fff4e0' },
+  { sticker: 'chocostar', tone: '#e6f8f2' },
+  { sticker: 'mintscoop', tone: '#f6ead8' },
   { sticker: 'swissroll', tone: '#e6f8f2' },
 ]
 const BENEFITS = LANDING.benefits.map((b, i) => ({ ...b, ...BENEFIT_STYLE[i % BENEFIT_STYLE.length] }))
@@ -52,7 +52,7 @@ export default function Home() {
             <h1 className={`${styles.heroLogo} ${styles.rise}`}>
               <span className="sr-only">operation: secret cake</span>
               <span aria-hidden>
-                <Logo size={78} />
+                <Logo size="clamp(36px, 10.5vw, 78px)" />
               </span>
             </h1>
             <p className={`on-dots ${styles.lede} ${styles.rise}`} style={{ animationDelay: '140ms' }}>
@@ -116,14 +116,16 @@ export default function Home() {
               <span id="why-title">{LANDING.whyTitle}</span>
             </Ribbon>
           </div>
-          <div className={styles.perks}>
+          <div className={styles.bento}>
             {BENEFITS.map((b, i) => (
-              <Reveal key={b.title} delay={i * 80}>
+              <Reveal key={b.title} delay={i * 80} className={styles[`bento${i}` as 'bento0']}>
                 <article className={`card ${styles.perk}`} style={{ background: b.tone }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={stickerUrl(b.sticker)} alt="" className={styles.perkSticker} />
-                  <h3 className="display">{b.title}</h3>
-                  <p>{b.body}</p>
+                  <div>
+                    <h3 className="display">{b.title}</h3>
+                    <p>{b.body}</p>
+                  </div>
                 </article>
               </Reveal>
             ))}
@@ -154,8 +156,8 @@ export default function Home() {
 
         {/* ---------- final call: a "level complete" card ---------- */}
         <section className={styles.final} aria-labelledby="final-title">
-          <div className={`card lace-bottom ${styles.finalCard}`}>
-            <CapyMascot size={130} aria-hidden className={styles.finalCapy} />
+          <div className={`card ${styles.finalCard}`}>
+            <CapyChef size={130} className={styles.finalCapy} />
             <h2 id="final-title" className={`display ${styles.finalTitle}`}>
               {LANDING.finalTitle}
             </h2>
@@ -168,7 +170,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className={`card lace-top ${styles.footer}`}>
+      <footer className={`card ${styles.footer}`}>
         <div className={styles.footCols}>
           <div>
             <span className={styles.brand}>
@@ -185,8 +187,9 @@ export default function Home() {
           <nav aria-label="help">
             <h3 className="mono">{LANDING.footerHelp}</h3>
             <a href="#faq">faq</a>
+            <a href={FEEDBACK_URL}>send feedback</a>
             <a href="https://github.com/blu-octopus/burn-away-bento-cake/issues">report a problem</a>
-            <a href="https://github.com/blu-octopus/burn-away-bento-cake">GitHub</a>
+            <a href={MADE_BY_URL}>made by me</a>
           </nav>
           <nav aria-label="legal">
             <h3 className="mono">legal</h3>

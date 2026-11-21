@@ -12,7 +12,11 @@ import { GALLERY } from '@/lib/gallery'
  * secret, holds for a moment, then the next cake comes out. Uses the
  * lightweight flames and no post-processing so it stays smooth.
  */
+const isPhone = () => typeof navigator !== 'undefined' && /iPhone|iPad|Android|Mobile/i.test(navigator.userAgent)
+
 export default function HeroScene() {
+  // phones get the gentle spinning version; the burn demo is desktop-only
+  const [phone] = useState(isPhone)
   const [i, setI] = useState(0)
   const [phase, setPhase] = useState<'show' | 'burn' | 'reveal'>('show')
   const burn = useRef<BurnSheetHandle>(null)
@@ -23,12 +27,16 @@ export default function HeroScene() {
   // show → light it
   useEffect(() => {
     if (phase !== 'show' || !top.url) return
+    if (phone) {
+      const t = setTimeout(() => setI((n) => (n + 1) % GALLERY.length), 4200)
+      return () => clearTimeout(t)
+    }
     const t = setTimeout(() => {
       burn.current?.igniteUV(0.5, 0.42)
       setPhase('burn')
     }, 2600)
     return () => clearTimeout(t)
-  }, [phase, top.url, i])
+  }, [phase, top.url, i, phone])
 
   // reveal → next cake
   useEffect(() => {
@@ -49,8 +57,8 @@ export default function HeroScene() {
 
   return (
     <Stage shot="hero" autoSpin background="#d2f3ea" style={{ position: 'absolute', inset: 0 }}>
-      <CakeModel design={cake.design} secretTexture={secret.tex} showTop={false} candleLit>
-        {top.url && phase !== 'reveal' && (
+      <CakeModel design={cake.design} topTexture={top.tex} secretTexture={secret.tex} showTop={phone} candleLit>
+        {!phone && top.url && phase !== 'reveal' && (
           <BurnSheet
             key={`${cake.id}-${top.url.length}`}
             ref={burn}

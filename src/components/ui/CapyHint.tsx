@@ -1,6 +1,6 @@
 'use client'
 
-import { CapyMascot } from '@/capy'
+import { CapyChef } from './CapyChef'
 
 /**
  * The capy baker with a little tooltip — same soft style as the rest of the
@@ -9,7 +9,7 @@ import { CapyMascot } from '@/capy'
 export function CapyHint({ text, size = 64, className }: { text: string; size?: number; className?: string }) {
   return (
     <div className={`capy-hint ${className ?? ''}`} role="status" aria-live="polite">
-      <CapyMascot size={size} aria-hidden className="capy-hint-capy" />
+      <CapyChef size={size} className="capy-hint-capy" />
       <span className="capy-hint-tip">{text}</span>
     </div>
   )

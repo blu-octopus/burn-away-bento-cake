@@ -148,9 +148,10 @@ export default function Maker() {
     setStep(STEPS[Math.max(0, Math.min(STEPS.length - 1, i))].id)
   }
 
-  const shot: CameraShot = shotOverride ?? (step === 'secret' || step === 'top' ? 'top' : step === 'package' ? 'box' : 'hero')
+  const shot: CameraShot = shotOverride ?? (step === 'secret' || step === 'top' ? 'top' : step === 'package' || step === 'send' ? 'box' : 'hero')
   const showTop = step === 'secret' ? peek : true
-  const showBox = step === 'package'
+  // at 'send' the cake is all boxed up (the box steps aside only while the poster photo is taken)
+  const showBox = step === 'package' || (step === 'send' && shotOverride === null)
 
   const bounceKey = useMemo(
     () => JSON.stringify([design.shape, design.frosting, design.piping, design.pipingColor, design.decor, design.decorColor, design.candle, design.sprinkles]),
@@ -189,9 +190,9 @@ export default function Maker() {
         <Stage orbit orbitLocked={step === 'top'} capture onCreated={(r) => (gl.current = r)} className={styles.canvas}>
           <OrbitShot shot={shot} />
           <Bounce trigger={bounceKey}>
-            <CakeModel design={design} topTexture={top.tex} secretTexture={secretTex.tex} showTop={showTop} candleLit={step === 'package' || step === 'send'} />
+            <CakeModel design={design} topTexture={top.tex} secretTexture={secretTex.tex} showTop={showTop} candleLit={step === 'package' && !lidClosed} />
             {step === 'top' && <StampLayer design={design} setDesign={setDesign} ink={ink} sel={sel} setSel={setSel} />}
-            {showBox && <BentoBox color={design.pack.box} ribbon={design.pack.ribbon} open={lidClosed ? 0 : 1} tag={tag} />}
+            {showBox && <BentoBox color={design.pack.box} ribbon={design.pack.ribbon} open={step === 'send' ? 0 : lidClosed ? 0 : 1} tag={tag} />}
           </Bounce>
         </Stage>
         <div className={styles.stageTag}>

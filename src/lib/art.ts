@@ -28,6 +28,15 @@ const _faceUnused = (cx: number, cy: number, s = 1) => `
   <path d="M${cx - 3.5 * s} ${cy + 3 * s} Q${cx} ${cy + 7 * s} ${cx + 3.5 * s} ${cy + 3 * s}" fill="none" stroke="${INK}" stroke-width="${2.4 * s}" stroke-linecap="round"/>
   <ellipse cx="${cx - 15 * s}" cy="${cy + 5 * s}" rx="${4 * s}" ry="${2.4 * s}" fill="#ff9db8" opacity=".85"/><ellipse cx="${cx + 15 * s}" cy="${cy + 5 * s}" rx="${4 * s}" ry="${2.4 * s}" fill="#ff9db8" opacity=".85"/>`
 
+/** A tidy ribbon bow: rounded loops with a fold, a soft knot and notched tails. */
+const bowBody = (fill: string, ink: string, knot: string) => `
+  <path d="M47 58 C44 68 38 80 30 90 L39 88 L42 96 C48 84 52 70 53 60 Z" fill="${fill}" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M53 58 C56 68 62 80 70 90 L61 88 L58 96 C52 84 48 70 47 60 Z" fill="${fill}" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M50 48 C42 36 30 24 17 27 C6 30 6 54 17 60 C29 66 43 58 50 52 Z" fill="${fill}" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M50 48 C58 36 70 24 83 27 C94 30 94 54 83 60 C71 66 57 58 50 52 Z" fill="${fill}" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M47 49 C38 44 28 42 21 46 M53 49 C62 44 72 42 79 46" fill="none" stroke="${ink}" stroke-width="2.2" stroke-linecap="round" opacity=".45"/>
+  <rect x="42.5" y="41" width="15" height="18" rx="6.5" fill="${knot}" stroke="${ink}" stroke-width="3"/>`
+
 export const STICKERS: StickerDef[] = [
   {
     id: 'strawberry',
@@ -51,12 +60,7 @@ export const STICKERS: StickerDef[] = [
   {
     id: 'bow',
     label: 'bow',
-    svg: svg(`
-      <path d="M50 50 C36 30 14 30 14 46 C14 62 36 62 50 50Z" fill="#f08aa3" ${line}/>
-      <path d="M50 50 C64 30 86 30 86 46 C86 62 64 62 50 50Z" fill="#f08aa3" ${line}/>
-      <path d="M46 54 L34 86 L42 82 L46 90 L50 56Z M54 54 L66 86 L58 82 L54 90 L50 56Z" fill="#e86a8a" ${line}/>
-      <ellipse cx="50" cy="50" rx="8" ry="9" fill="#e86a8a" ${line}/>
-      <path d="M24 42 C26 38 30 37 34 38" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>`),
+    svg: svg(bowBody('#f08aa3', INK, '#e86a8a') + `<path d="M24 38 C27 33 32 31 37 32" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>`),
   },
   {
     id: 'heart',
@@ -224,11 +228,7 @@ STICKERS.push(
   {
     id: 'dotbow',
     label: 'polka bow',
-    svg: svg(`<defs>${dots('pdB', '#5b3a2e', '#9fe1d1', 1.8, 7)}</defs>
-      <path d="M50 50 C36 28 10 30 12 46 C14 62 36 62 50 50Z" fill="url(#pdB)" stroke="#5b3a2e" stroke-width="3" stroke-linejoin="round"/>
-      <path d="M50 50 C64 28 90 30 88 46 C86 62 64 62 50 50Z" fill="url(#pdB)" stroke="#5b3a2e" stroke-width="3" stroke-linejoin="round"/>
-      <path d="M46 54 L32 88 L42 84 L46 92 L50 56Z M54 54 L68 88 L58 84 L54 92 L50 56Z" fill="url(#pdB)" stroke="#5b3a2e" stroke-width="3" stroke-linejoin="round"/>
-      <ellipse cx="50" cy="50" rx="8" ry="9" fill="#5b3a2e"/>`),
+    svg: svg(`<defs>${dots('pdB', '#5b3a2e', '#9fe1d1', 1.8, 7)}</defs>` + bowBody('url(#pdB)', '#5b3a2e', '#5b3a2e')),
   },
   {
     id: 'dotheart',
