@@ -20,9 +20,10 @@ let nextSeed = 11
 const seeds = new WeakMap<Element, number>()
 
 /**
- * Buttons and chips are outlined tone-on-tone: a deeper shade of their own
- * fill (raspberry on berry, dusty pink on blush, tan on cream), so each one
- * reads as a single object. Cards, keys and swatches keep capy's brown line.
+ * Everything is outlined tone-on-tone: a deeper shade of its own fill
+ * (raspberry on berry, dusty pink on blush, sage on mint, tan on cream), so
+ * each tile reads as one object. Colour swatches keep capy's brown line so the
+ * colour itself stays legible; anything without a fill falls back to brown.
  */
 function toneStroke(bg: string): string | null {
   const m = bg.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?/)
@@ -83,7 +84,7 @@ function paint(el: HTMLElement) {
   svg.setAttribute('viewBox', `0 0 ${w} ${h}`)
   const path = svg.firstChild as SVGPathElement
   path.setAttribute('d', ribbonPath)
-  const tone = el.matches('.btn, .chip') ? toneStroke(cs.backgroundColor) : null
+  const tone = el.matches('.swatch') ? null : toneStroke(cs.backgroundColor)
   if (tone) path.setAttribute('fill', tone)
   else path.removeAttribute('fill')
   path.setAttribute('fill-rule', 'evenodd')

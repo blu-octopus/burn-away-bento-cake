@@ -57,9 +57,6 @@ export default function Home() {
             <a href="#case">cakes</a>
             <a href="#faq">faq</a>
           </nav>
-          <a className={`btn primary ${styles.headerCta}`} href="/bake">
-            <CakeIcon className="ico" aria-hidden /> bake
-          </a>
         </div>
       </header>
 
@@ -116,7 +113,6 @@ export default function Home() {
                 <span className={`display ${styles.stepN}`}>{n}</span>
                 <h3 className="display">{t}</h3>
                 <p>{d}</p>
-                <span className="mono">step 0{n}</span>
               </article>
             </Reveal>
           ))}
