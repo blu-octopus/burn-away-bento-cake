@@ -27,9 +27,19 @@ function mat(color: string, _extra: Record<string, unknown> = {}) {
 }
 
 /** The ink outline that matches the UI: an inverted hull a hair wider than the mesh. */
-function Ink({ px = 2 }: { px?: number }) {
-  // drei's Outlines (with screenspace off) takes thickness in screen pixels
-  return <Outlines thickness={px} color={INK} />
+function Ink({ px = 2, color }: { px?: number; color?: string }) {
+  // drei's Outlines (with screenspace off) takes thickness in screen pixels.
+  // The line is a deeper shade of the thing it outlines, never a hard ink.
+  return <Outlines thickness={px} color={color ? deepen(color) : INK} />
+}
+
+/** A deeper, slightly rosier shade of a colour — for tone-on-tone outlines. */
+function deepen(hex: string) {
+  const c = new THREE.Color(hex)
+  const hsl = { h: 0, s: 0, l: 0 }
+  c.getHSL(hsl)
+  c.setHSL(hsl.h, Math.min(1, hsl.s * 0.9 + 0.12), Math.max(0.28, hsl.l * 0.66))
+  return `#${c.getHexString()}`
 }
 
 export function bodyGeometry(shape: CakeShape, height = H) {
@@ -112,8 +122,8 @@ export function candleSpot(shape: CakeShape): [number, number, number] {
 function Piping({ design }: { design: CakeDesign }) {
   const ref = useRef<THREE.InstancedMesh>(null)
   const ring = useMemo(() => {
-    const top = perimeter(design.shape, 0.15, 0.97).map((p) => ({ ...p, y: H + 0.02, top: true }))
-    const bottom = perimeter(design.shape, 0.17, 1.0).map((p) => ({ ...p, y: 0.04, top: false }))
+    const top = perimeter(design.shape, 0.13, 0.95).map((p) => ({ ...p, y: H + 0.008, top: true }))
+    const bottom = perimeter(design.shape, 0.14, 1.02).map((p) => ({ ...p, y: -0.002, top: false }))
     return [...top, ...bottom]
   }, [design.shape])
 
@@ -127,9 +137,17 @@ function Piping({ design }: { design: CakeDesign }) {
         return g
       }
       default: {
-        const g = new THREE.ConeGeometry(0.075, 0.13, 6)
-        g.rotateZ(0.5)
-        return g
+        // a soft frosting kiss: round base, gentle swirl up to a little tip
+        const profile = [
+          [0.0, 0.0],
+          [0.062, 0.004],
+          [0.072, 0.03],
+          [0.058, 0.06],
+          [0.034, 0.09],
+          [0.012, 0.118],
+          [0.0, 0.124],
+        ].map(([r, y]) => new THREE.Vector2(r, y))
+        return new THREE.LatheGeometry(profile, 7)
       }
     }
   }, [design.piping])
@@ -154,7 +172,7 @@ function Piping({ design }: { design: CakeDesign }) {
   if (design.piping === 'none') return null
   return (
     <instancedMesh key={design.piping + design.shape} ref={ref} args={[geom, material, ring.length]} castShadow>
-      <Ink px={1.3} />
+      <Ink px={1} color={design.pipingColor} />
     </instancedMesh>
   )
 }
@@ -217,10 +235,10 @@ export function Bow({ color }: { color: string }) {
   return (
     <group>
       <mesh geometry={loop} material={m} position={[-0.05, 0.012, 0]} rotation={[0, 0.25, 0.28]} castShadow>
-        <Ink px={1.4} />
+        <Ink px={1.2} color={color} />
       </mesh>
       <mesh geometry={loop} material={m} position={[0.05, 0.012, 0]} rotation={[0, -0.25, -0.28]} castShadow>
-        <Ink px={1.4} />
+        <Ink px={1.2} color={color} />
       </mesh>
       <mesh material={m} scale={[1, 1.15, 0.85]} castShadow>
         <icosahedronGeometry args={[0.022, 0]} />
@@ -262,7 +280,7 @@ function Strawberry() {
   return (
     <group position={[0, 0.012, 0]}>
       <mesh geometry={body} material={red} castShadow>
-        <Ink px={1.6} />
+        <Ink px={1.3} color="#e23a48" />
       </mesh>
       {seeds.map((p, i) => (
         <mesh key={i} material={seedMat} position={p}>
@@ -425,10 +443,10 @@ export function CakeModel({ design, topTexture, secretTexture, showTop = true, c
   return (
     <group>
       <mesh geometry={plate} material={plateMat} position={[0, -0.05, 0]} receiveShadow>
-        <Ink px={2.6} />
+        <Ink px={2} color="#f3d3e0" />
       </mesh>
       <mesh geometry={body} material={frosting} castShadow receiveShadow>
-        <Ink px={3.2} />
+        <Ink px={2.4} color={design.frosting} />
       </mesh>
       {/* the secret, printed on the frosting under the sheet */}
       <mesh geometry={cap} position={[0, H + 0.002, 0]} receiveShadow>

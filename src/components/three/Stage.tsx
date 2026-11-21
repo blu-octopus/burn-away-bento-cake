@@ -6,6 +6,7 @@ import { Bloom, EffectComposer, ToneMapping } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
 import { useRef, type ReactNode } from 'react'
 import * as THREE from 'three'
+import { Magic } from './Magic'
 
 /**
  * World scale. Scenes are authored in "cake units" (radius 1) but drawn at real
@@ -44,10 +45,10 @@ function gingham() {
   const c = cv.getContext('2d')!
   c.fillStyle = '#fff6f8'
   c.fillRect(0, 0, 64, 64)
-  c.fillStyle = 'rgba(255, 150, 185, 0.22)'
+  c.fillStyle = 'rgba(255, 160, 195, 0.16)'
   c.fillRect(0, 0, 32, 64)
   c.fillRect(0, 0, 64, 32)
-  c.fillStyle = 'rgba(255, 150, 185, 0.16)'
+  c.fillStyle = 'rgba(255, 160, 195, 0.1)'
   c.fillRect(0, 0, 32, 32)
   const t = new THREE.CanvasTexture(cv)
   t.wrapS = t.wrapT = THREE.RepeatWrapping
@@ -93,11 +94,13 @@ export interface StageProps {
   style?: React.CSSProperties
   /** keep the drawing buffer so we can snapshot frames for posters */
   capture?: boolean
-  /** bloom HDR sources (fire, flames) — on for the burn, off where nothing glows */
+  /** bloom: makes flames, candles and sparkles glow */
   glow?: boolean
+  /** sparkles + bubbles drifting around the cake */
+  magic?: boolean
 }
 
-export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, background = '#ffe6ef', onCreated, className, style, capture, glow }: StageProps) {
+export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, background = '#fff1f6', onCreated, className, style, capture, glow = true, magic = true }: StageProps) {
   return (
     <Canvas
       className={className}
@@ -108,16 +111,17 @@ export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, 
       gl={{ preserveDrawingBuffer: !!capture, antialias: true }}
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping
-        gl.toneMappingExposure = 1.05
+        gl.toneMappingExposure = 1.1
         onCreated?.(gl)
       }}
     >
       <color attach="background" args={[background]} />
-      <hemisphereLight args={['#fff6fb', '#d9c8ff', 0.85]} />
+      <hemisphereLight args={['#fffafd', '#e6dcff', 1.15]} />
+      <ambientLight intensity={0.25} color="#ffe8f2" />
       <directionalLight
         position={[2.5, 6, 3.5]}
-        intensity={1.15}
-        color="#fff4e6"
+        intensity={1.35}
+        color="#fff6ee"
         castShadow
         shadow-mapSize={[1024, 1024]}
         shadow-camera-left={-0.8}
@@ -135,6 +139,7 @@ export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, 
       <ContactShadows position={[0, -0.095 * WORLD, 0]} opacity={0.35} scale={8 * WORLD} blur={2.4} far={2 * WORLD} color="#7a5a48" />
       <group scale={WORLD}>
         <Spin on={!!autoSpin}>{children}</Spin>
+        {magic && <Magic />}
       </group>
       {orbit ? (
         <OrbitControls
@@ -153,7 +158,7 @@ export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, 
       {glow && (
         // Only things brighter than paper white bloom: flames, embers, the ember line.
         <EffectComposer multisampling={0}>
-          <Bloom mipmapBlur luminanceThreshold={1.35} luminanceSmoothing={0.25} intensity={0.75} radius={0.6} />
+          <Bloom mipmapBlur luminanceThreshold={1.02} luminanceSmoothing={0.2} intensity={0.6} radius={0.7} />
           <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
         </EffectComposer>
       )}
