@@ -1,0 +1,75 @@
+.page { max-width: 1120px; margin: 0 auto; padding: 0 16px 40px; }
+
+.nav { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; }
+.brand { display: flex; flex-direction: column; line-height: .9; }
+.brand .mono { font-size: 10px; }
+.brand .hand { font-size: 28px; font-weight: 700; color: var(--berry); }
+
+.hero { display: grid; gap: 18px; align-items: center; padding: 8px 0 32px; }
+.kicker { color: var(--ink-soft); }
+.h1 { font-size: clamp(36px, 9vw, 68px); line-height: 0.98; margin: 12px 0 18px; }
+.burn {
+  color: var(--berry);
+  background: linear-gradient(transparent 62%, var(--blush) 62%);
+}
+.ctas { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+.ctas > .btn { font-size: 15px; padding: 14px 22px; }
+.sub { font-size: 14px; color: var(--ink-soft); margin-top: 14px; }
+.heroCake {
+  position: relative; aspect-ratio: 1; width: 100%; max-width: 520px; justify-self: center;
+  border: 2px solid var(--ink); border-radius: 28px; overflow: hidden; box-shadow: 0 6px 0 var(--ink);
+  background: var(--paper);
+}
+.heroCake :global(.tape) { z-index: 2; }
+.heroPlaceholder { height: 100%; display: grid; place-items: center; font-size: 60px; }
+
+.paste { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%; max-width: 420px; }
+.paste input { flex: 1; min-width: 200px; }
+.paste .mono { width: 100%; font-size: 11px; }
+
+.how { display: grid; gap: 16px; padding: 24px 0 40px; }
+.step {
+  position: relative; border: 2px solid var(--ink); border-radius: 20px; padding: 18px 18px 14px;
+  box-shadow: 0 4px 0 var(--ink);
+}
+.step h3 { font-size: 32px; margin: 0 0 6px; }
+.step p { margin: 0 0 10px; font-size: 16px; line-height: 1.35; }
+.stepN {
+  position: absolute; right: 14px; top: 4px; font-size: 64px; opacity: .22; line-height: 1;
+}
+
+.case { padding: 16px 0 24px; }
+.caseHead { text-align: center; margin-bottom: 20px; }
+.caseHead h2 { font-size: clamp(30px, 6vw, 44px); margin: 6px 0; }
+.caseHead p { margin: 0; color: var(--ink-soft); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 18px; }
+.cake {
+  background: var(--card); border: 2px solid var(--ink); border-radius: 20px; padding: 12px;
+  box-shadow: 0 4px 0 var(--ink); display: flex; flex-direction: column; gap: 6px;
+}
+.cake h3 { margin: 4px 0 0; font-size: 22px; }
+.cake p { margin: 0; font-size: 10px; color: var(--ink-soft); }
+.cakeBtns { display: grid; gap: 6px; margin-top: 6px; }
+.cakeBtns .btn { padding: 9px 10px; font-size: 12px; }
+
+.thumb {
+  position: relative; aspect-ratio: 1; border-radius: 14px; border: 2px solid var(--ink);
+  display: grid; place-items: center; overflow: hidden;
+}
+.thumbCake {
+  width: 76%; aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--ink);
+  box-shadow: 0 8px 0 rgba(74,51,44,.25); overflow: hidden; display: grid; place-items: center;
+}
+.thumbCake img { width: 100%; height: 100%; }
+.thumbBow { position: absolute; top: 4px; right: 8px; font-size: 22px; }
+
+.modal { position: fixed; inset: 0; z-index: 60; background: var(--paper); }
+
+.footer { display: flex; flex-direction: column; gap: 10px; align-items: center; text-align: center; padding: 40px 0 10px; border-top: 1.5px dashed var(--line); margin-top: 30px; }
+.footer .mono { font-size: 10px; line-height: 1.8; }
+
+@media (min-width: 860px) {
+  .hero { grid-template-columns: 1.1fr 1fr; padding: 24px 0 48px; }
+  .how { grid-template-columns: repeat(3, 1fr); }
+}
