@@ -1,0 +1,195 @@
+'use client'
+
+import QRCode from 'qrcode'
+import { useEffect, useRef, useState } from 'react'
+import { haptic, sfx } from '@/lib/feel'
+import { buildLink } from '@/lib/link'
+import { hostPhoto } from '@/lib/photo'
+import { canvasBlob, downloadBlob, senderPoster, shareImage } from '@/lib/poster'
+import type { Draft } from './Maker'
+import styles from './Maker.module.css'
+
+export function SendStation({
+  draft,
+  captureHero,
+  onPreview,
+  onEdit,
+}: {
+  draft: Draft
+  captureHero: () => Promise<string>
+  onPreview: () => void
+  onEdit: () => void
+}) {
+  const [link, setLink] = useState('')
+  const [poster, setPoster] = useState<HTMLCanvasElement | null>(null)
+  const [status, setStatus] = useState('boxing it up…')
+  const [inlinePhoto, setInlinePhoto] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [email, setEmail] = useState('')
+  const [optIn, setOptIn] = useState(false)
+  const [mailed, setMailed] = useState(false)
+  const ran = useRef(false)
+
+  const needsCode = draft.usePasscode && !draft.passcode
+
+  useEffect(() => {
+    if (ran.current || needsCode) return
+    ran.current = true
+    ;(async () => {
+      const design = structuredClone(draft.design)
+      if (!draft.useUnlock) delete design.pack.unlockAt
+      if (!draft.usePasscode) delete design.pack.question
+      if (design.top.mode === 'photo' && design.top.photo) {
+        setStatus('uploading your photo…')
+        const hosted = await hostPhoto(design.top.photo)
+        design.top.photo = hosted.url
+        setInlinePhoto(hosted.inline)
+      } else {
+        delete design.top.photo
+      }
+      setStatus('sealing the secret…')
+      const url = await buildLink(design, draft.secret, draft.usePasscode ? draft.passcode : undefined)
+      setLink(url)
+      setStatus('taking its portrait…')
+      const shot = await captureHero()
+      setPoster(await senderPoster({ design, shot, link: url }))
+      setStatus('')
+      sfx.chime()
+      haptic.reveal()
+    })().catch((e) => {
+      console.error(e)
+      setStatus('something went wrong — try again?')
+      ran.current = false
+    })
+  }, [draft, captureHero, needsCode])
+
+  if (needsCode)
+    return (
+      <div className={styles.note}>
+        you turned on a passcode but didn’t set one yet.
+        <div style={{ marginTop: 12 }}>
+          <button className="btn" onClick={onEdit}>
+            ← back to packaging
+          </button>
+        </div>
+      </div>
+    )
+
+  const to = draft.design.pack.to || 'you'
+  const shareText = `i baked you a secret cake 🎂🔥 light it to open`
+
+  const shareLink = async () => {
+    haptic.tap()
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `a secret cake for ${to}`, text: shareText, url: link })
+        return
+      } catch {
+        /* cancelled */
+      }
+    }
+    copy()
+  }
+  const copy = async () => {
+    await navigator.clipboard.writeText(link).catch(() => undefined)
+    setCopied(true)
+    sfx.pop()
+    setTimeout(() => setCopied(false), 1600)
+  }
+  const saveQr = async () => {
+    const cv = document.createElement('canvas')
+    await QRCode.toCanvas(cv, link, { margin: 2, width: 900, color: { dark: '#4a332c', light: '#fffdf8' }, errorCorrectionLevel: 'L' })
+    downloadBlob(await canvasBlob(cv), 'secret-cake-qr.png')
+  }
+
+  const receipt = () => {
+    const p = draft.design.pack
+    const lines = [
+      `your secret cake for ${to} ♡`,
+      '',
+      `link: ${link}`,
+      draft.usePasscode ? `question: ${p.question || '(none)'}` : '',
+      draft.usePasscode ? `passcode: ${draft.passcode}` : '',
+      draft.useUnlock && p.unlockAt ? `opens: ${new Date(p.unlockAt).toLocaleString()}` : '',
+      '',
+      '— operation: secret cake',
+    ].filter((l, i, a) => l !== '' || a[i - 1] !== '')
+    const href = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(`🎂 secret cake receipt — for ${to}`)}&body=${encodeURIComponent(lines.join('\n'))}`
+    if (optIn && email) {
+      void fetch('/api/subscribe', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, optIn }) })
+    }
+    window.location.href = href
+    setMailed(true)
+  }
+
+  return (
+    <div className={styles.send}>
+      {status && (
+        <div className={styles.baking}>
+          <span className="float" style={{ fontSize: 40 }}>
+            📦
+          </span>
+          <span className="hand" style={{ fontSize: 26 }}>
+            {status}
+          </span>
+        </div>
+      )}
+      {poster && (
+        <div className={`${styles.posterWrap} pop-in`}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={poster.toDataURL('image/jpeg', 0.85)} alt="your cake poster with QR code" className={styles.posterImg} />
+        </div>
+      )}
+      {link && (
+        <>
+          <div className={styles.sendBtns}>
+            <button className="btn primary" onClick={shareLink}>
+              💌 send it
+            </button>
+            <button className="btn" onClick={copy}>
+              {copied ? 'copied ♡' : '🔗 copy link'}
+            </button>
+            <button className="btn" onClick={() => poster && shareImage(poster, 'secret-cake-poster', shareText, link)} disabled={!poster}>
+              🖼 save poster
+            </button>
+            <button className="btn" onClick={saveQr}>
+              ▦ save qr
+            </button>
+            <button className="btn soft" onClick={onPreview}>
+              ▶️ preview
+            </button>
+          </div>
+          <input type="text" readOnly value={link} aria-label="your cake link" className={styles.linkBox} onFocus={(e) => e.currentTarget.select()} />
+          {inlinePhoto && <p className={styles.small}>psst: photo uploads aren’t set up here, so your photo is tucked inside the link (it’s a long one).</p>}
+
+          <div className={styles.receipt}>
+            <span className="field-label">📧 email yourself a receipt</span>
+            <p className={styles.small} style={{ marginTop: -4 }}>
+              the link{draft.usePasscode ? ', question + passcode' : ''}
+              {draft.useUnlock ? ' and unlock time' : ''} — opens in your own mail app.
+            </p>
+            <div className="row" style={{ flexWrap: 'nowrap' }}>
+              <input type="email" placeholder="you@email.com" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+              <button className="btn" onClick={receipt} disabled={!/^\S+@\S+\.\S+$/.test(email)}>
+                {mailed ? 'sent ✓' : 'email'}
+              </button>
+            </div>
+            <label className={styles.optin}>
+              <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} />
+              <span>♡ tell me when new cakes &amp; decorations drop (optional, unsubscribe anytime)</span>
+            </label>
+          </div>
+
+          <div className="row" style={{ justifyContent: 'center', marginTop: 6 }}>
+            <button className="btn ghost" onClick={onEdit}>
+              ✏️ keep editing
+            </button>
+            <a className="btn ghost" href="/bake" onClick={() => localStorage.removeItem('secret-cake:draft')}>
+              🎂 bake another
+            </a>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
