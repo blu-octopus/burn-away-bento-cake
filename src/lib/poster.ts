@@ -266,7 +266,7 @@ export async function senderPoster(opts: { design: CakeDesign; shot: string; lin
     ctx.font = `600 44px ${CANVAS_FONTS.hand}`
     ;['the link is', 'in your', 'messages ♡'].forEach((l, i) => ctx.fillText(l, 825, 1580 + i * 64))
   }
-  ribbon(ctx, 'scan me', 825, 1392, '#3a9e8f', 58)
+  ribbon(ctx, 'scan me', 825, 1392, '#23756a', 58)
   ctx.textAlign = 'left'
   ctx.fillStyle = INK
   ctx.font = `600 24px ${CANVAS_FONTS.game}`

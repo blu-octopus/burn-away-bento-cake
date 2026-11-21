@@ -32,7 +32,7 @@ const LEVEL_STICKERS = ['mintscoop', 'dotbow', 'polkastar']
 export default function Home() {
   return (
     <>
-      <header className={styles.header}>
+      <header className={`lace-bottom ${styles.header}`}>
         <div className={styles.headerIn}>
           <a href="/" className={styles.brand} aria-label="operation: secret cake — home">
             <Logo size={24} />
@@ -55,7 +55,7 @@ export default function Home() {
                 <Logo size={78} />
               </span>
             </h1>
-            <p className={`${styles.lede} ${styles.rise}`} style={{ animationDelay: '140ms' }}>
+            <p className={`on-dots ${styles.lede} ${styles.rise}`} style={{ animationDelay: '140ms' }}>
               {LANDING.lede}
             </p>
             <div className={`${styles.ctas} ${styles.rise}`} style={{ animationDelay: '260ms' }}>
@@ -100,10 +100,10 @@ export default function Home() {
       {/* ---------- the bakery case ---------- */}
       <section id="case" className={styles.case} aria-labelledby="case-title">
         <header className={styles.caseHead}>
-          <Ribbon as="h2" color="#3a9e8f">
+          <Ribbon as="h2" color="#23756a">
             <span id="case-title">{LANDING.caseTitle}</span>
           </Ribbon>
-          <p>{LANDING.caseBody}</p>
+          <p className="on-dots">{LANDING.caseBody}</p>
         </header>
         <Gallery />
       </section>
@@ -133,7 +133,7 @@ export default function Home() {
         {/* ---------- faq ---------- */}
         <section id="faq" className={styles.section} aria-labelledby="faq-title">
           <div className={styles.sectionHead}>
-            <Ribbon as="h2" color="#3a9e8f">
+            <Ribbon as="h2" color="#23756a">
               <span id="faq-title">{LANDING.faqRibbon}</span>
             </Ribbon>
           </div>
@@ -154,7 +154,7 @@ export default function Home() {
 
         {/* ---------- final call: a "level complete" card ---------- */}
         <section className={styles.final} aria-labelledby="final-title">
-          <div className={`card ${styles.finalCard}`}>
+          <div className={`card lace-bottom ${styles.finalCard}`}>
             <CapyMascot size={130} aria-hidden className={styles.finalCapy} />
             <h2 id="final-title" className={`display ${styles.finalTitle}`}>
               {LANDING.finalTitle}
@@ -168,7 +168,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className={`card ${styles.footer}`}>
+      <footer className={`card lace-top ${styles.footer}`}>
         <div className={styles.footCols}>
           <div>
             <span className={styles.brand}>
@@ -187,19 +187,13 @@ export default function Home() {
             <a href="#faq">faq</a>
             <a href="https://github.com/blu-octopus/burn-away-bento-cake/issues">report a problem</a>
             <a href="https://github.com/blu-octopus/burn-away-bento-cake">GitHub</a>
-            <a href="/privacy">privacy policy</a>
           </nav>
-          <div>
-            <h3 className="mono">{LANDING.footerPrivacy}</h3>
-            <p className={styles.footNote}>{LANDING.privacy}</p>
-            <a href="/privacy">read the privacy policy</a>
-          </div>
+          <nav aria-label="legal">
+            <h3 className="mono">legal</h3>
+            <a href="/privacy">privacy policy</a>
+            <a href="/credits">assets used</a>
+          </nav>
         </div>
-        <p className={styles.credits}>
-          burn effect: <a href="https://github.com/NourMtir0722/Paperlab">paperlab</a> · ui: <a href="https://github.com/blu-octopus/capy-ui">capy-ui</a> ·
-          sticker style inspired by <a href="https://github.com/carolinaaafy/salt-journal-materials">salt journal materials</a> · icons:{' '}
-          <a href="https://simpleicons.org">simple-icons</a>
-        </p>
       </footer>
     </>
   )

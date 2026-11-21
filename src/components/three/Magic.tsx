@@ -69,12 +69,12 @@ function Bubbles({ count = 16 }: { count?: number }) {
 }
 
 /** The magic around the cake: twinkles and bubbles. In cake units (inside the scaled group). */
-export function Magic() {
+export function Magic({ lite = false }: { lite?: boolean }) {
   return (
     <group>
-      <Sparkles count={46} scale={[3.6, 2.2, 3.6]} position={[0, 0.9, 0]} size={5} speed={0.35} opacity={0.9} color="#fff3c4" noise={0.6} />
-      <Sparkles count={24} scale={[3, 1.8, 3]} position={[0, 0.8, 0]} size={4} speed={0.25} opacity={0.8} color="#bfeee2" noise={0.5} />
-      <Bubbles />
+      <Sparkles count={lite ? 18 : 46} scale={[3.6, 2.2, 3.6]} position={[0, 0.9, 0]} size={5} speed={0.35} opacity={0.9} color="#fff3c4" noise={0.6} />
+      <Sparkles count={lite ? 8 : 24} scale={[3, 1.8, 3]} position={[0, 0.8, 0]} size={4} speed={0.25} opacity={0.8} color="#bfeee2" noise={0.5} />
+      <Bubbles count={lite ? 6 : 16} />
     </group>
   )
 }

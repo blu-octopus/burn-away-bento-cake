@@ -77,14 +77,14 @@ body {
 /* the sky, pinned behind every page (iOS ignores background-attachment: fixed) */
 body::before {
   content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background-color: #c9f0e5;
+  background-color: #e3f7f0;
   background-image:
-    radial-gradient(circle, rgba(91, 58, 46, .55) 0 3.2px, transparent 3.8px),
-    radial-gradient(circle, rgba(91, 58, 46, .55) 0 3.2px, transparent 3.8px);
+    radial-gradient(circle, rgba(91, 58, 46, .22) 0 3px, transparent 3.6px),
+    radial-gradient(circle, rgba(91, 58, 46, .22) 0 3px, transparent 3.6px);
   background-size: 44px 44px;
   background-position: 0 0, 22px 22px;
 }
-html { background: #c9f0e5; }
+html { background: #e3f7f0; }
 button, input, textarea, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
 a { color: inherit; }
@@ -230,9 +230,10 @@ html { scroll-behavior: smooth; scroll-padding-top: 84px; }
 .logo-words { position: relative; display: inline-flex; flex-direction: column; align-items: flex-start; padding-top: calc(var(--logo-size) * .55); }
 .logo-tape {
   position: absolute; top: 0; left: calc(var(--logo-size) * .15); rotate: -4deg;
-  font-family: var(--hand); font-weight: 600; font-size: max(11px, calc(var(--logo-size) * .42)); color: var(--ink);
+  font-family: var(--body); font-weight: 700; font-size: max(11px, calc(var(--logo-size) * .36)); letter-spacing: .02em; color: var(--ink);
   padding: 0 calc(var(--logo-size) * .3); line-height: 1.5;
-  background-color: rgba(191, 238, 226, .95); background-image: radial-gradient(circle, rgba(91,58,46,.55) 0 1.4px, transparent 1.8px); background-size: 9px 9px;
+  background-color: #c9efe3; background-image: radial-gradient(circle, rgba(91,58,46,.18) 0 1.3px, transparent 1.7px); background-size: 9px 9px;
+  box-shadow: 0 0 0 3px #fff; border-radius: 2px;
 }
 .logo-name {
   font-family: var(--logo); font-size: var(--logo-size); letter-spacing: .01em; white-space: nowrap;
@@ -258,3 +259,18 @@ html { scroll-behavior: smooth; scroll-padding-top: 84px; }
   rotate: 45deg;
 }
 @media (prefers-reduced-motion: reduce) { .capy-hint-capy { animation: none; } }
+
+/* ---------- lace trims: scalloped white edges with little eyelets ---------- */
+.lace-bottom, .lace-top { position: relative; }
+.lace-bottom::after, .lace-top::before {
+  content: ''; position: absolute; left: 0; right: 0; height: 12px; pointer-events: none; z-index: 1;
+  background:
+    radial-gradient(circle at 50% 4px, #bfe9dc 0 1.6px, transparent 2px) 0 0 / 18px 12px repeat-x,
+    radial-gradient(circle at 50% 0, #fff 0 8.5px, transparent 9px) 0 0 / 18px 12px repeat-x;
+  filter: drop-shadow(0 1px 0 rgba(91, 58, 46, .12));
+}
+.lace-bottom::after { top: 100%; }
+.lace-top::before { bottom: 100%; transform: scaleY(-1); }
+
+/* text that sits straight on the polka dots gets a soft cream backdrop */
+.on-dots { background: rgba(255, 250, 240, .88); border-radius: 14px; padding: 10px 14px; }

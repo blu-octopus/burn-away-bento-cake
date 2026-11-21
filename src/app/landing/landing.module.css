@@ -5,7 +5,7 @@
 /* edge-to-edge chocolate bar, solid */
 .header {
   position: sticky; top: 0; z-index: 40; width: 100%;
-  background: var(--cream); border-bottom: 1.5px solid var(--cream-edge);
+  background: var(--cream);
 }
 .headerIn { max-width: 1120px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 16px; }
 .brand { display: inline-flex; text-decoration: none; }
@@ -17,11 +17,11 @@
 .hero { display: grid; gap: 34px; align-items: center; padding: 34px 0 44px; }
 .heroText { display: grid; justify-items: start; gap: 10px; }
 .heroLogo { margin: 0 0 8px; font-weight: 400; }
-.lede { font-size: 17px; line-height: 1.55; max-width: 40ch; margin: 2px 0 8px; color: var(--ink-soft); font-weight: 500; }
-.ctas { display: grid; grid-template-columns: 1fr; gap: 14px; width: 100%; max-width: 560px; }
+.lede { font-size: 17px; line-height: 1.55; max-width: 44ch; margin: 2px 0 8px; color: var(--ink); font-weight: 500; }
+.ctas { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; width: 100%; max-width: 580px; }
 /* the two big doors in: same size, a big die-cut sticker icon that pops out */
 .bigCta {
-  position: relative; width: 100%; min-height: 66px; padding: 14px 22px 14px 74px; justify-content: flex-start;
+  position: relative; width: 100%; height: 72px; min-height: 72px; padding: 10px 16px 10px 74px; justify-content: flex-start; white-space: normal; text-align: left; line-height: 1.15;
   font-size: 19px; border-radius: 22px;
 }
 .bigCtaAlt { background: var(--cream); border-color: var(--cream-edge); color: var(--ink); }
@@ -167,7 +167,7 @@
 .credits { margin: 22px 0 0; padding-top: 14px; border-top: 2px dashed var(--line); font-size: 12px; color: var(--ink-soft); line-height: 1.8; }
 
 @media (min-width: 720px) {
-  .ctas { grid-template-columns: 1fr 1fr; }
+  .ctas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .navLinks { display: flex; }
   .arrows { display: flex; }
   .levels { grid-template-columns: repeat(3, 1fr); }
@@ -181,3 +181,7 @@
   .rise, .finalCapy { animation: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
 }
+
+/* equal-height cards in a row (Reveal wraps each card in a div) */
+.levels > *, .perks > * { height: 100%; }
+.level, .perk { height: 100%; }

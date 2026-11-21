@@ -13,7 +13,7 @@ const UPDATED = 'November 20, 2026'
 export default function Privacy() {
   return (
     <>
-      <header className={styles.header}>
+      <header className={`lace-bottom ${styles.header}`}>
         <a href="/" aria-label="operation: secret cake — home">
           <Logo size={22} />
         </a>

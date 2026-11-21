@@ -1,10 +1,10 @@
 'use client'
 
-import { ContactShadows, OrbitControls } from '@react-three/drei'
+import { ContactShadows, OrbitControls, PerformanceMonitor } from '@react-three/drei'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Bloom, EffectComposer, ToneMapping } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
-import { useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import * as THREE from 'three'
 import { Magic } from './Magic'
 
@@ -101,21 +101,46 @@ export interface StageProps {
   magic?: boolean
 }
 
-export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, background = '#d2f3ea', onCreated, className, style, capture, glow = true, magic = false }: StageProps) {
+export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, background = '#d2f3ea', onCreated, className, style, capture, glow = false, magic = false }: StageProps) {
+  // Performance: start at a sensible pixel ratio and let the monitor lower it
+  // (and drop shadows) on slow machines; stop rendering entirely when the
+  // canvas is scrolled out of view.
+  const [dpr, setDpr] = useState(() => (typeof window === 'undefined' ? 1 : Math.min(window.devicePixelRatio || 1, 1.5)))
+  const [lowPower, setLowPower] = useState(false)
+  const [visible, setVisible] = useState(true)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  useEffect(() => {
+    const el = canvasRef.current
+    if (!el || typeof IntersectionObserver === 'undefined') return
+    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { rootMargin: '100px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
   return (
     <Canvas
+      ref={canvasRef}
       className={className}
       style={style}
-      shadows
-      dpr={[1, 2]}
+      shadows={!lowPower}
+      dpr={dpr}
+      frameloop={visible ? 'always' : 'never'}
       camera={{ position: SHOTS[shot].pos.map((v) => v * WORLD) as [number, number, number], fov: 34, near: 0.01, far: 20 }}
-      gl={{ preserveDrawingBuffer: !!capture, antialias: true }}
+      gl={{ preserveDrawingBuffer: !!capture, antialias: dpr < 1.5, powerPreference: 'high-performance' }}
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping
         gl.toneMappingExposure = 1.1
         onCreated?.(gl)
       }}
     >
+      <PerformanceMonitor
+        flipflops={3}
+        onDecline={() => {
+          setDpr(1)
+          setLowPower(true)
+          if (typeof window !== 'undefined') (window as unknown as { __cakeLowPower?: boolean }).__cakeLowPower = true
+        }}
+        onIncline={() => setDpr((d) => Math.min(d + 0.25, Math.min(window.devicePixelRatio || 1, 1.5)))}
+      />
       <color attach="background" args={[background]} />
       <hemisphereLight args={['#fffdf6', '#cdeee4', 1.15]} />
       <ambientLight intensity={0.25} color="#fff6ea" />
@@ -132,7 +157,7 @@ export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, 
         shadow-bias={-0.0004}
       />
       <directionalLight position={[-4, 2.5, -2]} intensity={0.35} color="#d4f5ec" />
-      {/* a pink gingham tablecloth, like a game kitchen counter */}
+      {/* mint tablecloth with chocolate polka dots */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1 * WORLD, 0]} receiveShadow>
         <planeGeometry args={[40, 40]} />
         <meshStandardMaterial map={gingham()} roughness={1} />
@@ -140,7 +165,7 @@ export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, 
       <ContactShadows position={[0, -0.095 * WORLD, 0]} opacity={0.35} scale={8 * WORLD} blur={2.4} far={2 * WORLD} color="#5b3a2e" />
       <group scale={WORLD}>
         <Spin on={!!autoSpin}>{children}</Spin>
-        {magic && <Magic />}
+        {magic && <Magic lite={lowPower} />}
       </group>
       {orbit ? (
         <OrbitControls
@@ -156,7 +181,7 @@ export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, 
       ) : (
         <CameraRig shot={shot} />
       )}
-      {glow && (
+      {glow && !lowPower && (
         // Only things brighter than paper white bloom: flames, embers, the ember line.
         <EffectComposer multisampling={0}>
           <Bloom mipmapBlur luminanceThreshold={1.02} luminanceSmoothing={0.2} intensity={0.6} radius={0.7} />

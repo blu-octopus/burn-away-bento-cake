@@ -29,7 +29,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={fontVariables}>
       <body>
         {children}
-        <div className="paper-grain" aria-hidden />
       </body>
     </html>
   )

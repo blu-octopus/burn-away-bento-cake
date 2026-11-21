@@ -25,7 +25,7 @@ import {
   type FireZonesInput,
   type SurfaceLocator,
 } from 'paperlab/fx'
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import type { CakeShape } from '@/lib/design'
 import { outsideCells } from '@/lib/textures'
@@ -67,6 +67,8 @@ const FLAME_PARAMS = {
 export interface BurnSheetHandle {
   /** Light the sheet at a world point (only x/z are used). Returns false if the point is off the sheet. */
   igniteAt(x: number, z: number): boolean
+  /** Light the sheet at a point of its own UV (0..1). */
+  igniteUV(u: number, v: number): void
   /** Fraction of the sheet left, 1 → 0. */
   remaining(): number
   /** Is anything still burning? */
@@ -77,6 +79,8 @@ export interface BurnSheetHandle {
 }
 
 interface Props {
+  /** force the lightweight flames (e.g. the landing demo) */
+  lite?: boolean
   shape: CakeShape
   image: string
   sound: boolean
@@ -85,14 +89,21 @@ interface Props {
 
 function deviceTier() {
   if (typeof navigator === 'undefined') return 'medium' as const
-  return /iPhone|iPad|Android|Mobile/i.test(navigator.userAgent) ? ('low' as const) : ('medium' as const)
+  const mobile = /iPhone|iPad|Android|Mobile/i.test(navigator.userAgent)
+  const weak = (navigator.hardwareConcurrency ?? 8) <= 4
+  const flagged = (window as unknown as { __cakeLowPower?: boolean }).__cakeLowPower
+  return mobile || weak || flagged ? ('low' as const) : ('medium' as const)
 }
 
-export const BurnSheet = forwardRef<BurnSheetHandle, Props>(function BurnSheet({ shape, image, sound, onProgress }, ref) {
+export const BurnSheet = forwardRef<BurnSheetHandle, Props>(function BurnSheet({ shape, image, sound, onProgress, lite }, ref) {
   const paper = useRef<PaperHandle>(null)
   const started = useRef(false)
   const audio = useRef<{ fx: FxAudio; fire: FireSound } | null>(null)
-  const quality = useMemo(deviceTier, [])
+  const quality = useMemo(() => (lite ? ('low' as const) : deviceTier()), [lite])
+  // The fluid fire is the prettiest and the heaviest: if frames start dropping
+  // while it burns, swap to the sprite flames for the rest of the burn.
+  const [fluid, setFluid] = useState(quality !== 'low')
+  const slow = useRef({ n: 0, sum: 0 })
   const scene = useThree((st) => st.scene)
 
   const field = useMemo(() => {
@@ -161,6 +172,10 @@ export const BurnSheet = forwardRef<BurnSheetHandle, Props>(function BurnSheet({
         started.current = true
         return true
       },
+      igniteUV(u, v) {
+        field.ignite(u, v, 0.06, 1)
+        started.current = true
+      },
       remaining: () => field.lastStats.remaining,
       burning: () => started.current && !field.asleep,
       enableSound() {
@@ -186,6 +201,16 @@ export const BurnSheet = forwardRef<BurnSheetHandle, Props>(function BurnSheet({
   useFrame((_, dt) => {
     const d = Math.min(dt, 1 / 20)
     if (!started.current) return
+    if (fluid) {
+      const w = slow.current
+      w.n++
+      w.sum += dt
+      if (w.n >= 45) {
+        if (w.sum / w.n > 1 / 38) setFluid(false)
+        w.n = 0
+        w.sum = 0
+      }
+    }
     const stats = field.step(d * BURN_SPEED)
     emitter.update(d)
     pool.step(d)
@@ -212,7 +237,7 @@ export const BurnSheet = forwardRef<BurnSheetHandle, Props>(function BurnSheet({
       {createPortal(
         <>
       {/* Real flames: the fluid fire on capable devices, sprite flames on phones. Both stand on the burning rim. */}
-      {quality === 'low' ? (
+      {!fluid ? (
         <FxFlames field={field} locate={locate} quality={quality} wind={pool.wind} />
       ) : (
         <FxFireFluid field={field} locate={locate} quality={quality} zones={FLAME_ZONES} params={FLAME_PARAMS} />

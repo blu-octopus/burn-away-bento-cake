@@ -212,7 +212,7 @@ STICKERS.push(
     id: 'polkastar',
     label: 'polka star',
     svg: svg(`<defs>${dots('pdA', '#5b3a2e', '#9fe1d1')}</defs>
-      <path d="M50 6 L62 36 L94 38 L69 58 L78 90 L50 72 L22 90 L31 58 L6 38 L38 36Z" fill="url(#pdA)" ${lineW(3)} stroke="#5b3a2e"/>`),
+      <path d="M50 6 L62 36 L94 38 L69 58 L78 90 L50 72 L22 90 L31 58 L6 38 L38 36Z" fill="url(#pdA)" stroke="#5b3a2e" stroke-width="3" stroke-linejoin="round"/>`),
   },
   {
     id: 'chocostar',
