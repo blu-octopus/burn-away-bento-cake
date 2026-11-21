@@ -347,6 +347,14 @@ function Striker({ onStrike }: { onStrike: () => void }) {
         }}
       >
         <span className={styles.sand} />
+        {x < 4 && (
+          // a little animated arrow showing which way to swipe
+          <span className={styles.swipeHint} aria-hidden>
+            <svg viewBox="0 0 60 24" width="72" height="28">
+              <path d="M4 12 H48 M38 4 L50 12 L38 20" fill="none" stroke="#fff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+        )}
         <span className={styles.match} style={{ transform: `translateX(${x}px) rotate(${-8 + (x / max()) * 16}deg)` }}>
           <i />
         </span>

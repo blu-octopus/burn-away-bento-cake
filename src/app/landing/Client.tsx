@@ -2,9 +2,10 @@
 
 import dynamic from 'next/dynamic'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { BackIcon, FlameIcon, GiftIcon, NextIcon, PencilIcon } from '@/components/ui/Icons'
+import { BackIcon, FlameIcon, NextIcon, PencilIcon } from '@/components/ui/Icons'
 import { GALLERY, type GalleryCake } from '@/lib/gallery'
 import { renderTop } from '@/lib/textures'
+import { stickerUrl } from '@/lib/art'
 import styles from './landing.module.css'
 import { LANDING } from '@/content/copy'
 
@@ -21,8 +22,10 @@ export function GotACake() {
   const [err, setErr] = useState('')
   if (!open)
     return (
-      <button className="btn" onClick={() => setOpen(true)}>
-        <GiftIcon className="ico" aria-hidden /> {LANDING.ctaSecondary}
+      <button className={`btn ${styles.bigCta} ${styles.bigCtaAlt}`} onClick={() => setOpen(true)}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={stickerUrl('gift')} alt="" className={styles.ctaSticker} />
+        {LANDING.ctaSecondary}
       </button>
     )
   const go = () => {

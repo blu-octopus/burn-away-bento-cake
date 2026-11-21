@@ -10,7 +10,8 @@
  * ones exist. The "proof" is the product itself — try a cake right on the page.
  */
 import { CapyMascot } from '@/capy'
-import { LinkIcon, PlayIcon } from '@/components/ui/Icons'
+import { LinkIcon } from '@/components/ui/Icons'
+import { Logo } from '@/components/ui/Logo'
 import { Ribbon } from '@/components/ui/Ribbon'
 import { Sky } from '@/components/ui/Sky'
 import { stickerUrl } from '@/lib/art'
@@ -20,27 +21,15 @@ import { LANDING } from '@/content/copy'
 
 // Words live in src/content/copy.ts — sticker art and tile colours stay here.
 const BENEFIT_STYLE = [
-  { sticker: 'lollipop', tone: '#ffd3e2' },
-  { sticker: 'cakeslice', tone: '#ffe9a8' },
-  { sticker: 'heart', tone: '#c6efdf' },
-  { sticker: 'cupcake', tone: '#ddd0ff' },
+  { sticker: 'lollipop', tone: '#ffe6ee' },
+  { sticker: 'cakeslice', tone: '#fff4cf' },
+  { sticker: 'heart', tone: '#e3f6ee' },
+  { sticker: 'cupcake', tone: '#efe7ff' },
 ]
 const BENEFITS = LANDING.benefits.map((b, i) => ({ ...b, ...BENEFIT_STYLE[i % BENEFIT_STYLE.length] }))
 const FAQ = LANDING.faq
-const LEVEL_TONES = ['#ffd3e2', '#c6efdf', '#ffe9a8']
+const LEVEL_TONES = ['#ffe6ee', '#e3f6ee', '#fff4cf']
 const LEVEL_STICKERS = ['strawberry', 'bow', 'sparkle']
-
-function Stars({ n = 3 }: { n?: number }) {
-  return (
-    <span className={styles.stars} aria-hidden>
-      {Array.from({ length: n }, (_, i) => (
-        <svg key={i} viewBox="0 0 24 24" width={22} height={22}>
-          <path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8z" fill="#ffd34d" stroke="#3a2622" strokeWidth="1.8" strokeLinejoin="round" />
-        </svg>
-      ))}
-    </span>
-  )
-}
 
 export default function Home() {
   return (
@@ -49,8 +38,7 @@ export default function Home() {
       <header className={styles.header}>
         <div className={styles.headerIn}>
           <a href="/" className={styles.brand} aria-label="operation: secret cake — home">
-            <span className="mono">operation:</span>
-            <span className="brandmark">secret cake</span>
+            <Logo size={24} />
           </a>
           <nav className={styles.navLinks} aria-label="sections">
             <a href="#how">{LANDING.howTitle}</a>
@@ -61,40 +49,28 @@ export default function Home() {
       </header>
 
       <main className={styles.page}>
-        {/* ---------- title screen ---------- */}
+        {/* ---------- hero ---------- */}
         <section className={styles.hero}>
           <div className={styles.heroText}>
-            <div className={styles.rise} style={{ animationDelay: '0ms' }}>
-              <Ribbon size="sm" color="#c8a6ff">
-                {LANDING.kicker}
-              </Ribbon>
-            </div>
-            <h1 className={`game-title ${styles.logo} ${styles.rise}`} style={{ animationDelay: '90ms' }}>
-              <span className={styles.logoSmall}>operation:</span>
-              secret cake
+            <h1 className={`${styles.heroLogo} ${styles.rise}`}>
+              <span className="sr-only">operation: secret cake</span>
+              <span aria-hidden>
+                <Logo size={78} />
+              </span>
             </h1>
-            <p className={`${styles.tagline} ${styles.rise}`} style={{ animationDelay: '200ms' }}>
-              {LANDING.titleLines.join(' ')}
-            </p>
-            <p className={`${styles.lede} ${styles.rise}`} style={{ animationDelay: '300ms' }}>
+            <p className={`${styles.lede} ${styles.rise}`} style={{ animationDelay: '140ms' }}>
               {LANDING.lede}
             </p>
-            <div className={`${styles.ctas} ${styles.rise}`} style={{ animationDelay: '420ms' }}>
+            <div className={`${styles.ctas} ${styles.rise}`} style={{ animationDelay: '260ms' }}>
               <a className={`btn primary ${styles.bigCta}`} href="/bake">
-                <PlayIcon className="ico" aria-hidden /> {LANDING.ctaPrimary}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={stickerUrl('cakeslice')} alt="" className={styles.ctaSticker} />
+                {LANDING.ctaPrimary}
               </a>
               <GotACake />
             </div>
-            <ul className={`${styles.proof} ${styles.rise}`} style={{ animationDelay: '540ms' }} aria-label="what you get">
-              {LANDING.proof.map((p) => (
-                <li key={p}>{p}</li>
-              ))}
-            </ul>
           </div>
           <div className={styles.window}>
-            <div className={styles.windowRibbon}>
-              <Ribbon size="sm">today’s special</Ribbon>
-            </div>
             <div className={`card ${styles.heroCake}`}>
               <HeroCake />
             </div>
@@ -104,7 +80,7 @@ export default function Home() {
         {/* ---------- how to play: three level cards ---------- */}
         <section id="how" className={styles.section} aria-labelledby="how-title">
           <div className={styles.sectionHead}>
-            <Ribbon as="h2" color="#f2577f">
+            <Ribbon as="h2" color="#ff9dbb">
               <span id="how-title">{LANDING.howTitle}</span>
             </Ribbon>
           </div>
@@ -112,10 +88,7 @@ export default function Home() {
             {LANDING.how.map((h, i) => (
               <Reveal key={h.title} delay={i * 90}>
                 <article className={`card ${styles.level}`} style={{ background: LEVEL_TONES[i % 3] }}>
-                  <div className={styles.levelTop}>
-                    <span className="badge">{i + 1}</span>
-                    <Stars n={i + 1} />
-                  </div>
+                  <span className="badge">{i + 1}</span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={stickerUrl(LEVEL_STICKERS[i % 3])} alt="" className={styles.levelSticker} />
                   <h3 className="display">{h.title}</h3>
@@ -130,7 +103,7 @@ export default function Home() {
       {/* ---------- the bakery case ---------- */}
       <section id="case" className={styles.case} aria-labelledby="case-title">
         <header className={styles.caseHead}>
-          <Ribbon as="h2" color="#9fe3cf">
+          <Ribbon as="h2" color="#8fdcc0">
             <span id="case-title">{LANDING.caseTitle}</span>
           </Ribbon>
           <p>{LANDING.caseBody}</p>
@@ -142,7 +115,7 @@ export default function Home() {
         {/* ---------- why ---------- */}
         <section className={styles.section} aria-labelledby="why-title">
           <div className={styles.sectionHead}>
-            <Ribbon as="h2" color="#ffb35a">
+            <Ribbon as="h2" color="#ffc47e">
               <span id="why-title">{LANDING.whyTitle}</span>
             </Ribbon>
           </div>
@@ -163,7 +136,7 @@ export default function Home() {
         {/* ---------- faq ---------- */}
         <section id="faq" className={styles.section} aria-labelledby="faq-title">
           <div className={styles.sectionHead}>
-            <Ribbon as="h2" color="#c8a6ff">
+            <Ribbon as="h2" color="#c9b3ff">
               <span id="faq-title">{LANDING.faqRibbon}</span>
             </Ribbon>
           </div>
@@ -184,18 +157,15 @@ export default function Home() {
 
         {/* ---------- final call: a "level complete" card ---------- */}
         <section className={styles.final} aria-labelledby="final-title">
-          <div className={styles.finalRibbon}>
-            <Ribbon size="lg">{LANDING.finalBadge}</Ribbon>
-          </div>
           <div className={`card ${styles.finalCard}`}>
-            <Stars n={3} />
             <CapyMascot size={130} aria-hidden className={styles.finalCapy} />
             <h2 id="final-title" className={`display ${styles.finalTitle}`}>
               {LANDING.finalTitle}
             </h2>
-            <p className={styles.finalSub}>{LANDING.finalBody}</p>
             <a className={`btn primary ${styles.hugeCta}`} href="/bake">
-              <PlayIcon className="ico" aria-hidden /> {LANDING.finalCta}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={stickerUrl('cakeslice')} alt="" className={styles.ctaSticker} />
+              {LANDING.finalCta}
             </a>
           </div>
         </section>
@@ -205,8 +175,7 @@ export default function Home() {
         <div className={styles.footCols}>
           <div>
             <span className={styles.brand}>
-              <span className="mono">operation:</span>
-              <span className="brandmark">secret cake</span>
+              <Logo size={26} />
             </span>
             <p className={styles.footNote}>{LANDING.footerTagline}</p>
           </div>

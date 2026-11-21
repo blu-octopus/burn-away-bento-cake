@@ -16,9 +16,10 @@ import { StampLayer } from './StampLayer'
 import { MAKER, STEP_COPY } from '@/content/copy'
 import { CapyHint } from '@/components/ui/CapyHint'
 import { Ribbon } from '@/components/ui/Ribbon'
+import { Logo } from '@/components/ui/Logo'
 import { Sky } from '@/components/ui/Sky'
 
-const RIBBON_TONES = ['#f2577f', '#c8a6ff', '#9fe3cf', '#ffb35a', '#7fc8ff', '#f2577f']
+const RIBBON_TONES = ['#ff9dbb', '#c9b3ff', '#8fdcc0', '#ffc47e', '#8fcaff', '#ff9dbb']
 import styles from './Maker.module.css'
 
 /**
@@ -172,9 +173,8 @@ export default function Maker() {
     <div className={styles.maker}>
       <Sky density={10} />
       <header className={styles.header}>
-        <a href="/" className={styles.logo}>
-          <span className="mono">operation:</span>
-          <span className="brandmark">secret cake</span>
+        <a href="/" className={styles.logo} aria-label="operation: secret cake — home">
+          <Logo size={20} />
         </a>
 
       </header>
@@ -201,18 +201,18 @@ export default function Maker() {
         </div>
         <div className={styles.stageTools}>
           {step === 'secret' && (
-            <button className="chip" aria-pressed={peek} onClick={() => setPeek((p) => !p)}>
+            <button className={`btn ${styles.toolBtn}`} aria-pressed={peek} onClick={() => setPeek((p) => !p)}>
               {peek ? MAKER.hideCover : MAKER.showCover}
             </button>
           )}
           {step === 'package' && (
-            <button className="chip" onClick={() => setLidClosed((c) => !c)}>
+            <button className={`btn ${styles.toolBtn}`} onClick={() => setLidClosed((c) => !c)}>
               {lidClosed ? MAKER.openLid : MAKER.closeLid}
             </button>
           )}
           {step !== 'send' && (
             <button
-              className="chip"
+              className={`btn ${styles.toolBtn}`}
               onClick={() => {
                 setDraft((dr) => surprise(step, dr))
                 sfx.pop()
@@ -231,9 +231,6 @@ export default function Maker() {
             <Ribbon as="h2" color={RIBBON_TONES[idx % RIBBON_TONES.length]}>
               {stepInfo.label}
             </Ribbon>
-            <span className={styles.levelTag}>
-              level {idx + 1} / {STEPS.length}
-            </span>
           </div>
           {step === 'bake' && <BakeStation design={design} setDesign={setDesign} />}
           {step === 'top' && <TopStation design={design} setDesign={setDesign} ink={ink} setInk={setInk} sel={sel} setSel={setSel} />}

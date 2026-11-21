@@ -2,17 +2,17 @@ import { siImessage, siInstagram, siPinterest, siSnapchat, siTiktok, siWhatsapp 
 import type { SVGProps } from 'react'
 
 /**
- * Brand marks come from simple-icons (CC0), drawn in their own colours.
+ * Brand marks come from simple-icons (CC0), drawn monochrome in currentColor.
  * Utility icons are hand-drawn-ish strokes in capy's brand brown (currentColor).
  */
 
 type P = SVGProps<SVGSVGElement> & { size?: number }
 
-function brand(icon: { path: string; title: string; hex: string }, fill?: string) {
+function brand(icon: { path: string; title: string }) {
   return function BrandIcon({ size = 20, ...props }: P) {
     return (
       <svg viewBox="0 0 24 24" width={size} height={size} role="img" aria-label={icon.title} {...props}>
-        <path d={icon.path} fill={fill ?? `#${icon.hex}`} />
+        <path d={icon.path} fill="currentColor" />
       </svg>
     )
   }
@@ -20,17 +20,7 @@ function brand(icon: { path: string; title: string; hex: string }, fill?: string
 
 export const InstagramIcon = brand(siInstagram)
 export const TiktokIcon = brand(siTiktok)
-export const SnapchatIcon = function SnapchatIcon({ size = 20, ...props }: P) {
-  // the ghost is white-on-yellow; give it its yellow tile so it reads on paper
-  return (
-    <svg viewBox="0 0 24 24" width={size} height={size} role="img" aria-label="Snapchat" {...props}>
-      <rect x="0" y="0" width="24" height="24" rx="6" fill={`#${siSnapchat.hex}`} />
-      <g transform="translate(3 3) scale(0.75)">
-        <path d={siSnapchat.path} fill="#1a1a1a" />
-      </g>
-    </svg>
-  )
-}
+export const SnapchatIcon = brand(siSnapchat)
 export const WhatsappIcon = brand(siWhatsapp)
 export const MessagesIcon = brand(siImessage)
 export const PinterestIcon = brand(siPinterest)

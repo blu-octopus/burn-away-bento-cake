@@ -180,6 +180,16 @@ STICKERS.push(
       ${face(56, 60, 0.7)}`),
   },
   {
+    id: 'gift',
+    label: 'gift',
+    svg: svg(`
+      <rect x="16" y="44" width="68" height="48" rx="8" fill="#c8b4ff" ${line}/>
+      <rect x="10" y="32" width="80" height="18" rx="6" fill="#ddd0ff" ${line}/>
+      <rect x="44" y="32" width="12" height="60" fill="#ff9dbd" ${lineW(2.6)}/>
+      <path d="M50 32 C38 14 18 18 24 28 C28 34 42 34 50 32 C58 34 72 34 76 28 C82 18 62 14 50 32Z" fill="#ff9dbd" ${line}/>
+      ${face(30, 66, 0.6)}`),
+  },
+  {
     id: 'cupcake',
     label: 'cupcake',
     svg: svg(`

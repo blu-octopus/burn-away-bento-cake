@@ -84,15 +84,7 @@ export function EndCard({
           ⌄
         </button>
         <div className={styles.endHead}>
-          <Ribbon color="#ffb35a">{mode === 'preview' ? 'preview' : RECEIVER.completeTitle}</Ribbon>
-          <div className={styles.endStars} aria-hidden>
-            {[0, 1, 2].map((i) => (
-              <svg key={i} viewBox="0 0 24 24" width={i === 1 ? 40 : 32} height={i === 1 ? 40 : 32} style={{ animationDelay: `${i * 140}ms` }}>
-                <path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8z" fill="#ffd34d" stroke="#3a2622" strokeWidth="1.8" strokeLinejoin="round" />
-              </svg>
-            ))}
-          </div>
-          <span className="mono">{RECEIVER.keepTitle}</span>
+          <Ribbon color="#ffb3c9">{mode === 'preview' ? 'preview' : RECEIVER.completeTitle}</Ribbon>
         </div>
         <div className="row" style={{ justifyContent: 'center', margin: '10px 0' }}>
           {(['both', 'strip', 'poster'] as Kind[]).map((k) => (

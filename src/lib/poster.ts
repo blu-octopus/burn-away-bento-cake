@@ -15,7 +15,8 @@ import { loadImage } from './textures'
 
 export const W = 1080
 export const HGT = 1920
-const INK = '#3a2622'
+const INK = '#5a3f47'
+const EDGE = '#f1c6d6'
 
 // ---------------------------------------------------------------------------
 // drawing kit
@@ -26,17 +27,20 @@ function rr(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: n
   ctx.roundRect(x, y, w, h, r)
 }
 
-/** A panel: hard ink drop, fill, ink outline. */
-function panel(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, opts: { r?: number; fill?: string; drop?: number; lw?: number } = {}) {
-  const { r = 34, fill = '#ffffff', drop = 12, lw = 6 } = opts
-  ctx.fillStyle = INK
-  rr(ctx, x, y + drop, w, h, r)
-  ctx.fill()
+/** A panel: soft pink glow, fill, a thin edge in a deeper shade of the fill. */
+function panel(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, opts: { r?: number; fill?: string; drop?: number; lw?: number; edge?: string } = {}) {
+  const { r = 34, fill = '#ffffff', lw = 3, edge = EDGE } = opts
+  ctx.save()
+  ctx.shadowColor = 'rgba(214, 110, 150, 0.35)'
+  ctx.shadowBlur = 40
+  ctx.shadowOffsetY = 16
   ctx.fillStyle = fill
   rr(ctx, x, y, w, h, r)
   ctx.fill()
+  ctx.restore()
   ctx.lineWidth = lw
-  ctx.strokeStyle = INK
+  ctx.strokeStyle = edge
+  rr(ctx, x, y, w, h, r)
   ctx.stroke()
 }
 
@@ -84,7 +88,7 @@ function sky() {
 function gameTitle(ctx: CanvasRenderingContext2D, text: string, cx: number, top: number, maxW: number, max = 150) {
   let size = max
   const fit = (sz: number) => {
-    ctx.font = `400 ${sz}px ${CANVAS_FONTS.brand}`
+    ctx.font = `400 ${sz}px ${CANVAS_FONTS.logo}`
     const words = text.split(' ')
     const out: string[] = []
     let line = ''
@@ -103,16 +107,18 @@ function gameTitle(ctx: CanvasRenderingContext2D, text: string, cx: number, top:
   ctx.textAlign = 'center'
   ctx.textBaseline = 'alphabetic'
   ctx.lineJoin = 'round'
-  const lh = size * 1.02
+  const lh = size * 1.08
   lines.forEach((l, i) => {
     const y = top + size * 0.86 + i * lh
-    ctx.lineWidth = size * 0.17
-    ctx.strokeStyle = INK
-    ctx.strokeText(l, cx, y + size * 0.07)
-    ctx.fillStyle = INK
-    ctx.fillText(l, cx, y + size * 0.07)
+    ctx.save()
+    ctx.shadowColor = 'rgba(220, 100, 150, 0.4)'
+    ctx.shadowBlur = 24
+    ctx.shadowOffsetY = 8
+    ctx.lineWidth = size * 0.16
+    ctx.strokeStyle = '#ffffff'
     ctx.strokeText(l, cx, y)
-    ctx.fillStyle = '#ffffff'
+    ctx.restore()
+    ctx.fillStyle = '#ff6f98'
     ctx.fillText(l, cx, y)
   })
   return top + lines.length * lh + size * 0.15
@@ -120,7 +126,7 @@ function gameTitle(ctx: CanvasRenderingContext2D, text: string, cx: number, top:
 
 /** A ribbon banner with notched tails, centred on cx. */
 function ribbon(ctx: CanvasRenderingContext2D, text: string, cx: number, y: number, color: string, h = 84) {
-  ctx.font = `400 ${h * 0.5}px ${CANVAS_FONTS.brand}`
+  ctx.font = `700 ${h * 0.46}px ${CANVAS_FONTS.game}`
   const tw = ctx.measureText(text).width
   const bw = tw + h * 1.1
   const x = cx - bw / 2
@@ -136,53 +142,27 @@ function ribbon(ctx: CanvasRenderingContext2D, text: string, cx: number, y: numb
     ctx.closePath()
     ctx.fillStyle = color
     ctx.fill()
-    ctx.fillStyle = 'rgba(0,0,0,0.18)'
+    ctx.fillStyle = 'rgba(140, 60, 90, 0.12)'
     ctx.fill()
-    ctx.lineWidth = 5
-    ctx.strokeStyle = INK
+    ctx.lineWidth = 3
+    ctx.strokeStyle = 'rgba(140, 60, 90, 0.35)'
     ctx.lineJoin = 'round'
     ctx.stroke()
   }
   tail(-1)
   tail(1)
-  panel(ctx, x, y, bw, h, { r: 16, fill: color, drop: 8, lw: 5 })
+  panel(ctx, x, y, bw, h, { r: 16, fill: color, lw: 3, edge: 'rgba(140, 60, 90, 0.35)' })
   ctx.fillStyle = 'rgba(255,255,255,0.35)'
   rr(ctx, x + 12, y + 8, bw - 24, h * 0.22, 999)
   ctx.fill()
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
   ctx.lineJoin = 'round'
-  ctx.lineWidth = h * 0.12
-  ctx.strokeStyle = INK
-  ctx.strokeText(text, cx, y + h * 0.54)
+  ctx.fillStyle = 'rgba(140, 60, 90, 0.35)'
+  ctx.fillText(text, cx, y + h * 0.54 + 2)
   ctx.fillStyle = '#ffffff'
   ctx.fillText(text, cx, y + h * 0.54)
   return y + h + 8
-}
-
-function star(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
-  ctx.save()
-  ctx.translate(x, y)
-  ctx.beginPath()
-  for (let i = 0; i < 10; i++) {
-    const a = -Math.PI / 2 + (i * Math.PI) / 5
-    const rad = i % 2 ? r * 0.48 : r
-    ctx.lineTo(Math.cos(a) * rad, Math.sin(a) * rad)
-  }
-  ctx.closePath()
-  ctx.fillStyle = '#ffd34d'
-  ctx.fill()
-  ctx.lineWidth = 5
-  ctx.lineJoin = 'round'
-  ctx.strokeStyle = INK
-  ctx.stroke()
-  ctx.restore()
-}
-
-function stars(ctx: CanvasRenderingContext2D, cx: number, y: number) {
-  star(ctx, cx - 92, y + 10, 38)
-  star(ctx, cx, y, 50)
-  star(ctx, cx + 92, y + 10, 38)
 }
 
 async function sticker(ctx: CanvasRenderingContext2D, id: string, x: number, y: number, size: number, rot = 0) {
@@ -201,7 +181,7 @@ function pill(ctx: CanvasRenderingContext2D, text: string, cx: number, y: number
   ctx.font = `700 ${size}px ${CANVAS_FONTS.game}`
   const w = ctx.measureText(text).width + size * 1.6
   const h = size * 1.9
-  panel(ctx, cx - w / 2, y, w, h, { r: h / 2, fill, drop: 6, lw: 4.5 })
+  panel(ctx, cx - w / 2, y, w, h, { r: h / 2, fill, lw: 2.5 })
   ctx.fillStyle = INK
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
@@ -217,7 +197,7 @@ async function polaroid(ctx: CanvasRenderingContext2D, src: string, cx: number, 
   ctx.save()
   ctx.translate(cx, top + fh / 2)
   ctx.rotate(tilt)
-  panel(ctx, -fw / 2, -fh / 2, fw, fh, { r: 22, fill: '#fffdf8', drop: 14, lw: 6 })
+  panel(ctx, -fw / 2, -fh / 2, fw, fh, { r: 22, fill: '#ffffff', lw: 3 })
   const s = Math.max(side / img.width, side / img.height)
   const sw = side / s
   const sh = side / s
@@ -227,8 +207,8 @@ async function polaroid(ctx: CanvasRenderingContext2D, src: string, cx: number, 
   ctx.drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, -side / 2, -fh / 2 + pad, side, side)
   ctx.restore()
   rr(ctx, -side / 2, -fh / 2 + pad, side, side, 14)
-  ctx.lineWidth = 4
-  ctx.strokeStyle = INK
+  ctx.lineWidth = 2
+  ctx.strokeStyle = EDGE
   ctx.stroke()
   ctx.fillStyle = INK
   ctx.textAlign = 'center'
@@ -266,7 +246,7 @@ export async function senderPoster(opts: { design: CakeDesign; shot: string; lin
   await fontsReady()
   const { design, shot, link } = opts
   const { cv, ctx } = sky()
-  let y = ribbon(ctx, 'operation: secret cake', W / 2, 70, '#c8a6ff', 78)
+  let y = ribbon(ctx, 'operation: secret cake', W / 2, 70, '#c9b3ff', 74)
   y = gameTitle(ctx, design.pack.title || 'a secret cake', W / 2, y + 22, W - 140, 140)
   if (design.pack.to) pill(ctx, `for ${design.pack.to} ♥`, W / 2, y, { fill: '#ffe08a', size: 34 })
 
@@ -276,14 +256,14 @@ export async function senderPoster(opts: { design: CakeDesign; shot: string; lin
   await sticker(ctx, 'cupcake', 140, 1330, 150, 8)
 
   // bottom: how to open it + the QR
-  panel(ctx, 70, 1500, 520, 300, { fill: '#ffd3e2', r: 30 })
+  panel(ctx, 70, 1500, 520, 300, { fill: '#ffe6ee', r: 30, edge: '#f6c1d2' })
   ctx.fillStyle = INK
   ctx.textAlign = 'left'
   ctx.textBaseline = 'alphabetic'
-  ctx.font = `400 56px ${CANVAS_FONTS.brand}`
-  ctx.fillText('light it.', 112, 1590)
-  ctx.fillText('burn it.', 112, 1660)
-  ctx.fillText('read it ♥', 112, 1730)
+  ctx.font = `600 54px ${CANVAS_FONTS.hand}`
+  ctx.fillText('strike a match,', 112, 1590)
+  ctx.fillText('burn it open,', 112, 1660)
+  ctx.fillText('find me inside ♡', 112, 1730)
 
   const qr = await qrDataUrl(link, 300)
   panel(ctx, 640, 1440, 370, 400, { r: 30 })
@@ -296,10 +276,10 @@ export async function senderPoster(opts: { design: CakeDesign; shot: string; lin
   } else {
     ctx.fillStyle = INK
     ctx.textAlign = 'center'
-    ctx.font = `400 44px ${CANVAS_FONTS.brand}`
-    ;['the link is', 'in your', 'messages ♥'].forEach((l, i) => ctx.fillText(l, 825, 1580 + i * 64))
+    ctx.font = `600 44px ${CANVAS_FONTS.hand}`
+    ;['the link is', 'in your', 'messages ♡'].forEach((l, i) => ctx.fillText(l, 825, 1580 + i * 64))
   }
-  ribbon(ctx, 'scan me', 825, 1392, '#9fe3cf', 62)
+  ribbon(ctx, 'scan me', 825, 1392, '#8fdcc0', 58)
   ctx.textAlign = 'left'
   ctx.fillStyle = INK
   ctx.font = `600 24px ${CANVAS_FONTS.game}`
@@ -312,9 +292,8 @@ export async function revealPoster(opts: { design: CakeDesign; shot: string }): 
   await fontsReady()
   const { design, shot } = opts
   const { cv, ctx } = sky()
-  let y = ribbon(ctx, 'cake opened!', W / 2, 64, '#ffb35a', 84)
-  stars(ctx, W / 2, y + 44)
-  y = gameTitle(ctx, design.pack.title || 'a secret cake', W / 2, y + 96, W - 140, 132)
+  let y = ribbon(ctx, 'you opened it!', W / 2, 64, '#ffb3c9', 80)
+  y = gameTitle(ctx, design.pack.title || 'a secret cake', W / 2, y + 30, W - 140, 132)
   if (design.pack.to) pill(ctx, `for ${design.pack.to} ♥`, W / 2, y + 8, { fill: '#ffe08a', size: 32 })
 
   await polaroid(ctx, shot, W / 2, 640, 680, `from ${design.pack.from || 'someone'} · ${today()}`, 0.025)
@@ -332,15 +311,15 @@ export async function photoStrip(opts: { design: CakeDesign; frames: string[] })
   await fontsReady()
   const { design, frames } = opts
   const { cv, ctx } = sky()
-  const labels = ['unboxed', 'lit', 'burning', 'opened!']
-  const tones = ['#ffd3e2', '#ffe08a', '#ffb35a', '#9fe3cf']
-  ribbon(ctx, 'photo booth', W / 2, 54, '#f2577f', 80)
+  const labels = ['unboxed', 'lit', 'burning', 'opened']
+  const tones = ['#ffe0ea', '#fff0b8', '#ffd9c2', '#d4f2e5']
+  ribbon(ctx, 'photo booth', W / 2, 54, '#ffb3c9', 78)
   const fw = 780
   const fh = 340
   const x = (W - fw) / 2
   let y = 190
   for (let i = 0; i < 4; i++) {
-    panel(ctx, x, y, fw, fh, { r: 26, fill: '#fffdf8', drop: 10, lw: 6 })
+    panel(ctx, x, y, fw, fh, { r: 26, fill: '#ffffff', lw: 3 })
     if (frames[i]) {
       const img = await loadImage(frames[i])
       const iw = fw - 36
@@ -354,26 +333,22 @@ export async function photoStrip(opts: { design: CakeDesign; frames: string[] })
       ctx.drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, x + 18, y + 18, iw, ih)
       ctx.restore()
       rr(ctx, x + 18, y + 18, iw, ih, 16)
-      ctx.lineWidth = 4
-      ctx.strokeStyle = INK
+      ctx.lineWidth = 2
+      ctx.strokeStyle = EDGE
       ctx.stroke()
     }
     // level badge + label
-    ctx.fillStyle = INK
-    ctx.beginPath()
-    ctx.arc(x + 4, y + 6 + 4, 40, 0, Math.PI * 2)
-    ctx.fill()
     ctx.fillStyle = tones[i]
     ctx.beginPath()
-    ctx.arc(x + 4, y + 6, 40, 0, Math.PI * 2)
+    ctx.arc(x + 4, y + 6, 38, 0, Math.PI * 2)
     ctx.fill()
-    ctx.lineWidth = 5
-    ctx.strokeStyle = INK
+    ctx.lineWidth = 3
+    ctx.strokeStyle = 'rgba(140, 60, 90, 0.3)'
     ctx.stroke()
     ctx.fillStyle = INK
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.font = `400 40px ${CANVAS_FONTS.brand}`
+    ctx.font = `700 38px ${CANVAS_FONTS.game}`
     ctx.fillText(String(i + 1), x + 4, y + 8)
     pill(ctx, labels[i], x + fw - 110, y + fh - 50, { fill: tones[i], size: 26 })
     y += fh + 34
@@ -397,7 +372,7 @@ export async function combo(opts: { strip: HTMLCanvasElement; poster: HTMLCanvas
     ctx.save()
     ctx.translate(x + w / 2, y + h / 2)
     ctx.rotate(rot)
-    panel(ctx, -w / 2 - 8, -h / 2 - 8, w + 16, h + 16, { r: 26, fill: '#ffffff', drop: 12, lw: 6 })
+    panel(ctx, -w / 2 - 8, -h / 2 - 8, w + 16, h + 16, { r: 26, fill: '#ffffff', lw: 3 })
     ctx.save()
     rr(ctx, -w / 2, -h / 2, w, h, 20)
     ctx.clip()
