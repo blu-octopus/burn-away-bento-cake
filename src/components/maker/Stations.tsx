@@ -18,6 +18,7 @@ import { FONT_LABELS } from '@/lib/fonts'
 import { haptic, sfx } from '@/lib/feel'
 import { readPhoto } from '@/lib/photo'
 import { NumberPad } from '@/components/ui/NumberPad'
+import { Toggle } from '@/capy'
 import type { Draft, StepId } from './Maker'
 import styles from './Maker.module.css'
 
@@ -67,7 +68,7 @@ export function BakeStation({ design, setDesign }: { design: CakeDesign; setDesi
       <Label>shape</Label>
       <div className={styles.bigChoices}>
         {shapes.map(([v, l, icon]) => (
-          <button key={v} className={styles.bigChoice} aria-pressed={design.shape === v} onClick={() => setDesign((d) => void (d.shape = v))}>
+          <button key={v} className={`sketch ${styles.bigChoice}`} aria-pressed={design.shape === v} onClick={() => setDesign((d) => void (d.shape = v))}>
             <span style={{ fontSize: 34, color: design.frosting === '#ffffff' ? 'var(--blush)' : design.frosting, WebkitTextStroke: '1.5px var(--ink)' }}>{icon}</span>
             <span className="mono">{l}</span>
           </button>
@@ -98,9 +99,22 @@ export function BakeStation({ design, setDesign }: { design: CakeDesign; setDesi
 
 // ---------------------------------------------------------------------------
 
-export function TopStation({ design, setDesign, preview }: { design: CakeDesign; setDesign: SetDesign; preview: string }) {
+export function TopStation({
+  design,
+  setDesign,
+  ink,
+  setInk,
+  sel,
+  setSel,
+}: {
+  design: CakeDesign
+  setDesign: SetDesign
+  ink: string | null
+  setInk: (id: string | null) => void
+  sel: number | null
+  setSel: (n: number | null) => void
+}) {
   const t = design.top
-  const [sel, setSel] = useState<number | null>(null)
   const file = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(false)
 
@@ -147,15 +161,13 @@ export function TopStation({ design, setDesign, preview }: { design: CakeDesign;
         }}
       />
 
-      <TopEditor design={design} setDesign={setDesign} preview={preview} sel={sel} setSel={setSel} />
-
       {t.mode === 'art' && (
         <>
           <Label>art</Label>
           <div className="scroll-x">
             {ART.map((a) => (
               <button key={a.id} className={styles.artChip} aria-pressed={t.art === a.id} onClick={() => setDesign((d) => void (d.top.art = a.id))}>
-                <span className={styles.artDot} style={{ background: a.ground === 'frosting' ? design.frosting : a.ground, borderColor: a.patternColor || 'var(--ink)' }}>
+                <span className={`sketch ${styles.artDot}`} style={{ background: a.ground === 'frosting' ? design.frosting : a.ground, borderColor: a.patternColor || 'var(--ink)' }}>
                   {a.stickers[0] && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={stickerUrl(a.stickers[0].id)} alt="" />
@@ -183,7 +195,7 @@ export function TopStation({ design, setDesign, preview }: { design: CakeDesign;
               <input type="range" min={1} max={3} step={0.01} value={t.zoom} onChange={(e) => setDesign((d) => void (d.top.zoom = +e.target.value), true)} className={styles.range} />
               <Label>rotate</Label>
               <input type="range" min={-180} max={180} step={1} value={t.rot} onChange={(e) => setDesign((d) => void (d.top.rot = +e.target.value), true)} className={styles.range} />
-              <p className={styles.note}>drag the photo to move it</p>
+              <p className={styles.note}>drag on the cake to move the photo</p>
             </>
           )}
         </>
@@ -198,29 +210,32 @@ export function TopStation({ design, setDesign, preview }: { design: CakeDesign;
         </>
       )}
 
-      <Label>stickers · tap to add</Label>
-      <div className="scroll-x">
-        {STICKERS.map((s) => (
+      <Label>stamps · pick one, then tap the cake</Label>
+      <div className="scroll-x" role="radiogroup" aria-label="stamp ink">
+        {STICKERS.map((st) => (
           <button
-            key={s.id}
-            className={styles.stickerBtn}
-            aria-label={`add ${s.label}`}
+            key={st.id}
+            role="radio"
+            className={`sketch ${styles.stickerBtn}`}
+            aria-checked={ink === st.id}
+            aria-pressed={ink === st.id}
+            aria-label={`stamp ${st.label}`}
             onClick={() => {
-              setDesign((d) => {
-                d.top.stickers.push({ id: s.id, x: 0.3 + Math.random() * 0.4, y: 0.3 + Math.random() * 0.4, s: 0.8, r: Math.round(Math.random() * 30 - 15) })
-              })
-              setSel(t.stickers.length)
+              setInk(ink === st.id ? null : st.id)
+              setSel(null)
+              sfx.soft()
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={stickerUrl(s.id)} alt="" />
+            <img src={stickerUrl(st.id)} alt="" />
           </button>
         ))}
       </div>
+      {ink && <p className={styles.note}>tap anywhere on the cake to stamp · tap a stamp to pick it up and drag it</p>}
 
       {sel !== null && t.stickers[sel] && (
         <div className={styles.selBar}>
-          <span className="mono">sticker</span>
+          <span className="mono">stamp</span>
           <label>
             size
             <input type="range" min={0.3} max={3} step={0.01} value={t.stickers[sel].s} onChange={(e) => setDesign((d) => void (d.top.stickers[sel].s = +e.target.value), true)} />
@@ -241,83 +256,6 @@ export function TopStation({ design, setDesign, preview }: { design: CakeDesign;
         </div>
       )}
     </>
-  )
-}
-
-/** The flat top sheet with draggable stickers (and a draggable photo). */
-function TopEditor({
-  design,
-  setDesign,
-  preview,
-  sel,
-  setSel,
-}: {
-  design: CakeDesign
-  setDesign: SetDesign
-  preview: string
-  sel: number | null
-  setSel: (n: number | null) => void
-}) {
-  const box = useRef<HTMLDivElement>(null)
-  const drag = useRef<{ kind: 'sticker' | 'photo'; i: number; sx: number; sy: number; ox: number; oy: number } | null>(null)
-  const t = design.top
-
-  const down = (e: React.PointerEvent, kind: 'sticker' | 'photo', i = -1) => {
-    e.stopPropagation()
-    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
-    const ox = kind === 'sticker' ? t.stickers[i].x : t.ox
-    const oy = kind === 'sticker' ? t.stickers[i].y : t.oy
-    drag.current = { kind, i, sx: e.clientX, sy: e.clientY, ox, oy }
-    if (kind === 'sticker') {
-      setSel(i)
-      haptic.tap()
-    } else setSel(null)
-  }
-  const move = (e: React.PointerEvent) => {
-    const d = drag.current
-    const el = box.current
-    if (!d || !el) return
-    const w = el.clientWidth
-    const dx = (e.clientX - d.sx) / w
-    const dy = (e.clientY - d.sy) / w
-    setDesign((des) => {
-      if (d.kind === 'sticker') {
-        des.top.stickers[d.i].x = Math.max(0, Math.min(1, d.ox + dx))
-        des.top.stickers[d.i].y = Math.max(0, Math.min(1, d.oy + dy))
-      } else {
-        des.top.ox = d.ox + dx
-        des.top.oy = d.oy + dy
-      }
-    }, true)
-  }
-  const up = () => {
-    if (drag.current) sfx.soft()
-    drag.current = null
-  }
-
-  return (
-    <div
-      ref={box}
-      className={styles.topEditor}
-      data-shape={design.shape}
-      onPointerDown={(e) => (t.mode === 'photo' && t.photo ? down(e, 'photo') : setSel(null))}
-      onPointerMove={move}
-      onPointerUp={up}
-      onPointerCancel={up}
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      {preview && <img src={preview} alt="top layer preview" className={styles.topImg} draggable={false} />}
-      {t.stickers.map((s, i) => (
-        <button
-          key={i}
-          className={styles.stickerHandle}
-          data-sel={sel === i || undefined}
-          style={{ left: `${s.x * 100}%`, top: `${s.y * 100}%`, width: `${s.s * 20}%`, height: `${s.s * 20}%`, transform: `translate(-50%,-50%) rotate(${s.r}deg)` }}
-          onPointerDown={(e) => down(e, 'sticker', i)}
-          aria-label={`sticker ${s.id}, drag to move`}
-        />
-      ))}
-    </div>
   )
 }
 
@@ -342,7 +280,7 @@ export function DecorateStation({ design, setDesign }: { design: CakeDesign; set
       <Label>rim spots · tap to cycle</Label>
       <div className={styles.spots}>
         {design.decor.map((k, i) => (
-          <button key={i} className={styles.spot} onClick={() => cycle(i)} aria-label={`${spots[i]}: ${k}`}>
+          <button key={i} className={`sketch ${styles.spot}`} onClick={() => cycle(i)} aria-label={`${spots[i]}: ${k}`}>
             <span style={{ fontSize: 28 }}>{kinds.find(([v]) => v === k)?.[1]}</span>
             <span className="mono" style={{ fontSize: 9 }}>
               {spots[i]}
@@ -361,7 +299,7 @@ export function DecorateStation({ design, setDesign }: { design: CakeDesign; set
       <Swatches colors={['#d9364a', '#e86a92', '#f4c2c9', '#ffffff', '#6b5ca5', '#3d6b8a', '#2f2a2a']} value={design.decorColor} onPick={(c) => setDesign((d) => void (d.decorColor = c))} />
       <label className="toggle">
         <span>sprinkles ✨</span>
-        <input type="checkbox" checked={design.sprinkles} onChange={(e) => setDesign((d) => void (d.sprinkles = e.target.checked))} />
+        <Toggle checked={design.sprinkles} onCheckedChange={(checked) => setDesign((d) => void (d.sprinkles = checked))} />
       </label>
       <Label>candle</Label>
       <Chips<CandleKind>
@@ -425,7 +363,7 @@ export function SecretStation({ secret, setSecret }: { secret: Secret; setSecret
           none
         </button>
         {STICKERS.map((s) => (
-          <button key={s.id} className={styles.stickerBtn} aria-pressed={secret.sticker === s.id} onClick={() => setSecret((x) => void (x.sticker = s.id))}>
+          <button key={s.id} className={`sketch ${styles.stickerBtn}`} aria-pressed={secret.sticker === s.id} onClick={() => setSecret((x) => void (x.sticker = s.id))}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={stickerUrl(s.id)} alt={s.label} />
           </button>
@@ -484,12 +422,9 @@ export function PackageStation({
           <br />
           <small className={styles.small}>the box stays shut until then</small>
         </span>
-        <input
-          type="checkbox"
-          checked={draft.useUnlock}
-          onChange={(e) => {
-            patch({ useUnlock: e.target.checked })
-            if (e.target.checked && !design.pack.unlockAt) setDesign((d) => void (d.pack.unlockAt = new Date(localInput()).toISOString()), true)
+        <Toggle checked={draft.useUnlock} onCheckedChange={(checked) => {
+            patch({ useUnlock: checked })
+            if (checked && !design.pack.unlockAt) setDesign((d) => void (d.pack.unlockAt = new Date(localInput()).toISOString()), true)
           }}
         />
       </label>
@@ -508,12 +443,9 @@ export function PackageStation({
           <br />
           <small className={styles.small}>numbers only · you ask the question</small>
         </span>
-        <input
-          type="checkbox"
-          checked={draft.usePasscode}
-          onChange={(e) => {
-            patch({ usePasscode: e.target.checked })
-            if (e.target.checked && !draft.passcode) setSettingCode(true)
+        <Toggle checked={draft.usePasscode} onCheckedChange={(checked) => {
+            patch({ usePasscode: checked })
+            if (checked && !draft.passcode) setSettingCode(true)
           }}
         />
       </label>
@@ -548,7 +480,7 @@ export function PackageStation({
       )}
       <label className="toggle">
         <span>🔊 sound on when they open it</span>
-        <input type="checkbox" checked={design.pack.sound} onChange={(e) => setDesign((d) => void (d.pack.sound = e.target.checked))} />
+        <Toggle checked={design.pack.sound} onCheckedChange={(checked) => setDesign((d) => void (d.pack.sound = checked))} />
       </label>
       <button className="btn soft" style={{ width: '100%', marginTop: 16 }} onClick={onPreview}>
         ▶️ preview as them (test-burn it!)

@@ -12,6 +12,8 @@ import { haptic, primeAudio, sfx } from '@/lib/feel'
 import { GALLERY_BY_ID } from '@/lib/gallery'
 import { BakeStation, DecorateStation, PackageStation, SecretStation, TopStation, surprise } from './Stations'
 import { SendStation } from './SendStation'
+import { StampLayer } from './StampLayer'
+import { CapyHint } from '@/components/ui/CapyHint'
 import styles from './Maker.module.css'
 
 export const STEPS = [
@@ -84,6 +86,9 @@ export default function Maker() {
   const [lidClosed, setLidClosed] = useState(true)
   const [preview, setPreview] = useState(false)
   const [shotOverride, setShotOverride] = useState<CameraShot | null>(null)
+  /** the sticker "ink" picked for stamping, and the stamp currently picked up */
+  const [ink, setInk] = useState<string | null>(null)
+  const [sel, setSel] = useState<number | null>(null)
   const gl = useRef<THREE.WebGLRenderer | null>(null)
 
   const { design, secret } = draft
@@ -128,10 +133,12 @@ export default function Maker() {
     primeAudio()
     sfx.soft()
     setPeek(false)
+    setInk(null)
+    setSel(null)
     setStep(STEPS[Math.max(0, Math.min(STEPS.length - 1, i))].id)
   }
 
-  const shot: CameraShot = shotOverride ?? (step === 'secret' || (step === 'top' && !peek) ? 'top' : step === 'package' ? 'box' : 'hero')
+  const shot: CameraShot = shotOverride ?? (step === 'secret' || step === 'top' ? 'top' : step === 'package' ? 'box' : 'hero')
   const showTop = step === 'secret' ? peek : true
   const showBox = step === 'package'
 
@@ -169,20 +176,21 @@ export default function Maker() {
       </header>
 
       <section className={styles.stage}>
-        <Stage orbit capture onCreated={(r) => (gl.current = r)} className={styles.canvas}>
+        <Stage orbit orbitLocked={step === 'top'} capture onCreated={(r) => (gl.current = r)} className={styles.canvas}>
           <OrbitShot shot={shot} />
           <Bounce trigger={bounceKey}>
             <CakeModel design={design} topTexture={top.tex} secretTexture={secretTex.tex} showTop={showTop} candleLit={step === 'package' || step === 'send'} />
+            {step === 'top' && <StampLayer design={design} setDesign={setDesign} ink={ink} sel={sel} setSel={setSel} />}
             {showBox && <BentoBox color={design.pack.box} ribbon={design.pack.ribbon} open={lidClosed ? 0 : 1} tag={tag} />}
           </Bounce>
         </Stage>
         <div className={styles.stageTag}>
-          <span className="hand">{stepInfo.hint}</span>
+          <CapyHint text={step === 'top' && ink ? 'tap the cake to stamp ♡' : stepInfo.hint} size={52} />
         </div>
         <div className={styles.stageTools}>
-          {(step === 'secret' || step === 'top') && (
+          {step === 'secret' && (
             <button className="chip" aria-pressed={peek} onClick={() => setPeek((p) => !p)}>
-              {step === 'secret' ? (peek ? '👀 top layer on' : '👀 peek top') : peek ? 'top-down' : '3d view'}
+              {peek ? '👀 top layer on' : '👀 peek top'}
             </button>
           )}
           {step === 'package' && (
@@ -214,7 +222,7 @@ export default function Maker() {
             <span className="display">{stepInfo.label}</span>
           </h2>
           {step === 'bake' && <BakeStation design={design} setDesign={setDesign} />}
-          {step === 'top' && <TopStation design={design} setDesign={setDesign} preview={top.url} />}
+          {step === 'top' && <TopStation design={design} setDesign={setDesign} ink={ink} setInk={setInk} sel={sel} setSel={setSel} />}
           {step === 'decorate' && <DecorateStation design={design} setDesign={setDesign} />}
           {step === 'secret' && <SecretStation secret={secret} setSecret={setSecret} />}
           {step === 'package' && <PackageStation draft={draft} setDesign={setDesign} patch={patch} onPreview={() => setPreview(true)} />}
