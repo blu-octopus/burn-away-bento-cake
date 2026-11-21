@@ -1,0 +1,9 @@
+operation: secret cake
+Copyright (c) 2026 blu-octopus
+
+This product depends on Paperlab (https://github.com/NourMtir0722/Paperlab),
+Copyright (c) Nour Mtir, licensed under the Apache License, Version 2.0.
+Paperlab is used unmodified as an npm dependency (`paperlab`, `paperlab/fx`)
+for the paper burn: the damage simulation, flames, particles and fire sound.
+A copy of the Apache License 2.0 is available at
+http://www.apache.org/licenses/LICENSE-2.0
