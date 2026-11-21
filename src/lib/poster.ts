@@ -187,7 +187,7 @@ export async function senderPoster(opts: { design: CakeDesign; shot: string; lin
     ctx.font = `500 24px ${CANVAS_FONTS.mono}`
     ctx.fillText('SCAN TO OPEN', 165, 345)
   } else {
-    ctx.font = `700 46px ${CANVAS_FONTS.hand}`
+    ctx.font = `600 46px ${CANVAS_FONTS.hand}`
     ;['the link is', 'in your', 'messages ♡'].forEach((l, i) => ctx.fillText(l, 165, 120 + i * 62))
   }
   ctx.restore()
@@ -195,7 +195,7 @@ export async function senderPoster(opts: { design: CakeDesign; shot: string; lin
 
   ctx.textAlign = 'left'
   ctx.fillStyle = INK
-  ctx.font = `700 64px ${CANVAS_FONTS.hand}`
+  ctx.font = `600 64px ${CANVAS_FONTS.hand}`
   ctx.fillText('light it. burn it.', 84, HGT - 270)
   ctx.fillText('read the secret ♡', 84, HGT - 200)
   ctx.font = `500 24px ${CANVAS_FONTS.mono}`
@@ -248,7 +248,7 @@ export async function photoStrip(opts: { design: CakeDesign; frames: string[] })
   }
   ctx.fillStyle = INK
   ctx.textAlign = 'center'
-  ctx.font = `700 60px ${CANVAS_FONTS.hand}`
+  ctx.font = `600 60px ${CANVAS_FONTS.hand}`
   ctx.fillText(`${design.pack.title || 'secret cake'} ♡`, W / 2, HGT - 92)
   ctx.font = `500 22px ${CANVAS_FONTS.mono}`
   ctx.fillText(`OPERATION: SECRET CAKE · ${today()}`, W / 2, HGT - 44)

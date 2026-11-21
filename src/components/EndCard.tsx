@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import type { CakeDesign } from '@/lib/design'
 import { haptic, sfx } from '@/lib/feel'
 import { canvasBlob, combo, downloadBlob, photoStrip, revealPoster, shareImage } from '@/lib/poster'
+import { RECEIVER } from '@/content/copy'
 import { BackIcon, CakeIcon, DownloadIcon, GiftIcon, InstagramIcon, SnapchatIcon, TiktokIcon } from './ui/Icons'
 import styles from './Unboxing.module.css'
 
@@ -81,7 +82,7 @@ export function EndCard({
         <button className={styles.endX} onClick={() => setOpen(false)} aria-label="hide">
           ⌄
         </button>
-        <span className="mono">{mode === 'preview' ? 'preview · this is what they’ll get' : 'keep the moment'}</span>
+        <span className="mono">{mode === 'preview' ? 'preview' : RECEIVER.keepTitle}</span>
         <div className="row" style={{ justifyContent: 'center', margin: '10px 0' }}>
           {(['both', 'strip', 'poster'] as Kind[]).map((k) => (
             <button
@@ -129,12 +130,12 @@ export function EndCard({
         <div className="row" style={{ justifyContent: 'center', marginTop: 10 }}>
           {mode === 'real' && (
             <a className="btn primary" href={replyHref}>
-              <GiftIcon className="ico" aria-hidden /> bake one back
+              <GiftIcon className="ico" aria-hidden /> {RECEIVER.bakeBack}
             </a>
           )}
           {mode === 'demo' && (
             <a className="btn primary" href="/bake">
-              <CakeIcon className="ico" aria-hidden /> bake your own
+              <CakeIcon className="ico" aria-hidden /> {RECEIVER.bakeYourOwn}
             </a>
           )}
           {mode !== 'real' && onClose && (

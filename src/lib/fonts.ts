@@ -1,7 +1,10 @@
-import { Bricolage_Grotesque, Caveat, DM_Mono, Fraunces, Inter, M_PLUS_Rounded_1c, Noto_Sans_Oriya, Noto_Sans_Symbols_2 } from 'next/font/google'
+import { Bricolage_Grotesque, Cherry_Bomb_One, DM_Mono, Klee_One, Fraunces, Inter, M_PLUS_Rounded_1c, Noto_Sans_Oriya, Noto_Sans_Symbols_2 } from 'next/font/google'
 import type { FontKey } from './design'
 
-export const caveat = Caveat({ subsets: ['latin'], weight: ['500', '700'], variable: '--font-hand' })
+// handwriting voice: Klee One — a neat, pencil-drawn hand (less "comic" than Caveat)
+export const klee = Klee_One({ subsets: ['latin'], weight: ['400', '600'], variable: '--font-hand' })
+// the wordmark: Cherry Bomb One — bubbly, candy-shop cute
+export const cherryBomb = Cherry_Bomb_One({ subsets: ['latin'], weight: '400', variable: '--font-brand' })
 export const fraunces = Fraunces({ subsets: ['latin'], weight: ['400', '600', '800'], style: ['normal', 'italic'], variable: '--font-serif' })
 export const dmMono = DM_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-mono' })
 export const bricolage = Bricolage_Grotesque({ subsets: ['latin'], weight: ['700', '800'], variable: '--font-poster' })
@@ -13,13 +16,13 @@ export const symbols = Noto_Sans_Symbols_2({ subsets: ['symbols'], weight: '400'
 export const capyDisplay = M_PLUS_Rounded_1c({ subsets: ['latin'], weight: ['400', '700', '800'], variable: '--font-capy-display' })
 export const capyBody = Inter({ subsets: ['latin'], variable: '--font-capy-body' })
 
-export const fontVariables = [caveat, fraunces, dmMono, bricolage, oriya, symbols, capyDisplay, capyBody].map((f) => f.variable).join(' ')
+export const fontVariables = [klee, cherryBomb, fraunces, dmMono, bricolage, oriya, symbols, capyDisplay, capyBody].map((f) => f.variable).join(' ')
 
 const fallback = `${oriya.style.fontFamily}, ${symbols.style.fontFamily}, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`
 
 /** Font stacks for canvas drawing (canvas needs the real hashed family names). */
 export const CANVAS_FONTS: Record<FontKey | 'display', string> = {
-  hand: `${caveat.style.fontFamily}, ${fallback}`,
+  hand: `${klee.style.fontFamily}, ${fallback}`,
   serif: `${fraunces.style.fontFamily}, ${fallback}`,
   mono: `${dmMono.style.fontFamily}, ${fallback}`,
   display: `${bricolage.style.fontFamily}, ${fallback}`,

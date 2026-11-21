@@ -20,6 +20,7 @@ import { haptic, sfx } from '@/lib/feel'
 import { readPhoto } from '@/lib/photo'
 import { NumberPad } from '@/components/ui/NumberPad'
 import { Toggle } from '@/capy'
+import { MAKER } from '@/content/copy'
 import type { Draft, StepId } from './Maker'
 import styles from './Maker.module.css'
 
@@ -121,9 +122,7 @@ export function TopStation({
 
   return (
     <>
-      <p className={styles.note}>
-        this is the printed layer on top — <b>it burns away</b> to show your secret.
-      </p>
+      <p className={styles.note}>{MAKER.topNote}</p>
       <Chips
         options={[
           ['art', '🎨 art'],
@@ -196,7 +195,7 @@ export function TopStation({
               <input type="range" min={1} max={3} step={0.01} value={t.zoom} onChange={(e) => setDesign((d) => void (d.top.zoom = +e.target.value), true)} className={styles.range} />
               <Label>rotate</Label>
               <input type="range" min={-180} max={180} step={1} value={t.rot} onChange={(e) => setDesign((d) => void (d.top.rot = +e.target.value), true)} className={styles.range} />
-              <p className={styles.note}>drag on the cake to move the photo</p>
+              <p className={styles.note}>{MAKER.photoDragNote}</p>
             </>
           )}
         </>
@@ -232,7 +231,7 @@ export function TopStation({
           </button>
         ))}
       </div>
-      {ink && <p className={styles.note}>tap anywhere on the cake to stamp · tap a stamp to pick it up and drag it</p>}
+      {ink && <p className={styles.note}>{MAKER.stampNote}</p>}
       {t.stickers.length > 0 && (
         <div className="row" style={{ marginTop: 6 }}>
           <span className={styles.small}>
@@ -387,10 +386,10 @@ export function SecretStation({ secret, setSecret, frosting }: { secret: Secret;
   }
   return (
     <>
-      <p className={styles.note}>only they see this — after they burn the top ♡</p>
+      <p className={styles.note}>{MAKER.secretNote}</p>
       <Label>your secret message</Label>
       <textarea ref={ta} rows={4} maxLength={160} value={secret.text} onChange={(e) => setSecret((s) => void (s.text = e.target.value))} className={styles.secretInput} data-font={secret.font} style={{ color: secret.ink, background: frosting }} />
-      {lowContrast && <p className={styles.warn}>psst: this ink is hard to read on your frosting — try a darker one ♡</p>}
+      {lowContrast && <p className={styles.warn}>{MAKER.lowContrast}</p>}
       <div className={styles.counter}>{secret.text.length}/160</div>
       <div className="scroll-x" style={{ marginTop: 4 }}>
         {BOWS.map((b) => (
@@ -535,7 +534,7 @@ export function PackageStation({
         <Toggle checked={design.pack.sound} onCheckedChange={(checked) => setDesign((d) => void (d.pack.sound = checked))} />
       </label>
       <button className="btn soft" style={{ width: '100%', marginTop: 16 }} onClick={onPreview}>
-        ▶️ preview as them (test-burn it!)
+        {MAKER.previewAsThem}
       </button>
     </>
   )

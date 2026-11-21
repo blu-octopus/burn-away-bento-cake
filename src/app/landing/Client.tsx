@@ -6,6 +6,7 @@ import { BackIcon, FlameIcon, GiftIcon, NextIcon, PencilIcon } from '@/component
 import { GALLERY, type GalleryCake } from '@/lib/gallery'
 import { renderTop } from '@/lib/textures'
 import styles from './landing.module.css'
+import { LANDING } from '@/content/copy'
 
 const HeroScene = dynamic(() => import('./HeroScene'), { ssr: false, loading: () => <div className={styles.heroPlaceholder}>🎂</div> })
 const Unboxing = dynamic(() => import('@/components/Unboxing').then((m) => m.Unboxing), { ssr: false })
@@ -21,7 +22,7 @@ export function GotACake() {
   if (!open)
     return (
       <button className="btn" onClick={() => setOpen(true)}>
-        <GiftIcon className="ico" aria-hidden /> i got a cake
+        <GiftIcon className="ico" aria-hidden /> {LANDING.ctaSecondary}
       </button>
     )
   const go = () => {
@@ -30,18 +31,18 @@ export function GotACake() {
       if (!u.pathname.startsWith('/c') || !u.searchParams.get('d')) throw new Error()
       window.location.href = `/c${u.search}${u.hash}`
     } catch {
-      setErr('that doesn’t look like a cake link 🥲')
+      setErr(LANDING.pasteError)
     }
   }
   return (
     <div className={styles.paste}>
-      <input type="text" placeholder="paste your cake link" value={val} onChange={(e) => (setVal(e.target.value), setErr(''))} onKeyDown={(e) => e.key === 'Enter' && go()} autoFocus />
+      <input type="text" placeholder={LANDING.pastePlaceholder} value={val} onChange={(e) => (setVal(e.target.value), setErr(''))} onKeyDown={(e) => e.key === 'Enter' && go()} autoFocus />
       <button className="btn primary" onClick={go}>
-        open
+        {LANDING.pasteOpen}
       </button>
       {err && <span className="mono">{err}</span>}
       <span className="mono" style={{ fontSize: 10, opacity: 0.7 }}>
-        got a qr code? just scan it with your camera ♡
+        {LANDING.pasteQrNote}
       </span>
     </div>
   )
@@ -111,10 +112,10 @@ export function Gallery() {
               <p className="mono">{g.blurb}</p>
               <div className={styles.cakeBtns}>
                 <button className="btn soft" onClick={() => setTrying(g)}>
-                  <FlameIcon className="ico" aria-hidden /> try it
+                  <FlameIcon className="ico" aria-hidden /> {LANDING.tryIt}
                 </button>
                 <a className="btn" href={`/bake?g=${g.id}`}>
-                  <PencilIcon className="ico" aria-hidden /> use this
+                  <PencilIcon className="ico" aria-hidden /> {LANDING.useThis}
                 </a>
               </div>
             </article>

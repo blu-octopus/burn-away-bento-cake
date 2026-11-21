@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
 import type { Secret } from '@/lib/design'
 import { cakeKey, decodeFragment, decodePublic } from '@/lib/link'
+import { RECEIVER } from '@/content/copy'
 
 const Unboxing = dynamic(() => import('@/components/Unboxing').then((m) => m.Unboxing), {
   ssr: false,
@@ -17,10 +18,9 @@ function Loading() {
         <div className="float" style={{ fontSize: 54 }}>
           🎂
         </div>
-        <p className="hand" style={{ fontSize: 30, margin: 8 }}>
-          someone baked you something ♡
+        <p className="hand" style={{ fontSize: 26, margin: 8 }}>
+          {RECEIVER.loading}
         </p>
-        <span className="mono">warming up the oven…</span>
       </div>
     </div>
   )
@@ -41,12 +41,11 @@ export default function Receiver({ d }: { d: string }) {
     return (
       <div style={{ height: '100dvh', display: 'grid', placeItems: 'center', textAlign: 'center', padding: 16 }}>
         <div className="card" style={{ padding: 24, maxWidth: 360 }}>
-          <p className="hand" style={{ fontSize: 30, margin: '0 0 8px' }}>
-            hmm, this cake got squished in the mail 🥲
+          <p className="hand" style={{ fontSize: 24, margin: '0 0 8px' }}>
+            {RECEIVER.brokenLink}
           </p>
-          <p className="mono">the link looks incomplete — ask them to send it again</p>
           <a className="btn primary" href="/" style={{ marginTop: 14 }}>
-            go to the bakery
+            go to the homepage
           </a>
         </div>
       </div>

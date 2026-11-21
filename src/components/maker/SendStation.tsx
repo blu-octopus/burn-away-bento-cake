@@ -21,6 +21,7 @@ import {
   SnapchatIcon,
   WhatsappIcon,
 } from '@/components/ui/Icons'
+import { SEND } from '@/content/copy'
 import type { Draft } from './Maker'
 import styles from './Maker.module.css'
 
@@ -61,7 +62,7 @@ export function SendStation({
       let stage = 'packing the photo'
       try {
         if (design.top.mode === 'photo' && design.top.photo) {
-          setStatus('uploading your photo…')
+          setStatus(SEND.uploading)
           const hosted = await hostPhoto(design.top.photo)
           design.top.photo = hosted.url
           setInlinePhoto(hosted.inline)
@@ -69,12 +70,12 @@ export function SendStation({
           delete design.top.photo
         }
         stage = 'sealing the secret'
-        setStatus('sealing the secret…')
+        setStatus(SEND.sealing)
         const url = await buildLink(design, draft.secret, draft.usePasscode ? draft.passcode : undefined)
         setLink(url)
         setQrOk(!!(await qrDataUrl(url, 64)))
         stage = 'drawing the poster'
-        setStatus('taking its portrait…')
+        setStatus(SEND.poster)
         const shot = await captureHero()
         setPoster(await senderPoster({ design, shot, link: url }))
         setStatus('')
@@ -83,7 +84,7 @@ export function SendStation({
       } catch (e) {
         console.error(e)
         // the link is the important part — if only the poster failed, it's still sendable
-        setStatus(stage === 'drawing the poster' ? '' : `oops — got stuck ${stage}. tap “try again” ♡`)
+        setStatus(stage === 'drawing the poster' ? '' : SEND.stuck.replace('{stage}', stage))
         if (stage === 'drawing the poster') setPosterError(true)
         else ran.current = false
       }
@@ -93,7 +94,7 @@ export function SendStation({
   if (needsCode)
     return (
       <div className={styles.note}>
-        you turned on a passcode but didn’t set one yet.
+        {SEND.needsCode}
         <div style={{ marginTop: 12 }}>
           <button className="btn" onClick={onEdit}>
             back to packaging
@@ -164,14 +165,14 @@ export function SendStation({
           <span className="hand" style={{ fontSize: 26, textAlign: 'center' }}>
             {status}
           </span>
-          {status.startsWith('oops') && (
+          {status.startsWith(SEND.stuck.split('{stage}')[0]) && (
             <button className="btn soft" onClick={tryAgain}>
               try again
             </button>
           )}
         </div>
       )}
-      {posterError && <p className={styles.small}>the poster didn’t draw this time, but your link is ready to send ♡</p>}
+      {posterError && <p className={styles.small}>{SEND.posterFailed}</p>}
       {poster && (
         <div className={`${styles.posterWrap} pop-in`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -231,11 +232,7 @@ export function SendStation({
             </button>
           </div>
           <input type="text" readOnly value={link} aria-label="your cake link" className={styles.linkBox} onFocus={(e) => e.currentTarget.select()} />
-          {inlinePhoto && (
-            <p className={styles.small}>
-              psst: your photo is tucked inside the link itself, so it’s a long one{qrOk ? '' : ' — too long for a QR code, so share the link instead'}. it still opens fine ♡
-            </p>
-          )}
+          {inlinePhoto && <p className={styles.small}>{qrOk ? SEND.longLink : SEND.longLinkNoQr}</p>}
 
           <div className={styles.receipt}>
             <span className="field-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

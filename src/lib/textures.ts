@@ -141,7 +141,7 @@ export async function renderTop(design: CakeDesign, size = 1024): Promise<HTMLCa
   } else if (t.mode === 'write') {
     ctx.fillStyle = design.frosting
     ctx.fillRect(0, 0, size, size)
-    const { size: fs, lines } = fitText(ctx, t.text || ' ', CANVAS_FONTS.hand, '700', size * 0.62, size * 0.5, 200, 1.05)
+    const { size: fs, lines } = fitText(ctx, t.text || ' ', CANVAS_FONTS.hand, '600', size * 0.62, size * 0.5, 200, 1.05)
     ctx.fillStyle = t.textColor
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
@@ -188,7 +188,7 @@ export async function renderSecret(secret: Secret, design: CakeDesign, size = 10
   const stickerS = secret.sticker ? (design.shape === 'heart' ? 0.6 : 0.8) : 0
   const stickerH = secret.sticker ? (size / 5) * stickerS + size * 0.02 : 0
   const font = CANVAS_FONTS[secret.font]
-  const weight = secret.font === 'hand' ? '700' : secret.font === 'serif' ? '400' : '500'
+  const weight = secret.font === 'hand' ? '600' : secret.font === 'serif' ? '400' : '500'
   const sigReserve = secret.signature ? 0.7 : 0 // in multiples of the message size
   // fit the message in what's left, leaving a line's room for the signature
   const maxFs = secret.font === 'hand' ? 120 : 84
@@ -212,10 +212,10 @@ export async function renderSecret(secret: Secret, design: CakeDesign, size = 10
   if (secret.signature) {
     // centred under the message (a right-aligned one falls off a heart's edge)
     let sf = sigFs
-    ctx.font = `500 ${sf}px ${CANVAS_FONTS.hand}`
+    ctx.font = `600 ${sf}px ${CANVAS_FONTS.hand}`
     while (ctx.measureText(secret.signature).width > boxW && sf > 16) {
       sf -= 2
-      ctx.font = `500 ${sf}px ${CANVAS_FONTS.hand}`
+      ctx.font = `600 ${sf}px ${CANVAS_FONTS.hand}`
     }
     ctx.fillText(secret.signature, size / 2, y + sf * 0.8)
   }

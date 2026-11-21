@@ -10,7 +10,7 @@
 .header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px 6px; }
 .logo { display: flex; flex-direction: column; line-height: 0.9; text-decoration: none; }
 .logo .mono { font-size: 9px; }
-.logo .hand { font-size: 24px; font-weight: 700; color: var(--berry); }
+.logo :global(.brandmark) { font-size: 22px; color: var(--berry); }
 
 .logo { flex: none; }
 .steps::-webkit-scrollbar { display: none; }

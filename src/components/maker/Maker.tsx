@@ -13,6 +13,7 @@ import { GALLERY_BY_ID } from '@/lib/gallery'
 import { BakeStation, DecorateStation, PackageStation, SecretStation, TopStation, surprise } from './Stations'
 import { SendStation } from './SendStation'
 import { StampLayer } from './StampLayer'
+import { MAKER, STEP_COPY } from '@/content/copy'
 import { CapyHint } from '@/components/ui/CapyHint'
 import styles from './Maker.module.css'
 
@@ -22,12 +23,12 @@ import styles from './Maker.module.css'
  * Each step's `chef` line is what the capy baker says while you're on it.
  */
 export const STEPS = [
-  { id: 'bake', n: '1', label: 'bake', chef: 'first things first — pick a shape and a frosting ♡' },
-  { id: 'secret', n: '2', label: 'secret', chef: 'now write the secret on the cake. only they’ll see it ♡' },
-  { id: 'top', n: '3', label: 'cover', chef: 'lay the burn-away cover on top — art, a photo, or words' },
-  { id: 'decorate', n: '4', label: 'decorate', chef: 'ooh, bows and berries time. tap a spot to dress it' },
-  { id: 'package', n: '5', label: 'package', chef: 'box it up! add a passcode or a time if you like' },
-  { id: 'send', n: '6', label: 'send', chef: 'all wrapped. who’s the lucky one?' },
+  { id: 'bake', n: '1', ...STEP_COPY.bake },
+  { id: 'secret', n: '2', ...STEP_COPY.secret },
+  { id: 'top', n: '3', ...STEP_COPY.top },
+  { id: 'decorate', n: '4', ...STEP_COPY.decorate },
+  { id: 'package', n: '5', ...STEP_COPY.package },
+  { id: 'send', n: '6', ...STEP_COPY.send },
 ] as const
 export type StepId = (typeof STEPS)[number]['id']
 
@@ -168,7 +169,7 @@ export default function Maker() {
       <header className={styles.header}>
         <a href="/" className={styles.logo}>
           <span className="mono">operation:</span>
-          <span className="hand">secret cake</span>
+          <span className="brandmark">secret cake</span>
         </a>
 
       </header>
@@ -191,17 +192,17 @@ export default function Maker() {
           </Bounce>
         </Stage>
         <div className={styles.stageTag}>
-          <CapyHint text={step === 'top' && ink ? 'tap anywhere on the cake to stamp it ♡' : step === 'secret' && peek ? 'that’s the cover they’ll burn away' : stepInfo.chef} size={52} />
+          <CapyHint text={step === 'top' && ink ? MAKER.stampHint : step === 'secret' && peek ? MAKER.coverPeekHint : stepInfo.chef} size={52} />
         </div>
         <div className={styles.stageTools}>
           {step === 'secret' && (
             <button className="chip" aria-pressed={peek} onClick={() => setPeek((p) => !p)}>
-              {peek ? 'hide burn-away cover' : 'show burn-away cover'}
+              {peek ? MAKER.hideCover : MAKER.showCover}
             </button>
           )}
           {step === 'package' && (
             <button className="chip" onClick={() => setLidClosed((c) => !c)}>
-              {lidClosed ? '📦 open lid' : '📦 close lid'}
+              {lidClosed ? MAKER.openLid : MAKER.closeLid}
             </button>
           )}
           {step !== 'send' && (
@@ -213,7 +214,7 @@ export default function Maker() {
                 haptic.tap()
               }}
             >
-              🎲 surprise me
+              {MAKER.surprise}
             </button>
           )}
         </div>
@@ -237,10 +238,10 @@ export default function Maker() {
         {step !== 'send' && (
           <footer className={styles.nav}>
             <button className="btn ghost" onClick={() => go(idx - 1)} disabled={idx === 0}>
-              back
+              {MAKER.back}
             </button>
             <button className="btn primary" onClick={() => go(idx + 1)}>
-              {idx === STEPS.length - 2 ? 'wrap it up' : `next: ${STEPS[idx + 1].label}`}
+              {idx === STEPS.length - 2 ? MAKER.finish : MAKER.next.replace('{step}', STEPS[idx + 1].label)}
             </button>
           </footer>
         )}

@@ -58,7 +58,8 @@ a { color: inherit; }
 
 /* ---------- type ---------- */
 .mono { font-family: var(--body); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 11px; }
-.hand { font-family: var(--hand); }
+.hand { font-family: var(--hand); font-weight: 600; }
+.brandmark { font-family: var(--font-brand), var(--display); font-weight: 400; letter-spacing: 0.01em; }
 .display { font-family: var(--display); font-weight: 800; letter-spacing: -0.01em; }
 
 /* ---------- capy hand-drawn primitives (strokes painted by SketchStrokes) ---------- */
@@ -68,27 +69,39 @@ svg[data-sketch-stroke] {
 }
 .btn, .chip, .card, .swatch, .sketch { position: relative; border: none; }
 
+/*
+ * Buttons come in clearly different weights:
+ *   .btn.primary — the one thing to do next: solid berry, white bold text, lifted.
+ *   .btn         — secondary: no fill, outlined in its own text colour.
+ *   .btn.soft    — secondary in berry (e.g. "try it", "preview").
+ *   .btn.ghost   — a text link.
+ */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  background: var(--card);
+  background: transparent;
+  color: var(--ink);
   border-radius: 14px;
   min-height: 44px;
   padding: 10px 20px;
   font-family: var(--body); font-weight: 600; font-size: 14px; letter-spacing: 0.01em;
-  transition: transform 100ms ease, background-color 120ms ease, opacity 120ms ease;
+  transition: transform 100ms ease, background-color 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
   text-decoration: none;
   user-select: none;
   white-space: nowrap;
   touch-action: manipulation;
 }
-.btn:hover { background: var(--paper-2); }
+.btn:hover { background: rgba(130, 61, 0, 0.06); }
 .btn:active { transform: scale(0.95); }
-.btn.primary { background: var(--berry); color: #fff; }
-.btn.primary svg[data-sketch-stroke] { fill: #6b1a24; }
-.btn.soft { background: var(--milk); }
-.btn.ghost { background: transparent; color: var(--ink-soft); padding: 10px 8px; }
-.btn.ghost:hover { color: var(--ink); }
-.btn:disabled { opacity: 0.45; pointer-events: none; }
+.btn.primary {
+  background: var(--berry); color: #fff; font-weight: 700;
+  box-shadow: 0 8px 16px -10px rgba(160, 30, 50, 0.7);
+}
+.btn.primary:hover { background: #c42c40; box-shadow: 0 10px 20px -10px rgba(160, 30, 50, 0.8); }
+.btn.soft { color: var(--berry); }
+.btn.soft:hover { background: rgba(217, 54, 74, 0.08); }
+.btn.ghost { color: var(--ink-soft); padding: 10px 8px; }
+.btn.ghost:hover { color: var(--ink); background: transparent; }
+.btn:disabled { opacity: 0.45; pointer-events: none; box-shadow: none; }
 .btn .ico { width: 18px; height: 18px; flex: none; }
 
 .card {

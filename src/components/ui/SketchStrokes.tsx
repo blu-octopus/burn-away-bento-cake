@@ -84,7 +84,8 @@ function paint(el: HTMLElement) {
   svg.setAttribute('viewBox', `0 0 ${w} ${h}`)
   const path = svg.firstChild as SVGPathElement
   path.setAttribute('d', ribbonPath)
-  const tone = el.matches('.swatch') ? null : toneStroke(cs.backgroundColor)
+  // unfilled buttons/chips (secondary) take their outline from their text colour
+  const tone = el.matches('.swatch') ? null : (toneStroke(cs.backgroundColor) ?? (el.matches('.btn, .chip') ? cs.color : null))
   if (tone) path.setAttribute('fill', tone)
   else path.removeAttribute('fill')
   path.setAttribute('fill-rule', 'evenodd')
@@ -105,7 +106,10 @@ export function SketchStrokes() {
         seen.add(el)
         ro.observe(el)
         paint(el)
-        if (el.matches('.btn, .chip')) el.addEventListener('pointerenter', onEnter)
+        if (el.matches('.btn, .chip')) {
+          el.addEventListener('pointerenter', onEnter)
+          el.addEventListener('pointerleave', () => paint(el))
+        }
       })
     }
     adopt(document)

@@ -11,6 +11,7 @@ import type { CakeDesign, Secret } from '@/lib/design'
 import { haptic, primeAudio, setMuted, sfx } from '@/lib/feel'
 import { openSecret } from '@/lib/link'
 import { CapyHint } from './ui/CapyHint'
+import { RECEIVER } from '@/content/copy'
 import { NumberPad } from './ui/NumberPad'
 import { Countdown } from './ui/Countdown'
 import { Confetti } from './ui/Confetti'
@@ -65,12 +66,13 @@ function shrink(src: string, w = 720): Promise<string> {
   })
 }
 
+// the capy baker's lines — edit them in src/content/copy.ts
 const HINTS: Partial<Record<Phase, string>> = {
-  boxed: 'someone baked you something ♡ tap the box',
-  strike: 'swipe the match across the striker →',
-  candle: 'touch the flame to the candle',
-  ignite: 'now hold the flame on the cake…',
-  burning: 'ooh it’s burning',
+  boxed: RECEIVER.boxed,
+  strike: RECEIVER.strike,
+  candle: RECEIVER.candle,
+  ignite: RECEIVER.ignite,
+  burning: RECEIVER.burning,
 }
 
 export function Unboxing({ design, secret: initialSecret, sealed, previewSecret, mode, storageKey, link, onClose }: UnboxingProps) {
@@ -166,7 +168,7 @@ export function Unboxing({ design, secret: initialSecret, sealed, previewSecret,
     setCandleLit(true)
     sfx.candle()
     haptic.light()
-    setHint('✨ make a wish…')
+    setHint(RECEIVER.wish)
     setTimeout(() => snap(1), 350)
     setTimeout(() => setPhase('ignite'), 1600)
   }
@@ -268,15 +270,15 @@ export function Unboxing({ design, secret: initialSecret, sealed, previewSecret,
 
       {phase === 'boxed' && (
         <button className={`btn primary ${styles.cta}`} onClick={open}>
-          open the box 🎀
+          {RECEIVER.openBox}
         </button>
       )}
 
       {phase === 'passcode' && (
         <div className={styles.overlay}>
           <div className={`card ${styles.sheet} pop-in`}>
-            <span className="mono">a little lock ♡</span>
-            <NumberPad question={design.pack.question || 'what’s the passcode?'} onSubmit={tryCode} shake={shake} />
+            <span className="mono">{RECEIVER.passcodeTitle}</span>
+            <NumberPad question={design.pack.question || RECEIVER.passcodeFallbackQuestion} onSubmit={tryCode} shake={shake} />
           </div>
         </div>
       )}

@@ -77,7 +77,7 @@ export async function renderTag(to: string, from: string): Promise<HTMLCanvasEle
   ctx.fillStyle = '#4a332c'
   ctx.font = `500 34px ${CANVAS_FONTS.mono}`
   ctx.fillText('FOR', 110, 90)
-  ctx.font = `700 78px ${CANVAS_FONTS.hand}`
+  ctx.font = `600 78px ${CANVAS_FONTS.hand}`
   ctx.fillText(to || 'you ♡', 110, 170, 370)
   if (from) {
     ctx.font = `500 30px ${CANVAS_FONTS.mono}`

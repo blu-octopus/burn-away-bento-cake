@@ -21,6 +21,10 @@ No app, no account, no database.
 
 Next.js (App Router) · React Three Fiber + drei · [Paperlab](https://github.com/NourMtir0722/Paperlab) for the burn (damage simulation, fluid flames, embers, fire sound) · capy-ui · `next/og` · Vercel Blob (photo uploads) · Resend (opt-in mailing list only) · WebAudio + Vibration API
 
+## Editing the words
+
+Every word on the site lives in [`src/content/copy.ts`](src/content/copy.ts). Edit a string there and the page updates; no component code needed.
+
 ## Run it
 
 ```bash
@@ -34,6 +38,10 @@ Optional env vars are listed in `.env.example`:
 - `RESEND_API_KEY` + `RESEND_AUDIENCE_ID`: only for the "tell me when new cakes drop" opt-in. Receipts open in the sender's own mail app (`mailto:`), so they work without these.
 
 ## Credits
+
+Made by [blu-octopus](https://github.com/blu-octopus).
+
+Built with:
 
 - Burn effect: **Paperlab** © Nour Mtir, Apache-2.0 (see `NOTICE`)
 - UI: [capy-ui](https://github.com/blu-octopus/capy-ui) (MIT), vendored in `src/capy`: its tokens, hand-drawn wobble-ribbon strokes, Toggle, Checkbox, DialogueBubble and the capy mascot, who is the baker
