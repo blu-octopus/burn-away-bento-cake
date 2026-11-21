@@ -35,6 +35,29 @@ function framed(shot: CameraShot, aspect: number) {
   return { pos, look }
 }
 
+let ginghamTex: THREE.Texture | null = null
+/** A soft pink gingham, drawn once on a canvas and tiled. */
+function gingham() {
+  if (ginghamTex) return ginghamTex
+  const cv = document.createElement('canvas')
+  cv.width = cv.height = 64
+  const c = cv.getContext('2d')!
+  c.fillStyle = '#fff6f8'
+  c.fillRect(0, 0, 64, 64)
+  c.fillStyle = 'rgba(255, 150, 185, 0.22)'
+  c.fillRect(0, 0, 32, 64)
+  c.fillRect(0, 0, 64, 32)
+  c.fillStyle = 'rgba(255, 150, 185, 0.16)'
+  c.fillRect(0, 0, 32, 32)
+  const t = new THREE.CanvasTexture(cv)
+  t.wrapS = t.wrapT = THREE.RepeatWrapping
+  t.repeat.set(260, 260)
+  t.magFilter = THREE.NearestFilter
+  t.colorSpace = THREE.SRGBColorSpace
+  ginghamTex = t
+  return t
+}
+
 /** Eases the camera to a named shot. Disabled while the user orbits. */
 function CameraRig({ shot, speed = 0.06 }: { shot: CameraShot; speed?: number }) {
   const { camera, size } = useThree()
@@ -74,7 +97,7 @@ export interface StageProps {
   glow?: boolean
 }
 
-export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, background = '#f6efe4', onCreated, className, style, capture, glow }: StageProps) {
+export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, background = '#ffe6ef', onCreated, className, style, capture, glow }: StageProps) {
   return (
     <Canvas
       className={className}
@@ -90,10 +113,10 @@ export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, 
       }}
     >
       <color attach="background" args={[background]} />
-      <hemisphereLight args={['#fff8ee', '#e9d6c3', 1.25]} />
+      <hemisphereLight args={['#fff6fb', '#d9c8ff', 0.85]} />
       <directionalLight
         position={[2.5, 6, 3.5]}
-        intensity={1.6}
+        intensity={1.15}
         color="#fff4e6"
         castShadow
         shadow-mapSize={[1024, 1024]}
@@ -104,10 +127,10 @@ export function Stage({ children, shot = 'front', orbit, orbitLocked, autoSpin, 
         shadow-bias={-0.0004}
       />
       <directionalLight position={[-4, 2.5, -2]} intensity={0.35} color="#f3d9ff" />
-      {/* paper tabletop */}
+      {/* a pink gingham tablecloth, like a game kitchen counter */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1 * WORLD, 0]} receiveShadow>
         <planeGeometry args={[40, 40]} />
-        <meshStandardMaterial color={background} roughness={1} />
+        <meshStandardMaterial map={gingham()} roughness={1} />
       </mesh>
       <ContactShadows position={[0, -0.095 * WORLD, 0]} opacity={0.35} scale={8 * WORLD} blur={2.4} far={2 * WORLD} color="#7a5a48" />
       <group scale={WORLD}>

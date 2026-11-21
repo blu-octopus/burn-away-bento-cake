@@ -3,6 +3,8 @@
 import { useFrame } from '@react-three/fiber'
 import { useEffect, useMemo, useRef, type ReactNode } from 'react'
 import * as THREE from 'three'
+import { Outlines } from '@react-three/drei'
+import { INK, toonMaterial } from './toon'
 import { shapeOutline, type CakeDesign, type CakeShape, type DecorKind } from '@/lib/design'
 
 /** Cake units: radius 1, body height H. Everything else hangs off these. */
@@ -18,8 +20,16 @@ function outline(shape: CakeShape) {
 /** shape (x, y-back) → world (x, z) */
 const toWorld = ([x, y]: [number, number]): [number, number] => [x, -y]
 
-function mat(color: string, extra: Partial<THREE.MeshStandardMaterialParameters> = {}) {
-  return new THREE.MeshStandardMaterial({ color, flatShading: true, roughness: 0.9, metalness: 0, ...extra })
+/** Every solid on the cake uses the cute toon shader (see ./toon.ts). */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function mat(color: string, _extra: Record<string, unknown> = {}) {
+  return toonMaterial(color)
+}
+
+/** The ink outline that matches the UI: an inverted hull a hair wider than the mesh. */
+function Ink({ px = 2 }: { px?: number }) {
+  // drei's Outlines (with screenspace off) takes thickness in screen pixels
+  return <Outlines thickness={px} color={INK} />
 }
 
 export function bodyGeometry(shape: CakeShape, height = H) {
@@ -142,7 +152,11 @@ function Piping({ design }: { design: CakeDesign }) {
 
   const material = useMemo(() => mat(design.pipingColor), [design.pipingColor])
   if (design.piping === 'none') return null
-  return <instancedMesh key={design.piping + design.shape} ref={ref} args={[geom, material, ring.length]} castShadow />
+  return (
+    <instancedMesh key={design.piping + design.shape} ref={ref} args={[geom, material, ring.length]} castShadow>
+      <Ink px={1.3} />
+    </instancedMesh>
+  )
 }
 
 function Sprinkles({ design }: { design: CakeDesign }) {
@@ -202,8 +216,12 @@ export function Bow({ color }: { color: string }) {
   }, [])
   return (
     <group>
-      <mesh geometry={loop} material={m} position={[-0.05, 0.012, 0]} rotation={[0, 0.25, 0.28]} castShadow />
-      <mesh geometry={loop} material={m} position={[0.05, 0.012, 0]} rotation={[0, -0.25, -0.28]} castShadow />
+      <mesh geometry={loop} material={m} position={[-0.05, 0.012, 0]} rotation={[0, 0.25, 0.28]} castShadow>
+        <Ink px={1.4} />
+      </mesh>
+      <mesh geometry={loop} material={m} position={[0.05, 0.012, 0]} rotation={[0, -0.25, -0.28]} castShadow>
+        <Ink px={1.4} />
+      </mesh>
       <mesh material={m} scale={[1, 1.15, 0.85]} castShadow>
         <icosahedronGeometry args={[0.022, 0]} />
       </mesh>
@@ -243,7 +261,9 @@ function Strawberry() {
   }, [])
   return (
     <group position={[0, 0.012, 0]}>
-      <mesh geometry={body} material={red} castShadow />
+      <mesh geometry={body} material={red} castShadow>
+        <Ink px={1.6} />
+      </mesh>
       {seeds.map((p, i) => (
         <mesh key={i} material={seedMat} position={p}>
           <boxGeometry args={[0.008, 0.012, 0.008]} />
@@ -404,8 +424,12 @@ export function CakeModel({ design, topTexture, secretTexture, showTop = true, c
 
   return (
     <group>
-      <mesh geometry={plate} material={plateMat} position={[0, -0.05, 0]} receiveShadow />
-      <mesh geometry={body} material={frosting} castShadow receiveShadow />
+      <mesh geometry={plate} material={plateMat} position={[0, -0.05, 0]} receiveShadow>
+        <Ink px={2.6} />
+      </mesh>
+      <mesh geometry={body} material={frosting} castShadow receiveShadow>
+        <Ink px={3.2} />
+      </mesh>
       {/* the secret, printed on the frosting under the sheet */}
       <mesh geometry={cap} position={[0, H + 0.002, 0]} receiveShadow>
         <meshStandardMaterial key={secretTexture?.uuid ?? 'plain'} map={secretTexture ?? null} color={secretTexture ? '#ffffff' : design.frosting} roughness={0.95} />
