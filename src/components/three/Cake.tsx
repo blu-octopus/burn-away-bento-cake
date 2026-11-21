@@ -179,64 +179,124 @@ function Sprinkles({ design }: { design: CakeDesign }) {
   )
 }
 
-function Decor({ kind, color }: { kind: DecorKind; color: string }) {
-  const m = useMemo(() => mat(color), [color])
-  const red = useMemo(() => mat('#d9283a'), [])
+/** A tied ribbon bow: two soft loops, a knot, two notched tails. Faces +z. */
+export function Bow({ color }: { color: string }) {
+  const m = useMemo(() => mat(color, { roughness: 0.55 }), [color])
+  const tail = useMemo(() => {
+    // a ribbon tail with a V-notch cut into its end
+    const s = new THREE.Shape()
+    s.moveTo(-0.014, 0)
+    s.lineTo(0.014, 0)
+    s.lineTo(0.02, -0.1)
+    s.lineTo(0.004, -0.085)
+    s.lineTo(-0.012, -0.1)
+    s.closePath()
+    const g = new THREE.ExtrudeGeometry(s, { depth: 0.008, bevelEnabled: false })
+    g.translate(0, 0, -0.004)
+    return g
+  }, [])
+  const loop = useMemo(() => {
+    const g = new THREE.TorusGeometry(0.038, 0.014, 4, 10)
+    g.scale(1.35, 0.85, 0.7)
+    return g
+  }, [])
+  return (
+    <group>
+      <mesh geometry={loop} material={m} position={[-0.05, 0.012, 0]} rotation={[0, 0.25, 0.28]} castShadow />
+      <mesh geometry={loop} material={m} position={[0.05, 0.012, 0]} rotation={[0, -0.25, -0.28]} castShadow />
+      <mesh material={m} scale={[1, 1.15, 0.85]} castShadow>
+        <icosahedronGeometry args={[0.022, 0]} />
+      </mesh>
+      <mesh geometry={tail} material={m} position={[-0.008, -0.008, 0.006]} rotation={[0.25, 0, -0.42]} castShadow />
+      <mesh geometry={tail} material={m} position={[0.008, -0.008, 0.006]} rotation={[0.25, 0, 0.42]} castShadow />
+    </group>
+  )
+}
+
+/** A plump low-poly strawberry standing tip-up on its leaves, with seeds. */
+function Strawberry() {
+  const red = useMemo(() => mat('#e23a48', { roughness: 0.5 }), [])
+  const seedMat = useMemo(() => mat('#ffe7a3'), [])
   const leaf = useMemo(() => mat('#5f9e4f'), [])
-  const pearl = useMemo(() => mat('#fbf4ea', { roughness: 0.35 }), [])
+  const { body, seeds } = useMemo(() => {
+    const profile = [
+      [0.0, 0.0],
+      [0.045, 0.006],
+      [0.062, 0.035],
+      [0.058, 0.07],
+      [0.038, 0.105],
+      [0.012, 0.13],
+      [0.0, 0.135],
+    ].map(([r, y]) => new THREE.Vector2(r, y))
+    const body = new THREE.LatheGeometry(profile, 8)
+    const seeds: Array<[number, number, number]> = []
+    for (const [y, r, n, off] of [
+      [0.035, 0.064, 7, 0],
+      [0.07, 0.06, 7, 0.45],
+      [0.1, 0.044, 6, 0.2],
+    ] as const)
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2 + off
+        seeds.push([Math.cos(a) * r, y, Math.sin(a) * r])
+      }
+    return { body, seeds }
+  }, [])
+  return (
+    <group position={[0, 0.012, 0]}>
+      <mesh geometry={body} material={red} castShadow />
+      {seeds.map((p, i) => (
+        <mesh key={i} material={seedMat} position={p}>
+          <boxGeometry args={[0.008, 0.012, 0.008]} />
+        </mesh>
+      ))}
+      {/* the calyx: five leaves fanned out under the berry */}
+      {[0, 1, 2, 3, 4].map((i) => (
+        <group key={i} rotation={[0, (i / 5) * Math.PI * 2, 0]} position={[0, 0.002, 0]}>
+          <mesh material={leaf} position={[0.045, 0, 0]} rotation={[0, 0, -0.15]} scale={[1, 0.25, 0.55]}>
+            <octahedronGeometry args={[0.035, 0]} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  )
+}
+
+function Decor({ kind, color }: { kind: DecorKind; color: string }) {
+  const red = useMemo(() => mat('#d9283a', { roughness: 0.35 }), [])
+  const stem = useMemo(() => mat('#5f7d3a'), [])
+  const pearl = useMemo(() => mat('#fbf4ea', { roughness: 0.3 }), [])
+  const stemCurve = useMemo(
+    () => new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(new THREE.Vector3(0, 0.06, 0), new THREE.Vector3(0.01, 0.13, 0), new THREE.Vector3(0.05, 0.16, 0)), 6, 0.006, 3),
+    [],
+  )
   switch (kind) {
     case 'bow':
       return (
-        <group position={[0, 0.07, 0]} scale={0.9}>
-          <mesh material={m} position={[-0.08, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-            <coneGeometry args={[0.07, 0.15, 5]} />
-          </mesh>
-          <mesh material={m} position={[0.08, 0, 0]} rotation={[0, 0, -Math.PI / 2]} castShadow>
-            <coneGeometry args={[0.07, 0.15, 5]} />
-          </mesh>
-          <mesh material={m} castShadow>
-            <icosahedronGeometry args={[0.04, 0]} />
-          </mesh>
-          <mesh material={m} position={[-0.035, -0.06, 0.02]} rotation={[0.3, 0, -0.35]}>
-            <boxGeometry args={[0.03, 0.1, 0.012]} />
-          </mesh>
-          <mesh material={m} position={[0.035, -0.06, 0.02]} rotation={[0.3, 0, 0.35]}>
-            <boxGeometry args={[0.03, 0.1, 0.012]} />
-          </mesh>
+        <group position={[0, 0.06, 0]} scale={1.1}>
+          <Bow color={color} />
         </group>
       )
     case 'cherry':
       return (
-        <group position={[0, 0.07, 0]}>
-          <mesh material={red} castShadow>
-            <icosahedronGeometry args={[0.075, 1]} />
+        <group position={[0, 0.055, 0]}>
+          <mesh material={red} scale={[1, 0.92, 1]} castShadow>
+            <icosahedronGeometry args={[0.06, 1]} />
           </mesh>
-          <mesh material={leaf} position={[0.02, 0.1, 0]} rotation={[0, 0, -0.3]}>
-            <cylinderGeometry args={[0.007, 0.007, 0.12, 4]} />
-          </mesh>
+          <mesh geometry={stemCurve} material={stem} />
         </group>
       )
     case 'strawberry':
-      return (
-        <group position={[0, 0.08, 0]}>
-          <mesh material={red} rotation={[Math.PI, 0, 0]} castShadow>
-            <coneGeometry args={[0.07, 0.15, 6]} />
-          </mesh>
-          <mesh material={leaf} position={[0, 0.075, 0]}>
-            <coneGeometry args={[0.065, 0.03, 6]} />
-          </mesh>
-        </group>
-      )
+      return <Strawberry />
     case 'pearls':
       return (
-        <group position={[0, 0.035, 0]}>
+        <group position={[0, 0.03, 0]}>
           {[
-            [-0.04, 0, 0.01],
-            [0.04, 0, 0.0],
-            [0, 0.0, -0.05],
+            [-0.035, 0, 0.012],
+            [0.035, 0, 0.0],
+            [0, 0.0, -0.04],
           ].map((p, i) => (
             <mesh key={i} material={pearl} position={p as [number, number, number]} castShadow>
-              <icosahedronGeometry args={[0.035, 1]} />
+              <icosahedronGeometry args={[0.03, 1]} />
             </mesh>
           ))}
         </group>
@@ -253,6 +313,17 @@ export function Candle({ design, lit, wickRef }: { design: CakeDesign; lit: bool
   const flame = useRef<THREE.Group>(null)
   const light = useRef<THREE.PointLight>(null)
   const h = design.candle === 'sparkler' ? 0.5 : 0.36
+  const heartCandle = useMemo(() => {
+    const g = new THREE.ExtrudeGeometry(new THREE.Shape(shapeOutline('heart', 24).map(([px, py]) => new THREE.Vector2(px * 0.075, py * 0.075))), {
+      depth: 0.024,
+      bevelEnabled: true,
+      bevelSize: 0.006,
+      bevelThickness: 0.006,
+      bevelSegments: 1,
+      curveSegments: 1,
+    })
+    return g
+  }, [])
   useFrame(({ clock }) => {
     const t = clock.elapsedTime
     if (flame.current) {
@@ -260,7 +331,7 @@ export function Candle({ design, lit, wickRef }: { design: CakeDesign; lit: bool
       flame.current.scale.set(1 / f, f, 1 / f)
       flame.current.rotation.z = Math.sin(t * 5) * 0.08
     }
-    if (light.current) light.current.intensity = lit ? 1.4 + Math.sin(t * 29) * 0.25 : 0
+    if (light.current) light.current.intensity = lit ? 0.09 + Math.sin(t * 29) * 0.015 : 0
   })
   return (
     <group position={[x, y, z]}>
@@ -269,9 +340,7 @@ export function Candle({ design, lit, wickRef }: { design: CakeDesign; lit: bool
           <mesh material={white} position={[0, h * 0.4, 0]}>
             <cylinderGeometry args={[0.012, 0.012, h * 0.8, 4]} />
           </mesh>
-          <mesh material={body} position={[0, h * 0.85, 0]} rotation={[0, 0, Math.PI]} castShadow>
-            <coneGeometry args={[0.08, 0.12, 4]} />
-          </mesh>
+          <mesh geometry={heartCandle} material={body} position={[0, h * 0.85, -0.012]} castShadow />
         </>
       ) : design.candle === 'sparkler' ? (
         <mesh material={mat('#9a948c', { metalness: 0.4 })} position={[0, h / 2, 0]}>
@@ -298,14 +367,14 @@ export function Candle({ design, lit, wickRef }: { design: CakeDesign; lit: bool
       <group ref={flame} position={[0, h + 0.07, 0]} visible={lit}>
         <mesh scale={[0.035, 0.07, 0.035]}>
           <sphereGeometry args={[1, 6, 5]} />
-          <meshBasicMaterial color="#ffb547" toneMapped={false} />
+          <meshBasicMaterial color={[3, 1.6, 0.5]} toneMapped={false} />
         </mesh>
         <mesh scale={[0.018, 0.04, 0.018]} position={[0, -0.012, 0]}>
           <sphereGeometry args={[1, 6, 5]} />
-          <meshBasicMaterial color="#fff6d0" toneMapped={false} />
+          <meshBasicMaterial color={[4, 3.6, 2.4]} toneMapped={false} />
         </mesh>
       </group>
-      <pointLight ref={light} position={[0, h + 0.12, 0]} color="#ffb05a" distance={2.4} decay={1.6} />
+      <pointLight ref={light} position={[0, h + 0.12, 0]} color="#ffb05a" distance={0.6} decay={2} />
     </group>
   )
 }
@@ -349,7 +418,7 @@ export function CakeModel({ design, topTexture, secretTexture, showTop = true, c
       <Piping design={design} />
       <Sprinkles design={design} />
       {design.decor.map((k, i) => (
-        <group key={i} position={[spots[i][0], TOP_Y, spots[i][1]]}>
+        <group key={i} position={[spots[i][0], TOP_Y, spots[i][1]]} rotation={[0, Math.atan2(spots[i][0], spots[i][1]), 0]}>
           <Decor kind={k} color={design.decorColor} />
         </group>
       ))}
@@ -392,6 +461,31 @@ export function BentoBox({ color, ribbon, open, tag }: { color: string; ribbon: 
           <boxGeometry args={[w, h, d]} />
         </mesh>
       ))}
+      {/* the ribbon carries on down every side of the box while it's tied */}
+      {ribbonVisible && (
+        <group>
+          {[
+            [0, D / 2 + 0.035, 0.22, 0.012],
+            [0, -D / 2 - 0.035, 0.22, 0.012],
+          ].map(([x, z, w, d], i) => (
+            <mesh key={`fb${i}`} material={r} position={[x, (baseH + lidH) / 2, z]}>
+              <boxGeometry args={[w, baseH + lidH + 0.02, d]} />
+            </mesh>
+          ))}
+          {[W / 2 + 0.035, -W / 2 - 0.035].map((x, i) => (
+            <mesh key={`lr${i}`} material={r} position={[x, (baseH + lidH) / 2, 0]}>
+              <boxGeometry args={[0.012, baseH + lidH + 0.02, 0.22]} />
+            </mesh>
+          ))}
+          {/* and tucks under the bottom */}
+          <mesh material={r} position={[0, -0.02, 0]}>
+            <boxGeometry args={[0.22, 0.012, D + 0.07]} />
+          </mesh>
+          <mesh material={r} position={[0, -0.02, 0]}>
+            <boxGeometry args={[W + 0.07, 0.012, 0.22]} />
+          </mesh>
+        </group>
+      )}
       {/* lid, hinged along the back edge */}
       <group ref={lid} position={[0, baseH, -D / 2]}>
         <group position={[0, 0, D / 2]}>
@@ -416,8 +510,8 @@ export function BentoBox({ color, ribbon, open, tag }: { color: string; ribbon: 
               <mesh material={r} position={[0, lidH + 0.02, 0]}>
                 <boxGeometry args={[W + 0.08, 0.02, 0.22]} />
               </mesh>
-              <group position={[0, lidH + 0.1, 0]} scale={2.4}>
-                <Decor kind="bow" color={ribbon} />
+              <group position={[0, lidH + 0.09, 0.02]} scale={3.2}>
+                <Bow color={ribbon} />
               </group>
             </group>
           )}
