@@ -24,11 +24,13 @@ export const fontVariables = [fredoka, klee, cherryBomb, fraunces, dmMono, brico
 const fallback = `${oriya.style.fontFamily}, ${symbols.style.fontFamily}, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`
 
 /** Font stacks for canvas drawing (canvas needs the real hashed family names). */
-export const CANVAS_FONTS: Record<FontKey | 'display', string> = {
+export const CANVAS_FONTS: Record<FontKey | 'display' | 'brand' | 'game', string> = {
   hand: `${klee.style.fontFamily}, ${fallback}`,
   serif: `${fraunces.style.fontFamily}, ${fallback}`,
   mono: `${dmMono.style.fontFamily}, ${fallback}`,
   display: `${bricolage.style.fontFamily}, ${fallback}`,
+  brand: `${cherryBomb.style.fontFamily}, ${fallback}`,
+  game: `${fredoka.style.fontFamily}, ${fallback}`,
 }
 
 export const FONT_LABELS: Record<FontKey, string> = { hand: 'handwriting', serif: 'serif', mono: 'mono' }
