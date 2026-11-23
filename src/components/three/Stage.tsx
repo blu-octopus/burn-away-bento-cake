@@ -6,6 +6,7 @@ import { Bloom, EffectComposer, ToneMapping } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
 import { Component, useEffect, useRef, useState, type ErrorInfo, type ReactNode } from 'react'
 import * as THREE from 'three'
+import { degradeRenderTier, useRenderTier } from '@/lib/renderTier'
 import { Magic } from './Magic'
 
 /**
@@ -99,69 +100,60 @@ export interface StageProps {
   glow?: boolean
   /** sparkles + bubbles drifting around the cake */
   magic?: boolean
+  /** what to show instead when this device can't do 3D (a 2D version of the scene) */
+  fallback?: ReactNode
+  /** set by Stage from the device's render tier */
+  lite?: boolean
 }
 
-/**
- * If WebGL is missing or a GPU chokes on the scene, show a friendly still
- * instead of letting the error take the whole page down with it.
- */
-class CanvasBoundary extends Component<{ children: ReactNode; className?: string; style?: React.CSSProperties }, { failed: boolean }> {
+/** Turns a render error (bad shader, missing WebGL) into a tier downgrade. */
+class CanvasBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false }
   static getDerivedStateFromError() {
     return { failed: true }
   }
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('3D scene failed, showing fallback', error, info.componentStack)
+    console.error('3D scene failed', error, info.componentStack)
+    degradeRenderTier('render error')
   }
   render() {
-    if (!this.state.failed) return this.props.children
-    return (
-      <div
-        className={this.props.className}
-        style={{ ...this.props.style, display: 'grid', placeItems: 'center', textAlign: 'center', padding: 16, background: '#d2f3ea' }}
-        role="img"
-        aria-label="a little cake"
-      >
-        <div>
-          <div style={{ fontSize: 56 }}>🎂</div>
-          <p style={{ margin: 6, fontWeight: 600 }}>your browser couldn’t draw the 3D cake, but everything else still works ♡</p>
-        </div>
-      </div>
-    )
+    return this.state.failed ? null : this.props.children
   }
 }
 
-function hasWebGL() {
-  if (typeof document === 'undefined') return true
-  try {
-    const c = document.createElement('canvas')
-    return !!(c.getContext('webgl2') || c.getContext('webgl'))
-  } catch {
-    return false
-  }
+/** What shows when there's no 3D: the page's own 2D version, or a still. */
+function FlatFallback({ className, style, children }: { className?: string; style?: React.CSSProperties; children?: ReactNode }) {
+  return (
+    <div className={className} style={{ ...style, display: 'grid', placeItems: 'center', background: '#d2f3ea', overflow: 'hidden' }}>
+      {children ?? (
+        <div style={{ textAlign: 'center', padding: 16 }}>
+          <div style={{ fontSize: 56 }} aria-hidden>
+            🎂
+          </div>
+          <p style={{ margin: 6, fontWeight: 600 }}>showing the simple version of your cake ♡</p>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export function Stage(props: StageProps) {
-  const [ok] = useState(hasWebGL)
+  const tier = useRenderTier()
+  // a new tier remounts the canvas (and its boundary) from scratch
+  if (tier === 'flat') return <FlatFallback className={props.className} style={props.style}>{props.fallback}</FlatFallback>
   return (
-    <CanvasBoundary className={props.className} style={props.style}>
-      {ok ? <StageCanvas {...props} /> : <NoWebGL className={props.className} style={props.style} />}
+    <CanvasBoundary key={tier}>
+      <StageCanvas {...props} lite={tier === 'lite'} />
     </CanvasBoundary>
   )
 }
 
-function NoWebGL({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  throw new Error('WebGL unavailable')
-  // eslint-disable-next-line no-unreachable
-  return <div className={className} style={style} />
-}
-
-function StageCanvas({ children, shot = 'front', orbit, orbitLocked, autoSpin, background = '#d2f3ea', onCreated, className, style, capture, glow = false, magic = false }: StageProps) {
+function StageCanvas({ children, shot = 'front', orbit, orbitLocked, autoSpin, background = '#d2f3ea', onCreated, className, style, capture, glow = false, magic = false, lite = false }: StageProps) {
   // Performance: start at a sensible pixel ratio and let the monitor lower it
   // (and drop shadows) on slow machines; stop rendering entirely when the
   // canvas is scrolled out of view.
-  const [dpr, setDpr] = useState(() => (typeof window === 'undefined' ? 1 : Math.min(window.devicePixelRatio || 1, 1.5)))
-  const [lowPower, setLowPower] = useState(false)
+  const [dpr, setDpr] = useState(() => (lite || typeof window === 'undefined' ? 1 : Math.min(window.devicePixelRatio || 1, 1.5)))
+  const [lowPower, setLowPower] = useState(lite)
   const [visible, setVisible] = useState(true)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
@@ -180,8 +172,13 @@ function StageCanvas({ children, shot = 'front', orbit, orbitLocked, autoSpin, b
       dpr={dpr}
       frameloop={visible ? 'always' : 'never'}
       camera={{ position: SHOTS[shot].pos.map((v) => v * WORLD) as [number, number, number], fov: 34, near: 0.01, far: 20 }}
-      gl={{ preserveDrawingBuffer: !!capture, antialias: dpr < 1.5, powerPreference: 'high-performance' }}
+      gl={{ preserveDrawingBuffer: !!capture, antialias: !lite && dpr < 1.5, powerPreference: lite ? 'default' : 'high-performance' }}
       onCreated={({ gl }) => {
+        // the GPU dropped us (Chrome draws its sad face in the canvas): step down a tier and redraw
+        gl.domElement.addEventListener('webglcontextlost', (e) => {
+          e.preventDefault()
+          degradeRenderTier('WebGL context lost')
+        }, { once: true })
         gl.toneMapping = THREE.ACESFilmicToneMapping
         gl.toneMappingExposure = 1.1
         onCreated?.(gl)
@@ -194,7 +191,7 @@ function StageCanvas({ children, shot = 'front', orbit, orbitLocked, autoSpin, b
           setLowPower(true)
           if (typeof window !== 'undefined') (window as unknown as { __cakeLowPower?: boolean }).__cakeLowPower = true
         }}
-        onIncline={() => setDpr((d) => Math.min(d + 0.25, Math.min(window.devicePixelRatio || 1, 1.5)))}
+        onIncline={() => !lite && setDpr((d) => Math.min(d + 0.25, Math.min(window.devicePixelRatio || 1, 1.5)))}
       />
       <color attach="background" args={[background]} />
       <hemisphereLight args={['#fffdf6', '#cdeee4', 1.15]} />
@@ -217,7 +214,7 @@ function StageCanvas({ children, shot = 'front', orbit, orbitLocked, autoSpin, b
         <planeGeometry args={[40, 40]} />
         <meshStandardMaterial map={gingham()} roughness={1} />
       </mesh>
-      <ContactShadows position={[0, -0.095 * WORLD, 0]} opacity={0.35} scale={8 * WORLD} blur={2.4} far={2 * WORLD} color="#5b3a2e" />
+      {!lowPower && <ContactShadows position={[0, -0.095 * WORLD, 0]} opacity={0.35} scale={8 * WORLD} blur={2.4} far={2 * WORLD} color="#5b3a2e" />}
       <group scale={WORLD}>
         <Spin on={!!autoSpin}>{children}</Spin>
         {magic && <Magic lite={lowPower} />}

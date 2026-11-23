@@ -67,7 +67,9 @@ Because everything is in the link, **old links keep working after new deploys**.
 - Vercel hosting, Vercel Blob for photos, Resend for the optional mailing list
 
 ### Performance
-The 3D adapts to the device: pixel ratio is capped and lowered automatically on slow machines, shadows and bloom turn off when frames drop, the heavy fluid fire falls back to lighter flames mid-burn if needed, phones get a lighter landing demo, and canvases stop rendering when scrolled out of view. If WebGL isn’t available, the 3D views show a friendly fallback and the rest of the page keeps working.
+The 3D adapts to the device: pixel ratio is capped and lowered automatically on slow machines, shadows and bloom turn off when frames drop, the heavy fluid fire falls back to lighter flames mid-burn if needed, phones get a lighter landing demo, and canvases stop rendering when scrolled out of view.
+
+**Render tiers.** Each browser remembers how much 3D it can take: `full` (desktop), `lite` (phones: no shadow maps or bloom, pixel ratio 1), and `flat` (no WebGL: 2D cake previews and a 2D canvas burn). If the GPU drops the WebGL context (Chrome’s sad-face canvas) or the scene errors, the page steps down a tier and redraws, so a cake can always be opened. Force a tier with `?render=full|lite|flat` for testing.
 
 ## Run it locally
 
@@ -83,7 +85,7 @@ Optional environment variables (`.env.local`; see `.env.example`):
 | Variable | What it enables | Without it |
 |---|---|---|
 | `BLOB_READ_WRITE_TOKEN` | photo uploads to Vercel Blob (created automatically when you add a Blob store to the Vercel project) | photos are shrunk and stored inside the link, so links get long |
-| `RESEND_API_KEY`, `RESEND_AUDIENCE_ID` | saving opted-in emails to a Resend Audience | the opt-in box does nothing; receipts still work (they open the sender’s own mail app) |
+| `RESEND_API_KEY`, `RESEND_AUDIENCE_ID`, `NEXT_PUBLIC_MAILING_LIST=1` | the “tell me when new cakes drop” opt-in, saved to a Resend Audience | the opt-in box is hidden; receipts still work (they open the sender’s own mail app) |
 | `NEXT_PUBLIC_SITE_URL` | the public URL used in links and QR codes | uses the current site’s address |
 
 Dev-only pages (404 in production): `/dev/burn` (burn test bench), `/dev/kit` (UI kit), `/dev/posters` (keepsake previews).

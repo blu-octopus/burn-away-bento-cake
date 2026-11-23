@@ -29,6 +29,7 @@ import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState }
 import * as THREE from 'three'
 import type { CakeShape } from '@/lib/design'
 import { outsideCells } from '@/lib/textures'
+import { getRenderTier } from '@/lib/renderTier'
 import { TOP_Y } from './Cake'
 
 /** Sim seconds per real second. A sugar-sheet burn takes ~24 sim s, so ~8 s on screen. */
@@ -91,7 +92,7 @@ function deviceTier() {
   if (typeof navigator === 'undefined') return 'medium' as const
   const mobile = /iPhone|iPad|Android|Mobile/i.test(navigator.userAgent)
   const weak = (navigator.hardwareConcurrency ?? 8) <= 4
-  const flagged = (window as unknown as { __cakeLowPower?: boolean }).__cakeLowPower
+  const flagged = (window as unknown as { __cakeLowPower?: boolean }).__cakeLowPower || getRenderTier() !== 'full'
   return mobile || weak || flagged ? ('low' as const) : ('medium' as const)
 }
 

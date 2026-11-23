@@ -53,5 +53,28 @@ export default function Receiver({ d }: { d: string }) {
 
   if (!frag) return <Loading />
 
-  return <Unboxing design={pub.design} secret={frag.secret} sealed={frag.sealed} mode="real" storageKey={cakeKey(d)} />
+  return (
+    <>
+      <InAppNudge />
+      <Unboxing design={pub.design} secret={frag.secret} sealed={frag.sealed} mode="real" storageKey={cakeKey(d)} />
+    </>
+  )
+}
+
+/** Instagram / TikTok / Snapchat open links in a limited built-in browser. Nudge people out of it. */
+function InAppNudge() {
+  const [show, setShow] = useState(false)
+  useEffect(() => {
+    setShow(/Instagram|FBAN|FBAV|TikTok|musical_ly|Bytedance|Snapchat|Line\//i.test(navigator.userAgent))
+  }, [])
+  if (!show) return null
+  return (
+    <div role="note" style={{ position: 'fixed', left: 12, right: 12, bottom: 12, zIndex: 70, padding: '12px 14px', borderRadius: 16, background: 'var(--cream)', border: '1.5px solid var(--cream-edge)', fontSize: 14, lineHeight: 1.4 }}>
+      <strong style={{ display: 'block' }}>{RECEIVER.inAppTitle}</strong>
+      {RECEIVER.inAppBody}
+      <button className="btn ghost" onClick={() => setShow(false)} style={{ position: 'absolute', top: 2, right: 4 }} aria-label="dismiss">
+        ✕
+      </button>
+    </div>
+  )
 }

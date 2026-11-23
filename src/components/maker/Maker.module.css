@@ -1,7 +1,7 @@
 .maker {
   height: 100dvh;
   display: grid;
-  grid-template-rows: auto minmax(0, 46dvh) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 44dvh) auto minmax(0, 1fr);
   grid-template-columns: minmax(0, 1fr);
   background: transparent;
   overflow: hidden;
@@ -20,7 +20,8 @@
   border: 1.5px solid var(--edge); border-radius: 26px; overflow: hidden;
 }
 .canvas { position: absolute !important; inset: 0; touch-action: none; }
-.stageTag { position: absolute; left: 12px; bottom: 10px; right: 70px; pointer-events: none; z-index: 3; }
+.stageTag { position: relative; z-index: 3; pointer-events: none; margin: 0 14px 2px; }
+.stageTag :global(.capy-hint-tip) { font-size: 14px; padding: 7px 12px; margin-bottom: 6px; }
 .stageTools { position: absolute; right: 12px; top: 10px; z-index: 5; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
 
 .panel {
@@ -106,8 +107,10 @@
 @media (min-width: 900px) {
   .maker { grid-template-columns: minmax(0, 1fr) 440px; grid-template-rows: auto minmax(0, 1fr); }
   .header { grid-column: 1 / -1; }
-  .stage { grid-row: 2; margin: 14px 8px 18px 14px; }
-  .panel { grid-row: 2; margin: 14px 14px 18px 8px; }
+  .stage { grid-row: 2; grid-column: 1; margin: 14px 8px 18px 14px; }
+  .stageTag { grid-row: 2; grid-column: 1; align-self: end; margin: 0 0 30px 30px; max-width: 62%; }
+  .stageTag :global(.capy-hint-tip) { font-size: 16px; padding: 9px 14px; }
+  .panel { grid-row: 2; grid-column: 2; margin: 14px 14px 18px 8px; }
   .posterImg { width: 280px; }
 }
 

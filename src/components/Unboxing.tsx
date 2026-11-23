@@ -12,6 +12,8 @@ import { haptic, primeAudio, setMuted, sfx } from '@/lib/feel'
 import { openSecret } from '@/lib/link'
 import { CapyHint } from './ui/CapyHint'
 import { RECEIVER } from '@/content/copy'
+import { useRenderTier } from '@/lib/renderTier'
+import { FlatScene, type FlatSceneHandle } from './FlatScene'
 import { NumberPad } from './ui/NumberPad'
 import { Countdown } from './ui/Countdown'
 import { Confetti } from './ui/Confetti'
@@ -85,6 +87,10 @@ export function Unboxing({ design, secret: initialSecret, sealed, previewSecret,
   const [candleLit, setCandleLit] = useState(!!saved)
   const [hint, setHint] = useState<string | undefined>(HINTS[phase])
   const gl = useRef<THREE.WebGLRenderer | null>(null)
+  const flatRef = useRef<FlatSceneHandle>(null)
+  const flat = useRenderTier() === 'flat'
+  const [stuck, setStuck] = useState(false)
+  const [muted, setMutedState] = useState(!design.pack.sound)
   const burn = useRef<BurnSheetHandle>(null)
   const startRemaining = useRef<number | null>(null)
   const midShot = useRef(false)
@@ -93,15 +99,27 @@ export function Unboxing({ design, secret: initialSecret, sealed, previewSecret,
   const secretTex = useSecretTexture(secret, design)
   const tag = useTagTexture(design.pack.to, design.pack.from)
 
-  useEffect(() => setMuted(!design.pack.sound), [design.pack.sound])
-  useEffect(() => setHint(HINTS[phase]), [phase])
+  useEffect(() => setMuted(muted), [muted])
+  // if lighting takes a while (or there's no pointer — keyboard, switch access), offer a button
+  useEffect(() => {
+    setStuck(false)
+    if (phase !== 'candle' && phase !== 'ignite') return
+    const t = setTimeout(() => setStuck(true), 6000)
+    return () => clearTimeout(t)
+  }, [phase])
+  const helpLight = () => {
+    if (phase === 'candle') candleOn()
+    else if (flat) flatRef.current?.igniteAt(0.5, 0.5)
+    else burn.current?.igniteUV(0.5, 0.5)
+  }
+  useEffect(() => setHint(flat && phase === 'candle' ? RECEIVER.flatCandle : flat && phase === 'ignite' ? RECEIVER.flatIgnite : HINTS[phase]), [phase, flat])
 
   const snap = useCallback(
     (i: number) => {
       // wait two frames so the camera/animation has landed
       requestAnimationFrame(() =>
         requestAnimationFrame(async () => {
-          const src = gl.current?.domElement.toDataURL('image/jpeg', 0.9)
+          const src = flatRef.current?.snapshot() ?? gl.current?.domElement.toDataURL('image/jpeg', 0.9)
           if (!src) return
           const small = await shrink(src)
           setFrames((f) => {
@@ -230,13 +248,38 @@ export function Unboxing({ design, secret: initialSecret, sealed, previewSecret,
 
   return (
     <div className={styles.wrap}>
-      <Stage shot={shot} capture glow={phase === 'burning'} magic={phase === 'burning' || phase === 'revealed'} onCreated={(r) => (gl.current = r)} className={styles.canvas}>
+      <Stage
+        shot={shot}
+        capture
+        glow={phase === 'burning'}
+        magic={phase === 'burning' || phase === 'revealed'}
+        onCreated={(r) => (gl.current = r)}
+        className={styles.canvas}
+        fallback={
+          top.url && secretTex.url ? (
+            <FlatScene
+              ref={flatRef}
+              design={design}
+              topUrl={top.url}
+              secretUrl={secretTex.url}
+              phase={phase}
+              candleLit={candleLit}
+              onOpenBox={() => phase === 'boxed' && open()}
+              onCake={(u, v) => {
+                if (phase === 'candle') candleOn()
+                else if (phase === 'ignite' || phase === 'burning') flatRef.current?.igniteAt(u, v)
+              }}
+              onProgress={onProgress}
+            />
+          ) : undefined
+        }
+      >
         <group onClick={phase === 'boxed' ? open : undefined}>
           <BentoBox color={design.pack.box} ribbon={design.pack.ribbon} open={lidOpen} tag={tag} />
         </group>
         <CakeModel design={design} topTexture={top.tex} secretTexture={secretTex.tex} showTop={false} candleLit={candleLit}>
           {burnable && top.url && (
-            <BurnSheet ref={burn} shape={design.shape} image={top.url} sound={design.pack.sound} onProgress={onProgress} />
+            <BurnSheet ref={burn} shape={design.shape} image={top.url} sound={!muted} onProgress={onProgress} />
           )}
         </CakeModel>
         {matchOn && (
@@ -291,6 +334,21 @@ export function Unboxing({ design, secret: initialSecret, sealed, previewSecret,
           <EndCard design={design} frames={frames} mode={mode} link={link} onClose={onClose} />
         </>
       )}
+
+      {stuck && (phase === 'candle' || phase === 'ignite') && (
+        <button className={`btn soft ${styles.helpLight}`} onClick={helpLight} autoFocus>
+          {phase === 'candle' ? RECEIVER.helpCandle : RECEIVER.helpIgnite}
+        </button>
+      )}
+
+      <button
+        className={`btn ${styles.mute}`}
+        onClick={() => setMutedState((m) => !m)}
+        aria-pressed={!muted}
+        aria-label={muted ? 'turn sound on' : 'turn sound off'}
+      >
+        {muted ? '🔇' : '🔊'}
+      </button>
 
       {mode !== 'real' && onClose && phase !== 'revealed' && (
         <button className={`btn ${styles.close}`} onClick={onClose} aria-label="close preview">

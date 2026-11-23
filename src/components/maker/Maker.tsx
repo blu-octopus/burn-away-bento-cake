@@ -13,6 +13,7 @@ import { GALLERY_BY_ID } from '@/lib/gallery'
 import { BakeStation, DecorateStation, PackageStation, SecretStation, TopStation, surprise } from './Stations'
 import { SendStation } from './SendStation'
 import { StampLayer } from './StampLayer'
+import { FlatCake } from '@/components/FlatCake'
 import { MAKER, STEP_COPY } from '@/content/copy'
 import { CapyHint } from '@/components/ui/CapyHint'
 import { Ribbon } from '@/components/ui/Ribbon'
@@ -187,7 +188,14 @@ export default function Maker() {
               </button>
             ))}
           </nav>
-        <Stage orbit orbitLocked={step === 'top'} capture onCreated={(r) => (gl.current = r)} className={styles.canvas}>
+        <Stage
+          orbit
+          orbitLocked={step === 'top'}
+          capture
+          onCreated={(r) => (gl.current = r)}
+          className={styles.canvas}
+          fallback={<FlatCake src={step === 'secret' && !peek ? secretTex.url : top.url} />}
+        >
           <OrbitShot shot={shot} />
           <Bounce trigger={bounceKey}>
             <CakeModel design={design} topTexture={top.tex} secretTexture={secretTex.tex} showTop={showTop} candleLit={step === 'package' && !lidClosed} />
@@ -195,9 +203,6 @@ export default function Maker() {
             {showBox && <BentoBox color={design.pack.box} ribbon={design.pack.ribbon} open={step === 'send' ? 0 : lidClosed ? 0 : 1} tag={tag} />}
           </Bounce>
         </Stage>
-        <div className={styles.stageTag}>
-          <CapyHint text={step === 'top' && ink ? MAKER.stampHint : step === 'secret' && peek ? MAKER.coverPeekHint : stepInfo.chef} size={52} />
-        </div>
         <div className={styles.stageTools}>
           {step === 'secret' && (
             <button className={`btn ${styles.toolBtn}`} aria-pressed={peek} onClick={() => setPeek((p) => !p)}>
@@ -223,6 +228,11 @@ export default function Maker() {
           )}
         </div>
       </section>
+
+      {/* capy's tip: its own row under the cake on phones, tucked over the stage's corner on desktop */}
+      <div className={styles.stageTag}>
+        <CapyHint text={step === 'top' && ink ? MAKER.stampHint : step === 'secret' && peek ? MAKER.coverPeekHint : stepInfo.chef} size={44} />
+      </div>
 
       <section className={styles.panel}>
         <div className={styles.panelInner} key={step}>

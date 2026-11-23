@@ -6,6 +6,7 @@ import { CakeModel } from '@/components/three/Cake'
 import { Stage } from '@/components/three/Stage'
 import { useSecretTexture, useTopTexture } from '@/components/three/useTextures'
 import { GALLERY } from '@/lib/gallery'
+import { FlatCake } from '@/components/FlatCake'
 
 /**
  * The landing demo: a cake spins, catches, burns its top away to show the
@@ -56,7 +57,7 @@ export default function HeroScene() {
   }, [phase, i])
 
   return (
-    <Stage shot="hero" autoSpin background="#d2f3ea" style={{ position: 'absolute', inset: 0 }}>
+    <Stage shot="hero" autoSpin background="#d2f3ea" style={{ position: 'absolute', inset: 0 }} fallback={<FlatCake src={phase === 'reveal' ? secret.url : top.url} />}>
       <CakeModel design={cake.design} topTexture={top.tex} secretTexture={secret.tex} showTop={phone} candleLit>
         {!phone && top.url && phase !== 'reveal' && (
           <BurnSheet

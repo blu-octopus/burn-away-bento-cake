@@ -27,11 +27,13 @@ function mat(color: string, _extra: Record<string, unknown> = {}) {
 }
 
 /** The ink outline that matches the UI: an inverted hull a hair wider than the mesh. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function Ink({ px = 2, color }: { px?: number; color?: string }) {
   // drei's Outlines (with screenspace off) takes thickness in screen pixels.
-  // The line is a deeper shade of the thing it outlines, never a hard ink.
-  return <Outlines thickness={px} color={color ? deepen(color) : INK} />
+  // One cocoa line on everything, like chiikawa's 3D-rendered-as-2D figures.
+  return <Outlines thickness={px * 1.25} color={INK} />
 }
+void deepen
 
 /** A deeper, slightly rosier shade of a colour — for tone-on-tone outlines. */
 function deepen(hex: string) {
@@ -172,7 +174,7 @@ function Piping({ design }: { design: CakeDesign }) {
   if (design.piping === 'none') return null
   return (
     <instancedMesh key={design.piping + design.shape} ref={ref} args={[geom, material, ring.length]} castShadow>
-      <Ink px={1} color={design.pipingColor} />
+      <Ink px={1.6} />
     </instancedMesh>
   )
 }
@@ -235,12 +237,13 @@ export function Bow({ color }: { color: string }) {
   return (
     <group>
       <mesh geometry={loop} material={m} position={[-0.05, 0.012, 0]} rotation={[0, 0.25, 0.28]} castShadow>
-        <Ink px={1.2} color={color} />
+        <Ink px={1.6} />
       </mesh>
       <mesh geometry={loop} material={m} position={[0.05, 0.012, 0]} rotation={[0, -0.25, -0.28]} castShadow>
-        <Ink px={1.2} color={color} />
+        <Ink px={1.6} />
       </mesh>
       <mesh material={m} scale={[1, 1.15, 0.85]} castShadow>
+        <Ink px={1.4} />
         <icosahedronGeometry args={[0.022, 0]} />
       </mesh>
       <mesh geometry={tail} material={m} position={[-0.008, -0.008, 0.006]} rotation={[0.25, 0, -0.42]} castShadow />
@@ -280,7 +283,7 @@ function Strawberry() {
   return (
     <group position={[0, 0.012, 0]}>
       <mesh geometry={body} material={red} castShadow>
-        <Ink px={1.3} color="#e23a48" />
+        <Ink px={1.8} />
       </mesh>
       {seeds.map((p, i) => (
         <mesh key={i} material={seedMat} position={p}>
@@ -318,6 +321,7 @@ function Decor({ kind, color }: { kind: DecorKind; color: string }) {
       return (
         <group position={[0, 0.055, 0]}>
           <mesh material={red} scale={[1, 0.92, 1]} castShadow>
+            <Ink px={1.8} />
             <icosahedronGeometry args={[0.06, 1]} />
           </mesh>
           <mesh geometry={stemCurve} material={stem} />
@@ -378,7 +382,9 @@ export function Candle({ design, lit, wickRef }: { design: CakeDesign; lit: bool
           <mesh material={white} position={[0, h * 0.4, 0]}>
             <cylinderGeometry args={[0.012, 0.012, h * 0.8, 4]} />
           </mesh>
-          <mesh geometry={heartCandle} material={body} position={[0, h * 0.85, -0.012]} castShadow />
+          <mesh geometry={heartCandle} material={body} position={[0, h * 0.85, -0.012]} castShadow>
+            <Ink px={1.6} />
+          </mesh>
         </>
       ) : design.candle === 'sparkler' ? (
         <mesh material={mat('#9a948c', { metalness: 0.4 })} position={[0, h / 2, 0]}>
@@ -387,6 +393,7 @@ export function Candle({ design, lit, wickRef }: { design: CakeDesign; lit: bool
       ) : (
         <>
           <mesh material={body} position={[0, h / 2, 0]} castShadow>
+            <Ink px={1.6} />
             <cylinderGeometry args={[0.032, 0.036, h, 6]} />
           </mesh>
           {design.candle === 'twist' &&
@@ -443,10 +450,10 @@ export function CakeModel({ design, topTexture, secretTexture, showTop = true, c
   return (
     <group>
       <mesh geometry={plate} material={plateMat} position={[0, -0.05, 0]} receiveShadow>
-        <Ink px={2} color="#d9c7a8" />
+        <Ink px={2.6} />
       </mesh>
       <mesh geometry={body} material={frosting} castShadow receiveShadow>
-        <Ink px={2.4} color={design.frosting} />
+        <Ink px={3} />
       </mesh>
       {/* the secret, printed on the frosting under the sheet */}
       <mesh geometry={cap} position={[0, H + 0.002, 0]} receiveShadow>
@@ -492,6 +499,7 @@ export function BentoBox({ color, ribbon, open, tag }: { color: string; ribbon: 
       {/* tray */}
       <mesh material={m} position={[0, 0, 0]} receiveShadow>
         <boxGeometry args={[W, T, D]} />
+        <Ink px={1.8} />
       </mesh>
       {[
         [0, baseH / 2, D / 2, W, baseH, T],
@@ -501,6 +509,7 @@ export function BentoBox({ color, ribbon, open, tag }: { color: string; ribbon: 
       ].map(([x, y, z, w, h, d], i) => (
         <mesh key={i} material={m} position={[x, y, z]} castShadow receiveShadow>
           <boxGeometry args={[w, h, d]} />
+          <Ink px={1.8} />
         </mesh>
       ))}
       {/* the ribbon carries on down every side of the box while it's tied */}
@@ -533,6 +542,7 @@ export function BentoBox({ color, ribbon, open, tag }: { color: string; ribbon: 
         <group position={[0, 0, D / 2]}>
           <mesh material={m} position={[0, lidH, 0]} castShadow>
             <boxGeometry args={[W + 0.04, T, D + 0.04]} />
+            <Ink px={1.8} />
           </mesh>
           {[
             [0, lidH / 2, D / 2 + 0.02, W + 0.04, lidH, T],
@@ -542,6 +552,7 @@ export function BentoBox({ color, ribbon, open, tag }: { color: string; ribbon: 
           ].map(([x, y, z, w, h, d], i) => (
             <mesh key={i} material={m} position={[x, y, z]} castShadow>
               <boxGeometry args={[w, h, d]} />
+          <Ink px={1.8} />
             </mesh>
           ))}
           {ribbonVisible && (

@@ -22,6 +22,9 @@ import {
   WhatsappIcon,
 } from '@/components/ui/Icons'
 import { SEND } from '@/content/copy'
+
+/** the opt-in only shows once a Resend mailing list is connected (see README) */
+const MAILING_LIST = process.env.NEXT_PUBLIC_MAILING_LIST === '1'
 import type { Draft } from './Maker'
 import styles from './Maker.module.css'
 
@@ -248,10 +251,12 @@ export function SendStation({
                 {mailed ? 'sent ✓' : 'email'}
               </button>
             </div>
+{MAILING_LIST && (
             <label className={styles.optin}>
               <Checkbox checked={optIn} onCheckedChange={(c) => setOptIn(!!c)} />
               <span>tell me when new cakes &amp; decorations drop ♡ (optional, unsubscribe anytime)</span>
             </label>
+            )}
           </div>
 
           <div className="row" style={{ justifyContent: 'center', marginTop: 6 }}>

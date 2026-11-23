@@ -2,7 +2,7 @@
 .canvas { position: absolute !important; inset: 0; touch-action: none; }
 
 .hint {
-  position: absolute; top: max(18px, env(safe-area-inset-top)); left: 0; right: 0;
+  position: absolute; top: max(26px, calc(env(safe-area-inset-top) + 14px)); left: 0; right: 0;
   display: flex; justify-content: center; pointer-events: none; z-index: 5; padding: 0 16px;
 }
 
@@ -69,3 +69,6 @@
 @keyframes swipe { 0% { transform: translateX(-10px); opacity: 0; } 25% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translateX(120px); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .swipeHint { animation: none; } }
 .postBtn, .postBtn svg { color: var(--ink); }
+
+.helpLight { position: absolute; left: 50%; bottom: max(120px, calc(env(safe-area-inset-bottom) + 110px)); translate: -50% 0; z-index: 6; }
+.mute { position: absolute; right: 14px; bottom: max(18px, env(safe-area-inset-bottom)); z-index: 6; min-height: 40px; width: 44px; padding: 0; font-size: 18px; border-radius: 50%; }

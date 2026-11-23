@@ -10,7 +10,7 @@ import * as THREE from 'three'
  */
 const ramp = (() => {
   // three bands: shade / mid / lit — soft, never black
-  const data = new Uint8Array([110, 175, 235])
+  const data = new Uint8Array([190, 225, 255]) // near-flat, cel-style: just a soft shade step
   const t = new THREE.DataTexture(data, 3, 1, THREE.RedFormat)
   t.minFilter = THREE.NearestFilter
   t.magFilter = THREE.NearestFilter
@@ -24,8 +24,8 @@ const RIM = new THREE.Color('#f3fffb')
 
 export function toonMaterial(color: THREE.ColorRepresentation, opts: { rim?: number; shadowTint?: number } = {}) {
   const m = new THREE.MeshToonMaterial({ color, gradientMap: ramp })
-  const rim = opts.rim ?? 0.28
-  const tint = opts.shadowTint ?? 0.45
+  const rim = opts.rim ?? 0.12
+  const tint = opts.shadowTint ?? 0.25
   m.onBeforeCompile = (shader) => {
     shader.uniforms.uRim = { value: RIM }
     shader.uniforms.uRimStrength = { value: rim }
